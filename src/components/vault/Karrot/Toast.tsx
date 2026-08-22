@@ -1,5 +1,10 @@
 import { useEffect, type HTMLAttributes, type ReactNode } from "react";
 
+/**
+ * 2026 local enhancement: liquid-glass refraction, spatial depth and WCAG-oriented reduced-motion/high-contrast utilities are layered over the existing brand DNA.
+ * The visual extension uses #ff6f0f only as this component's existing brand accent; it does not redefine unobserved official product states.
+ */
+
 export interface KarrotToastProps extends Omit<HTMLAttributes<HTMLDivElement>, "title"> {
   open?: boolean;
   visible?: boolean;
@@ -39,7 +44,7 @@ export function KarrotToast({ className, description, duration = 0, message, onC
     <div
       {...props}
       aria-live="polite"
-      className={joinClasses("fixed z-50 flex w-[min(calc(100vw-2rem),380px)] items-start gap-3 rounded-3xl border border-[#ffe1d0] bg-white p-4 text-[#212124] font-sans transition-all duration-200 ease-out", location.includes("top") ? "top-4" : "bottom-4", location.includes("right") ? "right-4" : "left-4", className)}
+      className={joinClasses("fixed z-50 overflow-hidden border border-white/45 bg-white/76 backdrop-blur-xl shadow-[0_18px_44px_rgba(15,23,42,0.18)] motion-reduce:transform-none motion-reduce:transition-none contrast-more:outline contrast-more:outline-2 contrast-more:outline-current focus-within:outline focus-within:outline-2 focus-within:outline-current flex w-[min(calc(100vw-2rem),380px)] items-start gap-3 rounded-3xl border border-[#ffe1d0] bg-white p-4 text-[#212124] font-sans transition-all duration-200 ease-out", location.includes("top") ? "top-4" : "bottom-4", location.includes("right") ? "right-4" : "left-4", className)}
       role="status"
     >
       <span className="mt-1 h-3 w-3 shrink-0 rounded-full bg-[#ff6f0f]" />

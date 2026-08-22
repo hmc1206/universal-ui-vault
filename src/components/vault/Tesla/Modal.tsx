@@ -1,5 +1,10 @@
 import { useEffect, useId, type ReactNode } from "react";
 
+/**
+ * 2026 local enhancement: liquid-glass refraction, spatial depth and WCAG-oriented reduced-motion/high-contrast utilities are layered over the existing brand DNA.
+ * The visual extension uses #3e6ae1 only as this component's existing brand accent; it does not redefine unobserved official product states.
+ */
+
 export interface TeslaModalAction {
   label: string;
   onClick?: () => void;
@@ -84,7 +89,7 @@ export function TeslaModal({
       <section
         aria-labelledby={titleId}
         aria-modal="true"
-        className={joinClasses("relative z-10 w-full max-w-md rounded-[8px] bg-[#f4f4f4] text-[#171a20]", className)}
+        className={joinClasses("relative z-10 w-full border border-white/50 bg-white/78 backdrop-blur-2xl shadow-[0_28px_76px_rgba(15,23,42,0.24)] motion-reduce:transform-none motion-reduce:transition-none contrast-more:outline contrast-more:outline-2 contrast-more:outline-current focus-within:outline focus-within:outline-2 focus-within:outline-current max-w-md rounded-[8px] bg-[#f4f4f4] text-[#171a20]", className)}
         role="dialog"
       >
         <div className="flex items-start justify-between gap-5 border-b border-[#d0d1d2] px-6 pb-5 pt-6">

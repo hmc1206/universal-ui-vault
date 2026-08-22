@@ -1,5 +1,10 @@
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 
+/**
+ * 2026 local enhancement: liquid-glass refraction, spatial depth and WCAG-oriented reduced-motion/high-contrast utilities are layered over the existing brand DNA.
+ * The visual extension uses #ffe300 only as this component's existing brand accent; it does not redefine unobserved official product states.
+ */
+
 export type KakaoBankButtonVariant = "primary" | "secondary" | "outline";
 export type KakaoBankButtonSize = "sm" | "md" | "lg";
 
@@ -30,7 +35,7 @@ export function KakaoBankButton({ children, className, disabled, fullWidth = fal
     <button
       {...props}
       aria-busy={loading || undefined}
-      className={joinClasses("inline-flex items-center justify-center gap-2 font-sans transition-all duration-300 ease-out outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#171717] disabled:cursor-not-allowed disabled:opacity-45", sizeClasses[size], variantClass, fullWidth && "w-full", className)}
+      className={joinClasses("relative isolate inline-flex items-center justify-center gap-2 overflow-hidden before:pointer-events-none before:absolute before:inset-[1px] before:rounded-[inherit] before:bg-gradient-to-br before:from-white/55 before:via-white/0 before:to-[#ffe300]/30 before:opacity-90 backdrop-blur-sm font-sans transition-all duration-300 ease-out outline-none motion-reduce:transform-none motion-reduce:transition-none contrast-more:outline contrast-more:outline-2 contrast-more:outline-current focus-within:outline focus-within:outline-2 focus-within:outline-current focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#171717] disabled:cursor-not-allowed shadow-[0_10px_26px_rgba(15,23,42,0.14)] hover:-translate-y-0.5 hover:shadow-[0_16px_34px_rgba(15,23,42,0.18)] active:translate-y-0 active:scale-[0.985] disabled:opacity-45", sizeClasses[size], variantClass, fullWidth && "w-full", className)}
       disabled={isDisabled}
       type={type}
     >

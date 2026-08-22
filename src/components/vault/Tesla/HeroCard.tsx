@@ -1,5 +1,10 @@
 import type { ReactNode } from "react";
 
+/**
+ * 2026 local enhancement: liquid-glass refraction, spatial depth and WCAG-oriented reduced-motion/high-contrast utilities are layered over the existing brand DNA.
+ * The visual extension uses #3e6ae1 only as this component's existing brand accent; it does not redefine unobserved official product states.
+ */
+
 export interface TeslaHeroAction {
   label: string;
   href?: string;
@@ -69,7 +74,7 @@ export function TeslaHeroCard({
   visual,
 }: TeslaHeroCardProps) {
   const resolvedVisual = visual ?? media ?? (
-    <div aria-hidden="true" className="relative h-64 overflow-hidden rounded-[8px] bg-[#f4f4f4] p-6 sm:h-72">
+    <div aria-hidden="true" className="relative h-64 relative isolate overflow-hidden before:pointer-events-none before:absolute before:inset-0 before:z-0 before:bg-[radial-gradient(circle_at_78%_18%,rgba(255,255,255,0.62),transparent_32%),linear-gradient(135deg,rgba(255,255,255,0.18),transparent_56%)] before:content-[''] rounded-[8px] bg-[#f4f4f4] p-6 sm:h-72">
       <div className="absolute inset-x-8 bottom-8 h-24 rounded-t-[999px] border-x-[18px] border-t-[18px] border-[#171a20]" />
       <div className="absolute bottom-[58px] left-[34%] h-3 w-24 rounded-full bg-[#3e6ae1]" />
       <div className="absolute right-6 top-6 h-2 w-2 rounded-full bg-[#3e6ae1]" />
@@ -79,7 +84,7 @@ export function TeslaHeroCard({
 
   return (
     <section className={joinClasses("overflow-hidden rounded-[8px] bg-[#171a20] font-sans text-white", className)}>
-      <div className="grid gap-0 lg:grid-cols-[1.05fr_0.95fr]">
+      <div className="relative z-10 grid gap-4 lg:grid-cols-[1.05fr_0.95fr]">
         <div className="flex min-h-[380px] flex-col justify-end p-6 sm:p-8 lg:p-10">
           <p className="text-sm font-medium tracking-[0.14em] text-white/75">{eyebrow}</p>
           <h1 className="mt-4 max-w-xl text-4xl font-medium leading-[1.16] tracking-[-0.04em] sm:text-[48px] sm:leading-[56px]">
@@ -94,7 +99,7 @@ export function TeslaHeroCard({
             </div>
           ) : null}
         </div>
-        <div className="bg-white p-4 sm:p-6 lg:p-8">{resolvedVisual}</div>
+        <div className="rounded-[inherit] border border-white/45 bg-white/72 p-4 backdrop-blur-xl shadow-[0_20px_50px_rgba(15,23,42,0.14)] motion-reduce:transform-none motion-reduce:transition-none contrast-more:outline contrast-more:outline-2 contrast-more:outline-current focus-within:outline focus-within:outline-2 focus-within:outline-current sm:p-6 lg:p-8">{resolvedVisual}</div>
       </div>
     </section>
   );

@@ -1,5 +1,10 @@
 import { useId, useState, type ReactNode } from "react";
 
+/**
+ * 2026 local enhancement: liquid-glass refraction, spatial depth and WCAG-oriented reduced-motion/high-contrast utilities are layered over the existing brand DNA.
+ * The visual extension uses #3e6ae1 only as this component's existing brand accent; it does not redefine unobserved official product states.
+ */
+
 export interface TeslaAccordionItem {
   value: string;
   title: ReactNode;
@@ -57,7 +62,7 @@ export function TeslaAccordion({
   }
 
   return (
-    <div className={joinClasses("overflow-hidden rounded-[8px] bg-[#f4f4f4] font-sans text-[#171a20]", className)}>
+    <div className={joinClasses("relative isolate overflow-hidden border border-white/45 bg-white/70 backdrop-blur-xl shadow-[0_14px_34px_rgba(15,23,42,0.10)] motion-reduce:transform-none motion-reduce:transition-none contrast-more:outline contrast-more:outline-2 contrast-more:outline-current focus-within:outline focus-within:outline-2 focus-within:outline-current rounded-[8px] bg-[#f4f4f4] font-sans text-[#171a20]", className)}>
       {items.map((item, index) => {
         const isOpen = values.includes(item.value);
         const panelId = `${baseId}-${item.value}`;

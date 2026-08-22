@@ -1,5 +1,10 @@
 import type { HTMLAttributes, ReactNode } from "react";
 
+/**
+ * 2026 local enhancement: liquid-glass refraction, spatial depth and WCAG-oriented reduced-motion/high-contrast utilities are layered over the existing brand DNA.
+ * The visual extension uses #3e6ae1 only as this component's existing brand accent; it does not redefine unobserved official product states.
+ */
+
 export type TeslaBadgeTone = "neutral" | "product" | "contrast";
 export type TeslaBadgeSize = "sm" | "md" | "lg";
 
@@ -36,7 +41,7 @@ export function TeslaBadge({ children, className, size = "md", tone = "neutral",
   return (
     <span
       {...props}
-      className={joinClasses("inline-flex items-center rounded-[4px] font-sans font-medium leading-4", sizeClasses[size], toneClasses[tone], className)}
+      className={joinClasses("inline-flex items-center relative overflow-hidden border-white/45 bg-white/68 backdrop-blur-md shadow-[0_6px_16px_rgba(15,23,42,0.08)] motion-reduce:transform-none motion-reduce:transition-none contrast-more:outline contrast-more:outline-2 contrast-more:outline-current focus-within:outline focus-within:outline-2 focus-within:outline-current rounded-[4px] font-sans font-medium leading-4", sizeClasses[size], toneClasses[tone], className)}
     >
       {children}
     </span>

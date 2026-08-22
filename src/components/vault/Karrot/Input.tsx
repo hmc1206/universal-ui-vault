@@ -1,5 +1,10 @@
 import { useId, type InputHTMLAttributes, type ReactNode } from "react";
 
+/**
+ * 2026 local enhancement: liquid-glass refraction, spatial depth and WCAG-oriented reduced-motion/high-contrast utilities are layered over the existing brand DNA.
+ * The visual extension uses #ff6f0f only as this component's existing brand accent; it does not redefine unobserved official product states.
+ */
+
 export interface KarrotInputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "size"> {
   label?: ReactNode;
   description?: ReactNode;
@@ -27,7 +32,7 @@ export function KarrotInput({ className, description, error, errorMessage, helpe
         <input
           {...props}
           aria-invalid={Boolean(error || errorMessage) || undefined}
-          className={joinClasses("min-h-12 w-full rounded-3xl border border-[#ffe1d0] bg-white px-4 text-base text-[#212124] outline-none placeholder:text-[#868b94] transition-all duration-200 ease-out focus:border-[#ff6f0f] focus:ring-2 focus:ring-[#ff6f0f]/20", inputClassName)}
+          className={joinClasses("min-h-12 w-full rounded-3xl border border-[#ffe1d0] bg-white px-4 text-base text-[#212124] outline-none motion-reduce:transform-none motion-reduce:transition-none contrast-more:outline contrast-more:outline-2 contrast-more:outline-current focus-within:outline focus-within:outline-2 focus-within:outline-current shadow-[0_8px_20px_rgba(15,23,42,0.07)] backdrop-blur-md placeholder:text-[#868b94] transition-all duration-200 ease-out focus:border-[#ff6f0f] focus:shadow-[0_14px_30px_rgba(15,23,42,0.12)] focus:ring-2 focus:ring-[#ff6f0f]/20", inputClassName)}
           id={inputId}
           type={type}
         />

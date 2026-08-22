@@ -1,5 +1,10 @@
 import { useId, type InputHTMLAttributes, type ReactNode } from "react";
 
+/**
+ * 2026 local enhancement: liquid-glass refraction, spatial depth and WCAG-oriented reduced-motion/high-contrast utilities are layered over the existing brand DNA.
+ * The visual extension uses #3182f6 only as this component's existing brand accent; it does not redefine unobserved official product states.
+ */
+
 export interface TossInputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "size"> {
   label?: ReactNode;
   description?: ReactNode;
@@ -27,7 +32,7 @@ export function TossInput({ className, description, error, errorMessage, helperT
         <input
           {...props}
           aria-invalid={Boolean(error || errorMessage) || undefined}
-          className={joinClasses("min-h-12 w-full rounded-3xl border border-[#dcecff] bg-white px-4 text-base text-[#191f28] outline-none placeholder:text-[#6b7684] transition-all duration-300 ease-out focus:border-[#3182f6] focus:ring-2 focus:ring-[#3182f6]/20", inputClassName)}
+          className={joinClasses("min-h-12 w-full rounded-3xl border border-[#dcecff] bg-white px-4 text-base text-[#191f28] outline-none motion-reduce:transform-none motion-reduce:transition-none contrast-more:outline contrast-more:outline-2 contrast-more:outline-current focus-within:outline focus-within:outline-2 focus-within:outline-current shadow-[0_8px_20px_rgba(15,23,42,0.07)] backdrop-blur-md placeholder:text-[#6b7684] transition-all duration-300 ease-out focus:border-[#3182f6] focus:shadow-[0_14px_30px_rgba(15,23,42,0.12)] focus:ring-2 focus:ring-[#3182f6]/20", inputClassName)}
           id={inputId}
           type={type}
         />

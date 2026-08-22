@@ -1,5 +1,10 @@
 import { useEffect, useId, type ReactNode } from "react";
 
+/**
+ * 2026 local enhancement: liquid-glass refraction, spatial depth and WCAG-oriented reduced-motion/high-contrast utilities are layered over the existing brand DNA.
+ * The visual extension uses #0cefd3 only as this component's existing brand accent; it does not redefine unobserved official product states.
+ */
+
 export interface BaeminModalAction { label: string; onClick?: () => void; }
 export interface BaeminModalProps {
   open: boolean;
@@ -32,7 +37,7 @@ export function BaeminModal({ actions, children, className, closeOnBackdrop = tr
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 font-sans font-black" role="presentation">
       <button aria-label="대화상자 닫기" className="absolute inset-0 bg-black/45 backdrop-blur-[2px]" onClick={closeOnBackdrop ? close : undefined} type="button" />
-      <section aria-labelledby={titleId} aria-modal="true" className={joinClasses("relative z-10 w-full max-w-md overflow-hidden rounded-[28px] border-[3px] border-[#222222] bg-[#f8fffc] shadow-[0_24px_60px_rgba(0,0,0,0.2)]", className)} role="dialog">
+      <section aria-labelledby={titleId} aria-modal="true" className={joinClasses("relative z-10 w-full border border-white/50 bg-white/78 backdrop-blur-2xl shadow-[0_28px_76px_rgba(15,23,42,0.24)] motion-reduce:transform-none motion-reduce:transition-none contrast-more:outline contrast-more:outline-2 contrast-more:outline-current focus-within:outline focus-within:outline-2 focus-within:outline-current max-w-md overflow-hidden rounded-[28px] border-[3px] border-[#222222] bg-[#f8fffc] shadow-[0_24px_60px_rgba(0,0,0,0.2)]", className)} role="dialog">
         <div className="flex items-start justify-between gap-5 border-b border-[#222222] p-6">
           <div><p className="text-[10px] font-bold tracking-[0.16em] text-[#222222]">오늘 뭐 먹지?</p><h2 className="mt-2 text-2xl font-black tracking-[-0.04em] text-[#222222]" id={titleId}>{title}</h2>{description ? <p className="mt-2 text-sm leading-6 text-[#52615e]">{description}</p> : null}</div>
           {(dismissible && showCloseButton) ? <button aria-label="대화상자 닫기" className="h-9 w-9 rounded-[28px] border border-[#222222] text-sm font-bold" onClick={close} type="button">×</button> : null}

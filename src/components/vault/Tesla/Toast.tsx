@@ -1,5 +1,10 @@
 import { useEffect, type HTMLAttributes, type ReactNode } from "react";
 
+/**
+ * 2026 local enhancement: liquid-glass refraction, spatial depth and WCAG-oriented reduced-motion/high-contrast utilities are layered over the existing brand DNA.
+ * The visual extension uses #3e6ae1 only as this component's existing brand accent; it does not redefine unobserved official product states.
+ */
+
 export type TeslaToastVariant = "success" | "warning" | "error" | "info";
 export type TeslaToastPlacement = "top-right" | "top-left" | "bottom-right" | "bottom-left";
 
@@ -85,7 +90,7 @@ export function TeslaToast({
       {...props}
       aria-live="polite"
       className={joinClasses(
-        "fixed z-50 flex w-[min(calc(100vw-2rem),360px)] items-start gap-3 rounded-[8px] bg-[#f4f4f4] px-6 py-5 font-sans text-[#171a20]",
+        "fixed z-50 overflow-hidden border border-white/45 bg-white/76 backdrop-blur-xl shadow-[0_18px_44px_rgba(15,23,42,0.18)] motion-reduce:transform-none motion-reduce:transition-none contrast-more:outline contrast-more:outline-2 contrast-more:outline-current focus-within:outline focus-within:outline-2 focus-within:outline-current flex w-[min(calc(100vw-2rem),360px)] items-start gap-3 rounded-[8px] bg-[#f4f4f4] px-6 py-5 font-sans text-[#171a20]",
         placementClasses[resolvedPlacement],
         className,
       )}

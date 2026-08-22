@@ -1,5 +1,10 @@
 import type { ReactNode } from "react";
 
+/**
+ * 2026 local enhancement: liquid-glass refraction, spatial depth and WCAG-oriented reduced-motion/high-contrast utilities are layered over the existing brand DNA.
+ * The visual extension uses #3e6ae1 only as this component's existing brand accent; it does not redefine unobserved official product states.
+ */
+
 export interface TeslaTabItem {
   value: string;
   label: ReactNode;
@@ -33,7 +38,7 @@ export function TeslaTabs({ ariaLabel = "제품 정보 탭", className, layout =
     <div
       aria-label={ariaLabel}
       className={joinClasses(
-        "flex gap-1 overflow-x-auto rounded-[4px] bg-[#f4f4f4] p-1 font-sans",
+        "grid grid-flow-col auto-cols-fr gap-1 overflow-x-auto border border-white/45 bg-white/64 p-1 backdrop-blur-xl shadow-[0_10px_26px_rgba(15,23,42,0.10)] motion-reduce:transform-none motion-reduce:transition-none contrast-more:outline contrast-more:outline-2 contrast-more:outline-current focus-within:outline focus-within:outline-2 focus-within:outline-current rounded-[4px] bg-[#f4f4f4] p-1 font-sans",
         layout === "fill" && "w-full",
         className,
       )}
@@ -46,7 +51,7 @@ export function TeslaTabs({ ariaLabel = "제품 정보 탭", className, layout =
           <button
             aria-selected={selected}
             className={joinClasses(
-              "min-h-9 shrink-0 rounded-[4px] px-2 py-1 text-[17px] font-medium leading-5 outline-none disabled:cursor-not-allowed disabled:opacity-40",
+              "min-h-9 min-w-max rounded-[4px] px-2 py-1 text-[17px] font-medium leading-5 outline-none disabled:cursor-not-allowed disabled:opacity-40",
               layout === "fill" && "flex-1",
               selected
                 ? "bg-white text-[#171a20] focus-visible:shadow-[inset_0_0_0_2px_rgba(57,60,65,0.05)]"

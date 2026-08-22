@@ -1,5 +1,10 @@
 import { useId, type InputHTMLAttributes, type ReactNode } from "react";
 
+/**
+ * 2026 local enhancement: liquid-glass refraction, spatial depth and WCAG-oriented reduced-motion/high-contrast utilities are layered over the existing brand DNA.
+ * The visual extension uses #0cefd3 only as this component's existing brand accent; it does not redefine unobserved official product states.
+ */
+
 export interface BaeminInputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "size"> {
   label?: ReactNode;
   description?: ReactNode;
@@ -27,7 +32,7 @@ export function BaeminInput({ className, description, error, errorMessage, helpe
         <input
           {...props}
           aria-invalid={Boolean(error || errorMessage) || undefined}
-          className={joinClasses("min-h-12 w-full rounded-[28px] border border-[#222222] bg-white px-4 text-base text-[#222222] outline-none placeholder:text-[#52615e] transition-all duration-200 ease-out focus:border-[#0cefd3] focus:ring-2 focus:ring-[#0cefd3]/20", inputClassName)}
+          className={joinClasses("min-h-12 w-full rounded-[28px] border border-[#222222] bg-white px-4 text-base text-[#222222] outline-none motion-reduce:transform-none motion-reduce:transition-none contrast-more:outline contrast-more:outline-2 contrast-more:outline-current focus-within:outline focus-within:outline-2 focus-within:outline-current shadow-[0_8px_20px_rgba(15,23,42,0.07)] backdrop-blur-md placeholder:text-[#52615e] transition-all duration-200 ease-out focus:border-[#0cefd3] focus:shadow-[0_14px_30px_rgba(15,23,42,0.12)] focus:ring-2 focus:ring-[#0cefd3]/20", inputClassName)}
           id={inputId}
           type={type}
         />

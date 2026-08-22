@@ -1,5 +1,10 @@
 import type { HTMLAttributes } from "react";
 
+/**
+ * 2026 local enhancement: liquid-glass refraction, spatial depth and WCAG-oriented reduced-motion/high-contrast utilities are layered over the existing brand DNA.
+ * The visual extension uses #0071e3 only as this component's existing brand accent; it does not redefine unobserved official product states.
+ */
+
 export interface AppleAvatarProps extends HTMLAttributes<HTMLDivElement> {
   src?: string;
   alt?: string;
@@ -17,7 +22,7 @@ function initials(name: string) { return name.trim().split(/\s+/).filter(Boolean
 export function AppleAvatar({ alt, className, name = "Alex Kim", showStatus = false, size = "md", src, status = "active", tone = "dark", ...props }: AppleAvatarProps) {
   const sizes = { sm: "h-8 w-8 text-xs", md: "h-10 w-10 text-sm", lg: "h-14 w-14 text-base", xl: "h-20 w-20 text-xl" };
   const statusClass = status === "active" ? "bg-[#2997ff]" : status === "away" ? "bg-[#6e6e73]" : "bg-[#d1d5db]";
-  return <div {...props} className={joinClasses("relative inline-flex shrink-0 font-['SF_Pro_Display']", sizes[size], className)}>{src ? <img alt={alt ?? name} className="h-full w-full rounded-full border-2 border-white object-cover" src={src} /> : <span aria-label={alt ?? name} className={joinClasses("inline-flex h-full w-full items-center justify-center rounded-full border-2 border-[#d2d2d7] font-black", tone === "light" ? "bg-white text-[#1d1d1f]" : "bg-[#0071e3] text-white")} role="img">{initials(name)}</span>}{showStatus ? <span aria-label={status} className={joinClasses("absolute bottom-0 right-0 h-4 w-4 rounded-full border-2 border-white", statusClass)} /> : null}</div>;
+  return <div {...props} className={joinClasses("relative isolate inline-flex shrink-0 rounded-full bg-white/48 p-0.5 backdrop-blur-md shadow-[0_8px_18px_rgba(15,23,42,0.12)] motion-reduce:transform-none motion-reduce:transition-none contrast-more:outline contrast-more:outline-2 contrast-more:outline-current focus-within:outline focus-within:outline-2 focus-within:outline-current font-['SF_Pro_Display']", sizes[size], className)}>{src ? <img alt={alt ?? name} className="h-full w-full rounded-full border-2 border-white object-cover" src={src} /> : <span aria-label={alt ?? name} className={joinClasses("inline-flex h-full w-full items-center justify-center rounded-full border-2 border-[#d2d2d7] font-black", tone === "light" ? "bg-white text-[#1d1d1f]" : "bg-[#0071e3] text-white")} role="img">{initials(name)}</span>}{showStatus ? <span aria-label={status} className={joinClasses("absolute bottom-0 right-0 h-4 w-4 rounded-full border-2 border-white", statusClass)} /> : null}</div>;
 }
 
 export default AppleAvatar;

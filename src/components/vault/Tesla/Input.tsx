@@ -1,5 +1,10 @@
 import { useId, type InputHTMLAttributes, type ReactNode } from "react";
 
+/**
+ * 2026 local enhancement: liquid-glass refraction, spatial depth and WCAG-oriented reduced-motion/high-contrast utilities are layered over the existing brand DNA.
+ * The visual extension uses #3e6ae1 only as this component's existing brand accent; it does not redefine unobserved official product states.
+ */
+
 export interface TeslaInputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "size"> {
   /** 필드의 목적을 알리는 레이블입니다. */
   label?: ReactNode;
@@ -58,7 +63,7 @@ export function TeslaInput({
           aria-describedby={feedback ? `${inputId}-feedback` : undefined}
           aria-invalid={hasError || undefined}
           className={joinClasses(
-            "min-h-11 w-full rounded-[4px] border border-transparent bg-white px-3 text-sm font-medium text-[#171a20] outline-none placeholder:text-[#5c5e62] focus:border-[#393c41] focus:shadow-[inset_0_0_0_2px_rgba(57,60,65,0.05)]",
+            "min-h-11 w-full rounded-[4px] border border-transparent bg-white px-3 text-sm font-medium text-[#171a20] outline-none motion-reduce:transform-none motion-reduce:transition-none contrast-more:outline contrast-more:outline-2 contrast-more:outline-current focus-within:outline focus-within:outline-2 focus-within:outline-current shadow-[0_8px_20px_rgba(15,23,42,0.07)] backdrop-blur-md placeholder:text-[#5c5e62] focus:shadow-[0_14px_30px_rgba(15,23,42,0.12)] focus:border-[#393c41] focus:shadow-[inset_0_0_0_2px_rgba(57,60,65,0.05)]",
             hasError && "border-[#393c41]",
             inputClassName,
           )}

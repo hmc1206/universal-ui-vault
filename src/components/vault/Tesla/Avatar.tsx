@@ -1,5 +1,10 @@
 import type { HTMLAttributes } from "react";
 
+/**
+ * 2026 local enhancement: liquid-glass refraction, spatial depth and WCAG-oriented reduced-motion/high-contrast utilities are layered over the existing brand DNA.
+ * The visual extension uses #3e6ae1 only as this component's existing brand accent; it does not redefine unobserved official product states.
+ */
+
 export type TeslaAvatarSize = "sm" | "md" | "lg" | "xl";
 export type TeslaAvatarStatus = "active" | "away" | "offline";
 
@@ -62,7 +67,7 @@ export function TeslaAvatar({
   ...props
 }: TeslaAvatarProps) {
   return (
-    <div {...props} className={joinClasses("relative inline-flex shrink-0 font-sans", sizeClasses[size], className)}>
+    <div {...props} className={joinClasses("relative isolate inline-flex shrink-0 rounded-full bg-white/48 p-0.5 backdrop-blur-md shadow-[0_8px_18px_rgba(15,23,42,0.12)] motion-reduce:transform-none motion-reduce:transition-none contrast-more:outline contrast-more:outline-2 contrast-more:outline-current focus-within:outline focus-within:outline-2 focus-within:outline-current font-sans", sizeClasses[size], className)}>
       {src ? (
         <img alt={alt ?? name} className="h-full w-full rounded-full border-2 border-white object-cover" src={src} />
       ) : (
