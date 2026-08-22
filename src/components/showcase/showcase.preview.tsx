@@ -1,6 +1,7 @@
 import { useState, type ChangeEvent } from "react";
 import { ACTION_PAIR_HERO_BRANDS, NATIVE_FORM_BRANDS, NATIVE_MODAL_BRANDS, VISIBLE_TOAST_BRANDS } from "./showcase.catalog";
-import type { ComponentId, ShowcaseBrand, ShowcaseBrandId, ShowcaseComponent, VaultComponentSet } from "./showcase.types";
+import { getThemeBridgeSkin, type ThemeBridgeSkin } from "./themebridge.skin";
+import type { ComponentId, ShowcaseBrand, ShowcaseBrandId, ShowcaseComponent, ThemeBridge, VaultComponentSet } from "./showcase.types";
 import { joinClasses, noOp } from "./showcase.utils";
 
 function PreviewLaunchButton({ brand, label, onClick }: { brand: ShowcaseBrand; label: string; onClick: () => void }) {
@@ -229,7 +230,7 @@ function ComponentPreview({ brand, componentId, components }: { brand: ShowcaseB
   );
 }
 
-function PreviewPane({ label, seniorMode, children }: { label: string; seniorMode: boolean; children: React.ReactNode }) {
+function PreviewPane({ children, label, seniorMode, skin }: { children: React.ReactNode; label: string; seniorMode: boolean; skin?: ThemeBridgeSkin }) {
   return (
     <section
       aria-label={label}
@@ -237,25 +238,46 @@ function PreviewPane({ label, seniorMode, children }: { label: string; seniorMod
         "relative flex min-h-[238px] w-full items-center justify-center overflow-auto rounded-xl border p-4",
         seniorMode
           ? "border-yellow-300 bg-black text-white shadow-[inset_0_0_0_2px_#ffffff] [&_button]:!min-h-12 [&_button]:!border-2 [&_button]:!border-yellow-300 [&_button]:!bg-yellow-300 [&_button]:!px-4 [&_button]:!text-[1.5em] [&_button]:!text-black [&_input]:!min-h-12 [&_input]:!border-2 [&_input]:!border-yellow-300 [&_input]:!bg-black [&_input]:!text-[1.5em] [&_input]:!text-white [&_select]:!min-h-12 [&_select]:!border-2 [&_select]:!border-yellow-300 [&_select]:!bg-black [&_select]:!text-[1.5em] [&_select]:!text-white [&_p]:!text-[1.5em] [&_span]:!text-[1.5em] [&_h1]:!text-[1.5em] [&_h2]:!text-[1.5em] [&_h3]:!text-[1.5em]"
-          : "border-[#ececf0] bg-white",
+          : skin
+            ? joinClasses("border-2", skin.frameClass, skin.surfaceClass)
+            : "border-[#ececf0] bg-white",
       )}
     >
-      <span className={joinClasses("absolute left-3 top-3 rounded-full px-2 py-1 text-[10px] font-bold", seniorMode ? "bg-yellow-300 text-black" : "bg-[#f1f2f5] text-[#63636d]")}>{label}</span>
-      <div className={joinClasses("w-full pt-6", seniorMode ? "min-w-[310px]" : "")}>{children}</div>
+      <span className={joinClasses("absolute left-3 top-3 z-10 rounded-full px-2 py-1 text-[10px] font-bold", seniorMode ? "bg-yellow-300 text-black" : skin ? skin.paletteBadgeClass : "bg-[#f1f2f5] text-[#63636d]")}>{label}</span>
+      <div className={joinClasses("w-full pt-6", seniorMode ? "min-w-[310px]" : "", skin?.controlClass)}>{children}</div>
     </section>
   );
 }
 
-export function ComponentComparison({ brand, component, components, seniorMode }: { brand: ShowcaseBrand; component: ShowcaseComponent; components: VaultComponentSet; seniorMode: boolean }) {
-  const preview = <ComponentPreview brand={brand} componentId={component.id} components={components} />;
+export function ComponentComparison({ brand, component, components, seniorMode, splitView = false, themeBridge }: { brand: ShowcaseBrand; component: ShowcaseComponent; components: VaultComponentSet; seniorMode: boolean; splitView?: boolean; themeBridge?: ThemeBridge }) {
+  const originalPane = (
+    <PreviewPane label="원본 vault" seniorMode={false}>
+      <ComponentPreview brand={brand} componentId={component.id} components={components} />
+    </PreviewPane>
+  );
+
+  if (themeBridge?.enabled) {
+    const skin = getThemeBridgeSkin(themeBridge);
+    const mixedPane = (
+      <PreviewPane label={`혼합 skin · ${skin.label}`} seniorMode={false} skin={skin}>
+        <ComponentPreview brand={brand} componentId={component.id} components={components} />
+      </PreviewPane>
+    );
+
+    if (splitView) {
+      return <div className="grid w-full gap-3 2xl:grid-cols-2">{originalPane}{mixedPane}</div>;
+    }
+
+    return mixedPane;
+  }
 
   if (!seniorMode) {
-    return <PreviewPane label="일반 모드" seniorMode={false}>{preview}</PreviewPane>;
+    return originalPane;
   }
 
   return (
     <div className="grid w-full gap-3 xl:grid-cols-2">
-      <PreviewPane label="일반 모드" seniorMode={false}><ComponentPreview brand={brand} componentId={component.id} components={components} /></PreviewPane>
+      {originalPane}
       <PreviewPane label="시니어 모드 · 150% 텍스트" seniorMode><ComponentPreview brand={brand} componentId={component.id} components={components} /></PreviewPane>
     </div>
   );
