@@ -17,7 +17,7 @@ export interface AppleButtonProps extends ButtonHTMLAttributes<HTMLButtonElement
 const variantClasses: Record<AppleButtonVariant, string> = {
   primary: "border border-[#0071e3] bg-[#0071e3] text-white",
   outline: "border border-[#0066cc] bg-transparent text-[#0066cc]",
-  dark-link: "border border-transparent bg-transparent text-[#2997ff]",
+  "dark-link": "border border-transparent bg-transparent text-[#2997ff]",
 };
 
 const sizeClasses: Record<AppleButtonSize, string> = {
