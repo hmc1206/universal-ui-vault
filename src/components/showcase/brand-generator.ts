@@ -60,7 +60,7 @@ export interface BrandGenerationManifest {
   };
   files: GeneratedVaultFile[];
   generatedAt: string;
-  schemaVersion: 2;
+  schemaVersion: 3;
 }
 
 interface GenerationContext {
@@ -75,9 +75,13 @@ interface GenerationContext {
   descriptor: string;
   displayFont: string;
   focusRing: string;
+  disabledOpacity: string;
+  hoverAccent: string;
+  hoverLift: string;
   ink: string;
   interaction: string;
   interactionPressed: string;
+  pressedScale: string;
   modalRadius: string;
   mutedInk: string;
   primaryHover: string;
@@ -141,13 +145,15 @@ export function createDefaultGenerationBrief(brand: CustomBrandDNA): BrandGenera
 function createContext(brand: CustomBrandDNA, componentId: ComponentId): GenerationContext {
   const componentTokens = resolveComponentTokens(brand, componentId);
   const accentRgb = hexToRgb(componentTokens.accent);
+  const override = brand.componentOverrides[componentId];
+  const states = override?.enabled ? override.states : undefined;
   const shadow = brand.shadow === "sharp"
     ? `shadow-[0_9px_0_rgba(${hexToRgb(brand.tokens.ink)},0.22)]`
     : brand.shadow === "soft"
       ? `shadow-[0_22px_46px_rgba(${accentRgb},0.18)]`
       : `shadow-[0_14px_32px_rgba(${accentRgb},0.26)]`;
   const duration = `duration-[${brand.motion.duration}]`;
-  const hoverLift = `hover:-translate-y-[${brand.motion.hoverLift}]`;
+  const hoverLift = `hover:-translate-y-[${states?.hoverLift || brand.motion.hoverLift}]`;
 
   return {
     accent: componentTokens.accent,
@@ -160,14 +166,18 @@ function createContext(brand: CustomBrandDNA, componentId: ComponentId): Generat
     densityClass: componentTokens.density === "compact" ? "py-1.5" : componentTokens.density === "spacious" ? "py-3" : "py-2.5",
     descriptor: brand.descriptor,
     displayFont: brand.displayFont,
-    focusRing: `focus-visible:ring-[${brand.tokens.focusRing}]/45`,
+    disabledOpacity: states?.disabledOpacity || "0.45",
+    focusRing: `focus-visible:ring-[${states?.focusRing || brand.tokens.focusRing}]/45`,
+    hoverAccent: states?.hoverAccent || brand.tokens.primaryHover,
+    hoverLift: states?.hoverLift || brand.motion.hoverLift,
     ink: brand.tokens.ink,
     interaction: brand.material === "elastic"
       ? `${duration} ${brand.motion.easing} ${hoverLift} hover:scale-[1.01]`
       : brand.material === "crisp"
         ? `${duration} ${brand.motion.easing} ${hoverLift}`
         : `${duration} ${brand.motion.easing} ${hoverLift}`,
-    interactionPressed: brand.material === "elastic" ? `active:translate-y-0 active:scale-[${brand.motion.pressScale}]` : "active:translate-y-0",
+    interactionPressed: brand.material === "elastic" ? `active:translate-y-0 active:scale-[${states?.pressedScale || brand.motion.pressScale}]` : "active:translate-y-0",
+    pressedScale: states?.pressedScale || brand.motion.pressScale,
     modalRadius: brand.geometry.modalRadius,
     mutedInk: brand.tokens.mutedInk,
     primaryHover: brand.tokens.primaryHover,
@@ -186,7 +196,9 @@ function sharedHeader(componentName: ComponentId, context: GenerationContext) {
 }
 
 function buttonSource(context: GenerationContext) {
-  return `${sharedHeader("Button", context)}import { useState, type ButtonHTMLAttributes } from "react";\n\nexport type ButtonVariant = "solid" | "outline" | "quiet";\nexport type ButtonSize = "sm" | "md" | "lg";\n\nexport interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {\n  fullWidth?: boolean;\n  size?: ButtonSize;\n  variant?: ButtonVariant;\n}\n\nfunction joinClasses(...classes: Array<string | false | null | undefined>) {\n  return classes.filter(Boolean).join(" ");\n}\n\nconst sizeClasses: Record<ButtonSize, string> = {\n  sm: "min-h-9 px-3 text-sm",\n  md: "min-h-11 px-4 text-sm",\n  lg: "min-h-12 px-5 text-base",\n};\n\nconst variantClasses: Record<ButtonVariant, string> = {\n  solid: "border-[${context.borderWidth}] border-[${context.accent}] bg-[${context.accent}] text-white shadow-[0_10px_20px_rgba(${context.accentRgb},0.24)] hover:bg-[${context.primaryHover}]",\n  outline: "border-[${context.borderWidth}] border-[${context.accent}] bg-[${context.surfaceElevated}] text-[${context.accent}] hover:bg-[${context.primarySoft}]",\n  quiet: "border border-transparent bg-transparent text-[${context.ink}] hover:bg-[${context.primarySoft}]",\n};\n\nexport function Button({ className, disabled, fullWidth = false, onKeyDown, onPointerDown, onPointerUp, size = "md", type = "button", variant = "solid", ...props }: ButtonProps) {\n  const [pressed, setPressed] = useState(false);\n\n  return (\n    <button\n      {...props}\n      aria-pressed={pressed || undefined}\n      className={joinClasses(\n        "inline-flex items-center justify-center gap-2 font-semibold outline-none transition-[transform,box-shadow,background-color,color,border-color] motion-reduce:transform-none motion-reduce:transition-none",\n        "rounded-[${context.radius}] ${context.densityClass} ${context.interaction} ${context.interactionPressed}",\n        "focus-visible:ring-4 ${context.focusRing} focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-45",\n        sizeClasses[size],\n        variantClasses[variant],\n        fullWidth && "w-full",\n        className,\n      )}\n      disabled={disabled}\n      onKeyDown={(event) => {\n        if (event.key === " " || event.key === "Enter") setPressed(true);\n        onKeyDown?.(event);\n      }}\n      onKeyUp={() => setPressed(false)}\n      onPointerDown={(event) => {\n        setPressed(true);\n        onPointerDown?.(event);\n      }}\n      onPointerUp={(event) => {\n        setPressed(false);\n        onPointerUp?.(event);\n      }}\n      type={type}\n    />\n  );\n}\n\nexport default Button;\n`;
+  return `${sharedHeader("Button", context)}import { useState, type ButtonHTMLAttributes } from "react";\n\nexport type ButtonVariant = "solid" | "outline" | "quiet";\nexport type ButtonSize = "sm" | "md" | "lg";\n\nexport interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {\n  fullWidth?: boolean;\n  size?: ButtonSize;\n  variant?: ButtonVariant;\n}\n\nfunction joinClasses(...classes: Array<string | false | null | undefined>) {\n  return classes.filter(Boolean).join(" ");\n}\n\nconst sizeClasses: Record<ButtonSize, string> = {\n  sm: "min-h-9 px-3 text-sm",\n  md: "min-h-11 px-4 text-sm",\n  lg: "min-h-12 px-5 text-base",\n};\n\nconst variantClasses: Record<ButtonVariant, string> = {\n    solid: "border-[${context.borderWidth}] border-[${context.accent}] bg-[${context.accent}] text-white shadow-[0_10px_20px_rgba(${context.accentRgb},0.24)] hover:bg-[${context.hoverAccent}]",
+\n  outline: "border-[${context.borderWidth}] border-[${context.accent}] bg-[${context.surfaceElevated}] text-[${context.accent}] hover:bg-[${context.primarySoft}]",\n  quiet: "border border-transparent bg-transparent text-[${context.ink}] hover:bg-[${context.primarySoft}]",\n};\n\nexport function Button({ className, disabled, fullWidth = false, onKeyDown, onPointerDown, onPointerUp, size = "md", type = "button", variant = "solid", ...props }: ButtonProps) {\n  const [pressed, setPressed] = useState(false);\n\n  return (\n    <button\n      {...props}\n      aria-pressed={pressed || undefined}\n      className={joinClasses(\n        "inline-flex items-center justify-center gap-2 font-semibold outline-none transition-[transform,box-shadow,background-color,color,border-color] motion-reduce:transform-none motion-reduce:transition-none",\n        "rounded-[${context.radius}] ${context.densityClass} ${context.interaction} ${context.interactionPressed}",\n                "focus-visible:ring-4 ${context.focusRing} focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-[${context.disabledOpacity}]",
+\n        sizeClasses[size],\n        variantClasses[variant],\n        fullWidth && "w-full",\n        className,\n      )}\n      disabled={disabled}\n      onKeyDown={(event) => {\n        if (event.key === " " || event.key === "Enter") setPressed(true);\n        onKeyDown?.(event);\n      }}\n      onKeyUp={() => setPressed(false)}\n      onPointerDown={(event) => {\n        setPressed(true);\n        onPointerDown?.(event);\n      }}\n      onPointerUp={(event) => {\n        setPressed(false);\n        onPointerUp?.(event);\n      }}\n      type={type}\n    />\n  );\n}\n\nexport default Button;\n`;
 }
 
 function inputSource(context: GenerationContext) {
@@ -269,7 +281,7 @@ export function createBrandGenerationManifest(brand: CustomBrandDNA, input: Part
     },
     files,
     generatedAt: new Date().toISOString(),
-    schemaVersion: 2,
+    schemaVersion: 3,
   };
 }
 
@@ -284,5 +296,5 @@ export function createManifestDownload(manifest: BrandGenerationManifest) {
 export function isGeneratedManifest(value: unknown): value is BrandGenerationManifest {
   if (!value || typeof value !== "object") return false;
   const record = value as Partial<BrandGenerationManifest>;
-  return record.schemaVersion === 2 && Array.isArray(record.files) && record.files.length === GENERATED_COMPONENT_IDS.length && Boolean(record.brand?.slug);
+  return record.schemaVersion === 3 && Array.isArray(record.files) && record.files.length === GENERATED_COMPONENT_IDS.length && Boolean(record.brand?.slug);
 }

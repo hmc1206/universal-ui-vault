@@ -3,6 +3,7 @@ import { createBrandGenerationManifest, GENERATED_COMPONENT_DESCRIPTIONS, GENERA
 import { copyGenerationText, downloadGeneratedFile, downloadGenerationManifest, loadStoredBrandGeneration, saveStoredBrandGeneration, type StoredBrandGeneration } from "./brand-generation-storage";
 import { getCustomCssVariables } from "./custom-brand";
 import { GeneratedVaultPreview } from "./GeneratedVaultPreview";
+import { VaultHandoffPanel } from "./VaultHandoffPanel";
 import type { ComponentId, CustomBrandDNA } from "./showcase.types";
 import { joinClasses } from "./showcase.utils";
 
@@ -172,6 +173,7 @@ export function BrandGenerationWorkbench({ brand, onActivateThemeBridge }: Brand
               ) : null}
 
               <div className="mt-4 grid gap-3 md:grid-cols-2"><aside className="rounded-xl border border-[#dbe2f0] bg-white/75 p-3"><p className="text-xs font-bold uppercase tracking-[0.12em] text-[#647189]">Observed / extension note</p><p className="mt-2 text-sm leading-6 text-[#4d596d]">{manifest.evidence.observedNote}</p>{manifest.evidence.referenceUrl ? <a className="mt-2 inline-flex text-sm font-bold text-[#315a9f] underline underline-offset-2" href={manifest.evidence.referenceUrl} rel="noreferrer" target="_blank">참조 URL 열기</a> : null}</aside><aside className="rounded-xl border border-[#dbe2f0] bg-white/75 p-3"><p className="text-xs font-bold uppercase tracking-[0.12em] text-[#647189]">Rights boundary</p><p className="mt-2 text-sm leading-6 text-[#4d596d]">{manifest.evidence.licenseNote}</p></aside></div>
+              <VaultHandoffPanel brand={brand} manifest={manifest} stale={isStale} />
             </div>
           ) : null}
         </div>

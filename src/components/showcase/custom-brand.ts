@@ -86,6 +86,31 @@ function sanitizeColor(value: unknown, fallback: string) {
   return typeof value === "string" && isHexColor(value) ? value.toUpperCase() : fallback;
 }
 
+function hexToRgbParts(hex: string) {
+  const safe = sanitizeColor(hex, "#7C3AED").slice(1);
+  return [Number.parseInt(safe.slice(0, 2), 16), Number.parseInt(safe.slice(2, 4), 16), Number.parseInt(safe.slice(4, 6), 16)] as const;
+}
+
+function rgbToHex(red: number, green: number, blue: number) {
+  return `#${[red, green, blue].map((value) => Math.max(0, Math.min(255, Math.round(value))).toString(16).padStart(2, "0")).join("").toUpperCase()}`;
+}
+
+function mixHex(first: string, second: string, weight: number) {
+  const [r1, g1, b1] = hexToRgbParts(first);
+  const [r2, g2, b2] = hexToRgbParts(second);
+  return rgbToHex(r1 + (r2 - r1) * weight, g1 + (g2 - g1) * weight, b1 + (b2 - b1) * weight);
+}
+
+export function generateToneScale(primary: string) {
+  const steps = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900] as const;
+  const weights = [0.92, 0.82, 0.68, 0.50, 0.25, 0, 0.16, 0.32, 0.50, 0.68];
+  return Object.fromEntries(steps.map((step, index) => [step, index < 5 ? mixHex(primary, "#FFFFFF", weights[index]) : mixHex(primary, "#0B1020", weights[index])])) as import("./showcase.types").CustomToneScale;
+}
+
+function createDarkTokens(tokens: CustomSemanticTokens): CustomSemanticTokens {
+  return { ...tokens, border: mixHex(tokens.primary, "#0B1020", 0.58), ink: "#F7F8FC", mutedInk: "#B8BED0", primarySoft: mixHex(tokens.primary, "#101522", 0.74), surface: "#101522", surfaceElevated: "#171D2C" };
+}
+
 function slugifyCustomId(value: unknown) {
   const raw = typeof value === "string" ? value.replace(/^custom:/, "") : "";
   const slug = raw.toLowerCase().replace(/[^a-z0-9-]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 28);
@@ -122,6 +147,13 @@ function sanitizeOverrides(input: Partial<Record<ComponentId, CustomComponentOve
       density: DENSITY_VALUES.includes(candidate.density as CustomDensity) ? candidate.density : "comfortable",
       enabled: Boolean(candidate.enabled),
       radius: typeof candidate.radius === "string" && isCssSize(candidate.radius) ? candidate.radius : "",
+      states: {
+        disabledOpacity: typeof candidate.states?.disabledOpacity === "string" && /^(0\.[1-9]|1)$/.test(candidate.states.disabledOpacity) ? candidate.states.disabledOpacity : "",
+        focusRing: sanitizeColor(candidate.states?.focusRing, ""),
+        hoverAccent: sanitizeColor(candidate.states?.hoverAccent, ""),
+        hoverLift: typeof candidate.states?.hoverLift === "string" && LIFT_PATTERN.test(candidate.states.hoverLift) ? candidate.states.hoverLift : "",
+        pressedScale: typeof candidate.states?.pressedScale === "string" && PRESS_SCALE_PATTERN.test(candidate.states.pressedScale) ? candidate.states.pressedScale : "",
+      },
       surface: sanitizeColor(candidate.surface, ""),
     };
   }
@@ -153,22 +185,32 @@ export function sanitizeCustomBrand(input: Partial<CustomBrandDNA>): CustomBrand
     warning: sanitizeColor(inputTokens.warning, DEFAULT_TOKENS.warning),
   };
 
+  const sourceModes = input.colorModes;
+  const lightMode = sourceModes ? { ...tokens, ...sourceModes.light } : tokens;
+  const darkBase = createDarkTokens(lightMode);
+  const darkMode = sourceModes ? { ...darkBase, ...sourceModes.dark } : darkBase;
+  const activeColorMode = input.activeColorMode === "dark" ? "dark" : "light";
+  const activeTokens = activeColorMode === "dark" ? darkMode : lightMode;
+
   return {
-    accent: primary,
+    accent: activeTokens.primary,
+    activeColorMode,
+    colorModes: { dark: darkMode, light: lightMode },
     componentOverrides: sanitizeOverrides(input.componentOverrides),
     descriptor,
     displayFont: FONT_CLASS_VALUES.includes(input.displayFont as (typeof FONT_CLASS_VALUES)[number]) ? input.displayFont! : DEFAULT_CUSTOM_BRAND.displayFont,
     geometry,
     id: slugifyCustomId(input.id),
-    ink,
+    ink: activeTokens.ink,
     material: input.material === "crisp" || input.material === "elastic" || input.material === "soft" ? input.material : DEFAULT_CUSTOM_BRAND.material,
     motion,
     name,
     radius: geometry.controlRadius,
     sansFont: FONT_CLASS_VALUES.includes(input.sansFont as (typeof FONT_CLASS_VALUES)[number]) ? input.sansFont! : DEFAULT_CUSTOM_BRAND.sansFont,
     shadow: input.shadow === "ambient" || input.shadow === "sharp" || input.shadow === "soft" ? input.shadow : DEFAULT_CUSTOM_BRAND.shadow,
-    surface,
-    tokens,
+    surface: activeTokens.surface,
+    toneScale: generateToneScale(activeTokens.primary),
+    tokens: activeTokens,
   };
 }
 
