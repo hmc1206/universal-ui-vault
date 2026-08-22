@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { BrandGenerationWorkbench } from "./BrandGenerationWorkbench";
 import { CustomBrandBuilder } from "./CustomBrandBuilder";
 import { SHOWCASE_BRANDS } from "./showcase.catalog";
 import { GALLERY_RECIPES, MATERIAL_LABELS, MATERIAL_MOTION_RECIPES, MATERIAL_PREVIEW_CLASSES, type GalleryRecipe } from "./themebridge.gallery-data";
@@ -186,6 +187,14 @@ export function ThemeBridgePanel({
       </section>
 
       <CustomBrandBuilder brand={customBrand} onChange={onCustomBrandChange} onReset={onCustomBrandReset} onSave={onCustomBrandSave} saved={customBrandSaved} />
+      <BrandGenerationWorkbench
+        brand={customBrand}
+        onActivateThemeBridge={() => {
+          onPaletteBrandChange("custom");
+          onMaterialBrandChange("custom");
+          if (!mixEnabled) onToggleMix();
+        }}
+      />
 
       <section aria-labelledby="mix-gallery-title" className="mt-8">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
