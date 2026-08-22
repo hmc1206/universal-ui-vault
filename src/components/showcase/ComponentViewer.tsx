@@ -109,6 +109,16 @@ import SamsungSelect from "../vault/Samsung/Select";
 import SamsungAvatar from "../vault/Samsung/Avatar";
 import SamsungTabs from "../vault/Samsung/Tabs";
 import SamsungAccordion from "../vault/Samsung/Accordion";
+import TeslaButton from "../vault/Tesla/Button";
+import TeslaInput from "../vault/Tesla/Input";
+import TeslaHeroCard from "../vault/Tesla/HeroCard";
+import TeslaToast from "../vault/Tesla/Toast";
+import TeslaBadge from "../vault/Tesla/Badge";
+import TeslaModal from "../vault/Tesla/Modal";
+import TeslaSelect from "../vault/Tesla/Select";
+import TeslaAvatar from "../vault/Tesla/Avatar";
+import TeslaTabs from "../vault/Tesla/Tabs";
+import TeslaAccordion from "../vault/Tesla/Accordion";
 import TossButton from "../vault/Toss/Button";
 import TossInput from "../vault/Toss/Input";
 import TossHeroCard from "../vault/Toss/HeroCard";
@@ -152,6 +162,7 @@ export type ShowcaseBrandId =
   | "likelion"
   | "musinsa"
   | "samsung"
+  | "tesla"
   | "toss"
   | "upstage"
   | "goodchoice";
@@ -368,6 +379,20 @@ export const SHOWCASE_BRANDS: ShowcaseBrand[] = [
     status: "10개 실물 연결됨",
   },
   {
+    id: "tesla",
+    name: "Tesla",
+    directory: "Tesla",
+    exportPrefix: "Tesla",
+    descriptor: "Product-led sustainable energy marketing",
+    initials: "T",
+    accentClass: "bg-[#3e6ae1]",
+    surfaceClass: "bg-[#f4f4f4]",
+    borderClass: "border-[#d0d1d2]",
+    textClass: "text-[#171a20]",
+    avatarClass: "bg-[#3e6ae1] text-white",
+    status: "10개 실물 연결됨",
+  },
+  {
     id: "toss",
     name: "Toss",
     directory: "Toss",
@@ -543,6 +568,18 @@ const VAULT_COMPONENTS: Record<ShowcaseBrandId, VaultComponentSet> = {
     Avatar: SamsungAvatar,
     Tabs: SamsungTabs,
     Accordion: SamsungAccordion,
+  },
+  tesla: {
+    Button: TeslaButton,
+    Input: TeslaInput,
+    HeroCard: TeslaHeroCard,
+    Toast: TeslaToast,
+    Badge: TeslaBadge,
+    Modal: TeslaModal,
+    Select: TeslaSelect,
+    Avatar: TeslaAvatar,
+    Tabs: TeslaTabs,
+    Accordion: TeslaAccordion,
   },
   toss: {
     Button: TossButton,
