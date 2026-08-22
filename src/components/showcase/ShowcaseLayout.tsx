@@ -145,6 +145,106 @@ const MATERIAL_LABELS: Record<ShowcaseBrandId, string> = {
   goodchoice: "travel ticket lift",
 };
 
+interface MaterialMotionRecipe {
+  ambientClass: string;
+  chipClass: string;
+  label: string;
+  orbitClass: string;
+}
+
+const MATERIAL_MOTION_RECIPES: Record<ShowcaseBrandId, MaterialMotionRecipe> = {
+  "29cm": {
+    ambientClass: "animate-[pulse_3.2s_ease-in-out_infinite] motion-reduce:animate-none",
+    chipClass: "group-hover:translate-x-1 transition-transform duration-300 ease-out motion-reduce:transition-none",
+    label: "editorial glide",
+    orbitClass: "animate-[pulse_2.4s_ease-in-out_infinite] motion-reduce:animate-none",
+  },
+  ably: {
+    ambientClass: "animate-[pulse_1.15s_ease-in-out_infinite] motion-reduce:animate-none",
+    chipClass: "group-hover:-translate-y-1 group-hover:scale-105 transition duration-200 ease-out motion-reduce:transition-none",
+    label: "realtime pulse",
+    orbitClass: "animate-[bounce_1.2s_infinite] motion-reduce:animate-none",
+  },
+  apple: {
+    ambientClass: "animate-[pulse_3.6s_ease-in-out_infinite] motion-reduce:animate-none",
+    chipClass: "group-hover:-translate-y-0.5 transition-transform duration-500 ease-out motion-reduce:transition-none",
+    label: "restrained settle",
+    orbitClass: "animate-[pulse_2.8s_ease-in-out_infinite] motion-reduce:animate-none",
+  },
+  baemin: {
+    ambientClass: "animate-[bounce_1.8s_infinite] motion-reduce:animate-none",
+    chipClass: "group-hover:translate-y-1 transition-transform duration-150 ease-out motion-reduce:transition-none",
+    label: "playful press",
+    orbitClass: "animate-[bounce_1.1s_infinite] motion-reduce:animate-none",
+  },
+  figma: {
+    ambientClass: "animate-[spin_10s_linear_infinite] motion-reduce:animate-none",
+    chipClass: "group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform duration-150 ease-out motion-reduce:transition-none",
+    label: "tool orbit",
+    orbitClass: "animate-[spin_5s_linear_infinite] motion-reduce:animate-none",
+  },
+  kakao: {
+    ambientClass: "animate-[pulse_1.8s_ease-in-out_infinite] motion-reduce:animate-none",
+    chipClass: "group-hover:-translate-y-1 group-hover:rotate-2 transition duration-200 ease-out motion-reduce:transition-none",
+    label: "bubble pop",
+    orbitClass: "animate-[bounce_1.6s_infinite] motion-reduce:animate-none",
+  },
+  kakaobank: {
+    ambientClass: "animate-[pulse_2.5s_ease-in-out_infinite] motion-reduce:animate-none",
+    chipClass: "group-hover:-translate-y-1 transition-transform duration-300 ease-out motion-reduce:transition-none",
+    label: "calm lift",
+    orbitClass: "animate-[pulse_2.1s_ease-in-out_infinite] motion-reduce:animate-none",
+  },
+  karrot: {
+    ambientClass: "animate-[pulse_1.6s_ease-in-out_infinite] motion-reduce:animate-none",
+    chipClass: "group-hover:-translate-y-1 group-hover:rotate-1 transition duration-200 ease-out motion-reduce:transition-none",
+    label: "warm rise",
+    orbitClass: "animate-[bounce_1.4s_infinite] motion-reduce:animate-none",
+  },
+  likelion: {
+    ambientClass: "animate-[pulse_1.3s_ease-in-out_infinite] motion-reduce:animate-none",
+    chipClass: "group-hover:translate-x-1 transition-transform duration-150 ease-out motion-reduce:transition-none",
+    label: "maker signal",
+    orbitClass: "animate-[spin_6s_linear_infinite] motion-reduce:animate-none",
+  },
+  musinsa: {
+    ambientClass: "animate-[pulse_2.8s_ease-in-out_infinite] motion-reduce:animate-none",
+    chipClass: "group-hover:scale-105 transition-transform duration-150 ease-out motion-reduce:transition-none",
+    label: "contrast snap",
+    orbitClass: "animate-[pulse_1.9s_ease-in-out_infinite] motion-reduce:animate-none",
+  },
+  samsung: {
+    ambientClass: "animate-[pulse_2.6s_ease-in-out_infinite] motion-reduce:animate-none",
+    chipClass: "group-hover:-translate-y-1 transition-transform duration-300 ease-out motion-reduce:transition-none",
+    label: "wide depth",
+    orbitClass: "animate-[pulse_2.2s_ease-in-out_infinite] motion-reduce:animate-none",
+  },
+  tesla: {
+    ambientClass: "animate-[pulse_3s_ease-in-out_infinite] motion-reduce:animate-none",
+    chipClass: "group-hover:translate-x-1 transition-transform duration-300 ease-out motion-reduce:transition-none",
+    label: "product settle",
+    orbitClass: "animate-[pulse_2.5s_ease-in-out_infinite] motion-reduce:animate-none",
+  },
+  toss: {
+    ambientClass: "animate-[pulse_1.25s_ease-in-out_infinite] motion-reduce:animate-none",
+    chipClass: "group-hover:-translate-y-1 group-hover:scale-105 transition duration-200 ease-out motion-reduce:transition-none",
+    label: "elastic depth",
+    orbitClass: "animate-[bounce_1.15s_infinite] motion-reduce:animate-none",
+  },
+  upstage: {
+    ambientClass: "animate-[pulse_1.7s_ease-in-out_infinite] motion-reduce:animate-none",
+    chipClass: "group-hover:translate-x-1 transition-transform duration-200 ease-out motion-reduce:transition-none",
+    label: "conversion glow",
+    orbitClass: "animate-[pulse_1.35s_ease-in-out_infinite] motion-reduce:animate-none",
+  },
+  goodchoice: {
+    ambientClass: "animate-[pulse_1.55s_ease-in-out_infinite] motion-reduce:animate-none",
+    chipClass: "group-hover:-translate-y-1 group-hover:rotate-1 transition duration-200 ease-out motion-reduce:transition-none",
+    label: "ticket lift",
+    orbitClass: "animate-[bounce_1.45s_infinite] motion-reduce:animate-none",
+  },
+};
+
 function BrandSelect({ id, label, value, onChange }: { id: string; label: string; value: ShowcaseBrandId; onChange: (value: ShowcaseBrandId) => void }) {
   return (
     <label className="grid gap-2 text-sm font-semibold text-[#34343c]" htmlFor={id}>
@@ -166,28 +266,47 @@ function BrandSelect({ id, label, value, onChange }: { id: string; label: string
 }
 
 function GalleryRecipeCard({ recipe, paletteBrand, materialBrand, selected, onApply }: { recipe: GalleryRecipe; paletteBrand: ShowcaseBrand; materialBrand: ShowcaseBrand; selected: boolean; onApply: () => void }) {
+  const [isMotionPlaying, setIsMotionPlaying] = useState(true);
+  const motionRecipe = MATERIAL_MOTION_RECIPES[materialBrand.id];
+  const motionClass = isMotionPlaying ? motionRecipe.ambientClass : "animate-none";
+  const orbitClass = isMotionPlaying ? motionRecipe.orbitClass : "animate-none";
+
   return (
     <article
       className={joinClasses(
-        "group overflow-hidden rounded-2xl border bg-white p-4 text-left transition-[border-color,box-shadow,transform] duration-200 hover:-translate-y-1 focus-within:ring-2 focus-within:ring-[#242429]/30",
+        "group overflow-hidden rounded-2xl border bg-white p-4 text-left transition-[border-color,box-shadow,transform] duration-200 hover:-translate-y-1 focus-within:ring-2 focus-within:ring-[#242429]/30 motion-reduce:transition-none",
         selected ? "border-[#315a9f] shadow-[0_18px_36px_rgba(49,90,159,0.18)]" : "border-[#dfe2e9] shadow-[0_10px_24px_rgba(29,29,34,0.06)]",
       )}
     >
-      <div className={joinClasses("relative min-h-36 overflow-hidden border p-4", paletteBrand.surfaceClass, paletteBrand.borderClass, MATERIAL_PREVIEW_CLASSES[materialBrand.id])}>
-        <div className="absolute -right-7 -top-8 h-24 w-24 rounded-full bg-white/75 blur-2xl" />
-        <div className="absolute -bottom-10 left-4 h-20 w-20 rounded-full bg-white/60 blur-xl" />
+      <div className={joinClasses("relative min-h-40 overflow-hidden border p-4", paletteBrand.surfaceClass, paletteBrand.borderClass, MATERIAL_PREVIEW_CLASSES[materialBrand.id])}>
+        <div className={joinClasses("absolute -right-7 -top-8 h-24 w-24 rounded-full bg-white/75 blur-2xl", motionClass)} />
+        <div className={joinClasses("absolute -bottom-10 left-4 h-20 w-20 rounded-full bg-white/60 blur-xl", orbitClass)} />
+        <span aria-hidden="true" className={joinClasses("absolute right-6 top-10 h-3 w-3 rounded-full border-2 border-white/90 bg-white/80 shadow-sm", orbitClass)} />
         <div className="relative flex h-full flex-col justify-between">
           <div className="flex items-center justify-between gap-3">
             <span className={joinClasses("inline-flex h-8 w-8 items-center justify-center rounded-lg text-xs font-bold", paletteBrand.avatarClass)}>{paletteBrand.initials}</span>
             <span className="rounded-full border border-white/80 bg-white/75 px-2 py-1 text-[10px] font-bold uppercase tracking-[0.1em] text-[#45454e] backdrop-blur">{MATERIAL_LABELS[materialBrand.id]}</span>
           </div>
           <div>
-            <div className={joinClasses("h-2.5 w-16 rounded-full", paletteBrand.accentClass)} />
+            <div className={joinClasses("h-2.5 w-16 rounded-full", paletteBrand.accentClass, motionRecipe.chipClass)} />
             <div className={joinClasses("mt-2 h-2 w-24 rounded-full bg-current/20", paletteBrand.textClass)} />
-            <button className={joinClasses("mt-4 inline-flex min-h-9 items-center rounded-lg px-3 text-xs font-bold outline-none focus-visible:ring-2 focus-visible:ring-[#242429]/35 focus-visible:ring-offset-2", paletteBrand.avatarClass)} type="button">
-              Preview
-            </button>
+            <div className="mt-4 flex items-center justify-between gap-2">
+              <span className={joinClasses("inline-flex min-h-9 items-center rounded-lg px-3 text-xs font-bold", paletteBrand.avatarClass, motionRecipe.chipClass)}>Preview</span>
+              <button
+                aria-label={`${recipe.title} 모션 ${isMotionPlaying ? "일시 정지" : "재생"}`}
+                aria-pressed={isMotionPlaying}
+                className="inline-flex min-h-9 items-center rounded-lg border border-white/90 bg-white/75 px-2.5 text-[11px] font-bold text-[#3c3c45] outline-none backdrop-blur transition hover:bg-white focus-visible:ring-2 focus-visible:ring-[#242429]/35 focus-visible:ring-offset-2"
+                onClick={() => setIsMotionPlaying((value) => !value)}
+                type="button"
+              >
+                {isMotionPlaying ? "정지" : "재생"}
+              </button>
+            </div>
           </div>
+        </div>
+        <div className="absolute bottom-2 right-3 flex items-center gap-1.5 rounded-full border border-white/85 bg-white/75 px-2 py-1 text-[10px] font-bold uppercase tracking-[0.1em] text-[#4c4c56] backdrop-blur">
+          <span className={joinClasses("h-1.5 w-1.5 rounded-full", isMotionPlaying ? "bg-[#20a779] animate-pulse motion-reduce:animate-none" : "bg-[#91919a]")} />
+          {isMotionPlaying ? `live · ${motionRecipe.label}` : "preview paused"}
         </div>
       </div>
       <div className="mt-4">

@@ -171,6 +171,233 @@ Tailwind CSS v4는 JavaScript 설정 대신 CSS의 `@theme` 구성을 권장합�
 
 v4에서도 React markup은 v3와 동일하게 `bg-brand`, `font-brand`, `rounded-brand`, `shadow-brand`, `ease-brand`를 사용합니다. `@theme`에 정의한 값은 utility뿐 아니라 일반 CSS variable로도 접근할 수 있습니다.[3]
 
+### 3.2 Vite + React v4 CSS-first 전체 프로젝트 예제
+
+Tailwind v4의 Vite 통합은 `tailwindcss`와 `@tailwindcss/vite`를 설치한 뒤 Vite plugin과 CSS `@import "tailwindcss"`를 추가하는 방식입니다.[4] 아래 예제는 쇼케이스에서 복사한 **29CM와 Toss 토큰을 하나의 React 프로젝트에서 안전하게 전환**하는 최소하지만 완전한 구조입니다.
+
+```text
+brand-workbench/
+├── index.html
+├── package.json
+├── vite.config.ts
+└── src/
+    ├── main.tsx
+    ├── App.tsx
+    ├── components/
+    │   └── BrandThemePlayground.tsx
+    └── styles/
+        ├── app.css
+        ├── brand-utilities.css
+        └── brand-scopes.css
+```
+
+#### 3.2.1 설치와 Vite 설정
+
+```bash
+npm create vite@latest brand-workbench -- --template react-ts
+cd brand-workbench
+npm install
+npm install tailwindcss @tailwindcss/vite
+```
+
+```ts
+// vite.config.ts
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import tailwindcss from "@tailwindcss/vite";
+
+export default defineConfig({
+  plugins: [react(), tailwindcss()],
+});
+```
+
+#### 3.2.2 `src/styles/brand-utilities.css`: utility와 runtime variable을 연결하기
+
+`@theme`은 top-level에서 선언되어야 하며 utility 생성을 지시합니다.[3] 반대로 `:root`와 `[data-brand-theme]`는 runtime에 바꿀 일반 CSS custom property를 담습니다. `@theme inline`은 theme variable이 다른 custom property를 참조할 때 utility가 참조 대상 값을 직접 사용하도록 만들기 때문에 scoped theme switch에 적합합니다.[3]
+
+```css
+/* src/styles/brand-utilities.css */
+@theme inline {
+  --color-brand: var(--brand-primary);
+  --color-brand-surface: var(--brand-surface);
+  --color-brand-ink: var(--brand-ink);
+  --color-brand-contrast: var(--brand-contrast);
+
+  --font-brand: var(--brand-font);
+  --font-brand-display: var(--brand-display-font);
+
+  --radius-brand: var(--brand-radius);
+  --shadow-brand: var(--brand-shadow);
+  --ease-brand: var(--brand-ease);
+}
+```
+
+#### 3.2.3 `src/styles/brand-scopes.css`: 실제 내보낸 값을 scope에 배치하기
+
+```css
+/* src/styles/brand-scopes.css */
+:root,
+[data-brand-theme="29cm"] {
+  --brand-primary: #111111;
+  --brand-surface: #ffffff;
+  --brand-ink: #111111;
+  --brand-contrast: #ff4800;
+  --brand-font: Pretendard, sans-serif;
+  --brand-display-font: Pretendard, sans-serif;
+  --brand-radius: 0px;
+  --brand-shadow: 0 12px 30px rgba(17, 17, 17, 0.12);
+  --brand-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+[data-brand-theme="toss"] {
+  --brand-primary: #3182f6;
+  --brand-surface: #e8f3ff;
+  --brand-ink: #191f28;
+  --brand-contrast: #1b64da;
+  --brand-font: Pretendard, sans-serif;
+  --brand-display-font: Pretendard, sans-serif;
+  --brand-radius: 28px;
+  --brand-shadow: 0 18px 42px rgba(49, 130, 246, 0.2);
+  --brand-ease: cubic-bezier(0.22, 1.2, 0.36, 1);
+}
+```
+
+#### 3.2.4 `src/styles/app.css`: import 순서 고정하기
+
+```css
+/* src/styles/app.css */
+@import "tailwindcss";
+@import "./brand-utilities.css";
+@import "./brand-scopes.css";
+
+@layer base {
+  body {
+    min-width: 320px;
+    background: var(--color-brand-surface);
+    color: var(--color-brand-ink);
+  }
+}
+```
+
+#### 3.2.5 `src/main.tsx`와 `src/App.tsx`
+
+```tsx
+// src/main.tsx
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import App from "./App";
+import "./styles/app.css";
+
+createRoot(document.getElementById("root")!).render(
+  <StrictMode>
+    <App />
+  </StrictMode>,
+);
+```
+
+```tsx
+// src/App.tsx
+import { useState } from "react";
+import BrandThemePlayground from "./components/BrandThemePlayground";
+
+type BrandTheme = "29cm" | "toss";
+
+export default function App() {
+  const [brandTheme, setBrandTheme] = useState<BrandTheme>("29cm");
+
+  return (
+    <main className="min-h-screen bg-brand-surface p-6 text-brand-ink sm:p-10" data-brand-theme={brandTheme}>
+      <div className="mx-auto max-w-3xl">
+        <div className="flex flex-wrap gap-3" role="group" aria-label="브랜드 테마 선택">
+          {(["29cm", "toss"] as const).map((theme) => (
+            <button
+              aria-pressed={brandTheme === theme}
+              className="min-h-11 rounded-brand border border-brand-ink/20 bg-brand-surface px-4 font-brand text-sm font-bold transition ease-brand hover:shadow-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-contrast focus-visible:ring-offset-2"
+              key={theme}
+              onClick={() => setBrandTheme(theme)}
+              type="button"
+            >
+              {theme === "29cm" ? "29CM editorial" : "Toss elastic"}
+            </button>
+          ))}
+        </div>
+        <BrandThemePlayground brandTheme={brandTheme} />
+      </div>
+    </main>
+  );
+}
+```
+
+#### 3.2.6 `src/components/BrandThemePlayground.tsx`: static utility로 runtime theme를 사용하기
+
+```tsx
+// src/components/BrandThemePlayground.tsx
+type BrandThemePlaygroundProps = {
+  brandTheme: "29cm" | "toss";
+};
+
+export default function BrandThemePlayground({ brandTheme }: BrandThemePlaygroundProps) {
+  const isToss = brandTheme === "toss";
+
+  return (
+    <section className="mt-8 rounded-brand border border-brand-ink/15 bg-brand-surface p-6 shadow-brand transition duration-300 ease-brand motion-reduce:transition-none sm:p-8">
+      <p className="font-brand text-sm font-semibold text-brand-ink/65">{isToss ? "Toss material" : "29CM palette"}</p>
+      <h1 className="mt-2 font-brand-display text-4xl font-bold tracking-tight text-brand-ink">정적 utility, 동적 브랜드 표면.</h1>
+      <p className="mt-4 max-w-xl font-brand text-base leading-7 text-brand-ink/75">
+        `bg-brand`, `rounded-brand`, `shadow-brand`, `ease-brand` class는 모두 정적입니다. data attribute가 바뀌면 이 utility가 참조하는 CSS variable만 바뀝니다.
+      </p>
+      <button className="mt-6 min-h-12 rounded-brand bg-brand px-5 font-brand text-sm font-bold text-white shadow-brand transition duration-200 ease-brand hover:-translate-y-0.5 active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-contrast focus-visible:ring-offset-2 motion-reduce:transform-none motion-reduce:transition-none" type="button">
+        계속하기
+      </button>
+    </section>
+  );
+}
+```
+
+이 예제는 `bg-${brand}`처럼 class 이름을 동적으로 조립하지 않습니다. Tailwind는 소스에서 발견한 정적 class를 기반으로 CSS를 만들고, 런타임 전환은 data attribute 아래의 regular CSS variable 재정의로 처리합니다.[3] 이렇게 하면 brand switch 중에도 build-time class detection이 깨지지 않습니다.
+
+### 3.3 공유 token package와 `@source`가 필요한 경우
+
+여러 React 앱 또는 monorepo가 같은 brand token을 소비한다면 `packages/brand-tokens/theme.css`처럼 독립 CSS 파일로 만들어 import할 수 있습니다. Tailwind는 theme variable CSS 파일을 프로젝트 간에 import해 공유하는 방식을 안내합니다.[3]
+
+```css
+/* packages/brand-tokens/theme.css */
+@theme static {
+  --color-brand: #111111;
+  --color-brand-surface: #ffffff;
+  --color-brand-ink: #111111;
+  --color-brand-contrast: #ff4800;
+  --font-brand: Pretendard, sans-serif;
+  --radius-brand: 0px;
+  --shadow-brand: 0 12px 30px rgba(17, 17, 17, 0.12);
+  --ease-brand: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+```
+
+`@theme static`은 사용된 utility만이 아니라 정의한 CSS variable 전체를 최종 CSS에 남기고 싶을 때 사용합니다.[3] consumer app의 CSS는 다음처럼 구성합니다.
+
+```css
+/* apps/admin/src/styles/app.css */
+@import "tailwindcss";
+@import "../../../../packages/brand-tokens/theme.css";
+
+/* package가 자동 탐색 범위 밖에 있다면 경로를 명시합니다. */
+@source "../../../../packages/ui/src";
+```
+
+Tailwind v4는 일반적으로 template source를 자동 탐색하지만, 무시되거나 외부 package에 있는 source가 utility를 제공한다면 `@source`로 명시할 수 있습니다.[2] [4]
+
+### 3.4 v4 전환 검증 체크리스트
+
+| 단계 | 실행 또는 확인 | 통과 기준 |
+|---|---|---|
+| 의존성 | `npm install tailwindcss @tailwindcss/vite` | Vite plugin과 Tailwind package가 lockfile에 기록됩니다. |
+| CSS entry | `@import "tailwindcss";` 뒤에 token CSS를 import | `bg-brand` 등 token utility가 생성됩니다. |
+| Scope | root와 각 `[data-brand-theme]`에서 regular variable을 선언 | 테마 선택 시 페이지 reload 없이 surface가 바뀝니다. |
+| Utility | `bg-brand`, `shadow-brand`, `ease-brand`처럼 정적인 class 사용 | build output에 필요한 utility가 남습니다. |
+| Accessibility | keyboard focus와 `motion-reduce`를 확인 | 테마 변경이 focus indicator나 reduced motion 사용성을 훼손하지 않습니다. |
+| Production | `npm run build` | CSS import, theme namespace, source detection 오류 없이 bundle이 생성됩니다. |
+
 ## 4. 한 프로젝트에서 여러 브랜드를 다루는 방법
 
 서로 다른 브랜드를 전역 `brand` key에 병합하지 마십시오. 브랜드를 동시에 유지해야 한다면 namespace를 만듭니다.
@@ -315,3 +542,5 @@ npm run build
 [2] [Tailwind CSS v4.0 — CSS-first configuration](https://tailwindcss.com/blog/tailwindcss-v4#css-first-configuration)
 
 [3] [Tailwind CSS — Theme variables and utility namespaces](https://tailwindcss.com/docs/theme)
+
+[4] [Tailwind CSS — Installing Tailwind CSS with Vite](https://tailwindcss.com/docs)
