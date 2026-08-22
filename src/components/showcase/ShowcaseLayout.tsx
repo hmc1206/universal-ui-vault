@@ -1,5 +1,5 @@
 import { useState } from "react";
-import ComponentViewer, { SHOWCASE_BRANDS, type ShowcaseBrandId, type ThemeBridge } from "./ComponentViewer";
+import ComponentViewer, { SHOWCASE_BRANDS, type ShowcaseBrand, type ShowcaseBrandId, type ThemeBridge } from "./ComponentViewer";
 
 function joinClasses(...classes: Array<string | undefined | false>) {
   return classes.filter(Boolean).join(" ");
@@ -31,6 +31,120 @@ function SparkleIcon() {
   );
 }
 
+function GalleryIcon() {
+  return (
+    <svg aria-hidden="true" className="h-4 w-4" fill="none" viewBox="0 0 24 24">
+      <rect height="7" rx="1.5" stroke="currentColor" strokeWidth="1.7" width="7" x="3" y="3" />
+      <rect height="7" rx="1.5" stroke="currentColor" strokeWidth="1.7" width="7" x="14" y="3" />
+      <rect height="7" rx="1.5" stroke="currentColor" strokeWidth="1.7" width="7" x="3" y="14" />
+      <path d="M14 17.5h7M17.5 14v7" stroke="currentColor" strokeLinecap="round" strokeWidth="1.7" />
+    </svg>
+  );
+}
+
+interface GalleryRecipe {
+  id: string;
+  paletteBrandId: ShowcaseBrandId;
+  materialBrandId: ShowcaseBrandId;
+  title: string;
+  description: string;
+}
+
+const GALLERY_RECIPES: GalleryRecipe[] = [
+  {
+    id: "29cm-toss",
+    paletteBrandId: "29cm",
+    materialBrandId: "toss",
+    title: "Editorial Soft Utility",
+    description: "29CM의 절제된 흑백 편집감에 Toss의 넓고 탄성적인 표면 반응을 결합합니다.",
+  },
+  {
+    id: "apple-ably",
+    paletteBrandId: "apple",
+    materialBrandId: "ably",
+    title: "Calm Signal",
+    description: "Apple의 중립적인 정밀도를 Ably의 선명한 볼륨과 빠른 협업 신호로 확장합니다.",
+  },
+  {
+    id: "figma-karrot",
+    paletteBrandId: "figma",
+    materialBrandId: "karrot",
+    title: "Maker Neighborhood",
+    description: "Figma의 도구형 대비 위에 Karrot의 따뜻하고 가벼운 부상감을 얹습니다.",
+  },
+  {
+    id: "kakao-tesla",
+    paletteBrandId: "kakao",
+    materialBrandId: "tesla",
+    title: "Bright Product Drive",
+    description: "Kakao의 일상적인 옐로우를 Tesla의 제품 중심 깊이와 안정적인 동작으로 조합합니다.",
+  },
+  {
+    id: "upstage-samsung",
+    paletteBrandId: "upstage",
+    materialBrandId: "samsung",
+    title: "AI Product Clarity",
+    description: "Upstage의 violet conversion surface에 Samsung의 넓고 단정한 제품 물성을 적용합니다.",
+  },
+  {
+    id: "musinsa-toss",
+    paletteBrandId: "musinsa",
+    materialBrandId: "toss",
+    title: "Mono Elastic Commerce",
+    description: "Musinsa의 강한 모노크롬 대비를 Toss의 부드러운 depth와 elastic feedback으로 완화합니다.",
+  },
+  {
+    id: "baemin-apple",
+    paletteBrandId: "baemin",
+    materialBrandId: "apple",
+    title: "Friendly Precision",
+    description: "Baemin의 친근한 민트 표면을 Apple의 차분하고 정밀한 rise-and-settle 움직임에 연결합니다.",
+  },
+  {
+    id: "goodchoice-likelion",
+    paletteBrandId: "goodchoice",
+    materialBrandId: "likelion",
+    title: "Travel Builder Energy",
+    description: "여기어때의 여행 탐색감에 Likelion의 maker 에너지와 실행형 공간감을 더합니다.",
+  },
+];
+
+const MATERIAL_PREVIEW_CLASSES: Record<ShowcaseBrandId, string> = {
+  "29cm": "rounded-none shadow-[0_10px_22px_rgba(17,17,17,0.14)]",
+  ably: "rounded-[24px] shadow-[0_18px_36px_rgba(255,81,96,0.24)]",
+  apple: "rounded-[18px] shadow-[0_16px_32px_rgba(29,29,31,0.14)]",
+  baemin: "rounded-[20px] shadow-[0_9px_0_rgba(34,34,34,0.16)]",
+  figma: "rounded-lg shadow-[0_16px_32px_rgba(0,0,0,0.24)]",
+  kakao: "rounded-[18px] shadow-[0_12px_26px_rgba(92,72,0,0.18)]",
+  kakaobank: "rounded-[20px] shadow-[0_16px_32px_rgba(65,56,0,0.16)]",
+  karrot: "rounded-[22px] shadow-[0_16px_32px_rgba(255,111,15,0.20)]",
+  likelion: "rounded-xl shadow-[0_14px_28px_rgba(255,96,0,0.18)]",
+  musinsa: "rounded-none shadow-[0_10px_22px_rgba(0,0,0,0.16)]",
+  samsung: "rounded-[24px] shadow-[0_18px_36px_rgba(0,122,255,0.18)]",
+  tesla: "rounded-lg shadow-[0_16px_32px_rgba(23,26,32,0.16)]",
+  toss: "rounded-[28px] shadow-[0_18px_36px_rgba(49,130,246,0.20)]",
+  upstage: "rounded-lg shadow-[0_18px_36px_rgba(91,82,255,0.22)]",
+  goodchoice: "rounded-[18px] shadow-[0_18px_36px_rgba(249,66,57,0.20)]",
+};
+
+const MATERIAL_LABELS: Record<ShowcaseBrandId, string> = {
+  "29cm": "flat editorial edge",
+  ably: "realtime volume",
+  apple: "restrained lift",
+  baemin: "playful press",
+  figma: "tool precision",
+  kakao: "soft bubble pop",
+  kakaobank: "calm financial lift",
+  karrot: "warm neighborhood rise",
+  likelion: "maker energy",
+  musinsa: "hard contrast snap",
+  samsung: "wide product depth",
+  tesla: "product-led settle",
+  toss: "elastic soft depth",
+  upstage: "AI conversion glow",
+  goodchoice: "travel ticket lift",
+};
+
 function BrandSelect({ id, label, value, onChange }: { id: string; label: string; value: ShowcaseBrandId; onChange: (value: ShowcaseBrandId) => void }) {
   return (
     <label className="grid gap-2 text-sm font-semibold text-[#34343c]" htmlFor={id}>
@@ -51,6 +165,52 @@ function BrandSelect({ id, label, value, onChange }: { id: string; label: string
   );
 }
 
+function GalleryRecipeCard({ recipe, paletteBrand, materialBrand, selected, onApply }: { recipe: GalleryRecipe; paletteBrand: ShowcaseBrand; materialBrand: ShowcaseBrand; selected: boolean; onApply: () => void }) {
+  return (
+    <article
+      className={joinClasses(
+        "group overflow-hidden rounded-2xl border bg-white p-4 text-left transition-[border-color,box-shadow,transform] duration-200 hover:-translate-y-1 focus-within:ring-2 focus-within:ring-[#242429]/30",
+        selected ? "border-[#315a9f] shadow-[0_18px_36px_rgba(49,90,159,0.18)]" : "border-[#dfe2e9] shadow-[0_10px_24px_rgba(29,29,34,0.06)]",
+      )}
+    >
+      <div className={joinClasses("relative min-h-36 overflow-hidden border p-4", paletteBrand.surfaceClass, paletteBrand.borderClass, MATERIAL_PREVIEW_CLASSES[materialBrand.id])}>
+        <div className="absolute -right-7 -top-8 h-24 w-24 rounded-full bg-white/75 blur-2xl" />
+        <div className="absolute -bottom-10 left-4 h-20 w-20 rounded-full bg-white/60 blur-xl" />
+        <div className="relative flex h-full flex-col justify-between">
+          <div className="flex items-center justify-between gap-3">
+            <span className={joinClasses("inline-flex h-8 w-8 items-center justify-center rounded-lg text-xs font-bold", paletteBrand.avatarClass)}>{paletteBrand.initials}</span>
+            <span className="rounded-full border border-white/80 bg-white/75 px-2 py-1 text-[10px] font-bold uppercase tracking-[0.1em] text-[#45454e] backdrop-blur">{MATERIAL_LABELS[materialBrand.id]}</span>
+          </div>
+          <div>
+            <div className={joinClasses("h-2.5 w-16 rounded-full", paletteBrand.accentClass)} />
+            <div className={joinClasses("mt-2 h-2 w-24 rounded-full bg-current/20", paletteBrand.textClass)} />
+            <button className={joinClasses("mt-4 inline-flex min-h-9 items-center rounded-lg px-3 text-xs font-bold outline-none focus-visible:ring-2 focus-visible:ring-[#242429]/35 focus-visible:ring-offset-2", paletteBrand.avatarClass)} type="button">
+              Preview
+            </button>
+          </div>
+        </div>
+      </div>
+      <div className="mt-4">
+        <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#73737d]">{paletteBrand.name} style × {materialBrand.name} material</p>
+        <h3 className="mt-1 text-lg font-bold tracking-[-0.035em] text-[#22222a]">{recipe.title}</h3>
+        <p className="mt-2 min-h-12 text-sm leading-5 text-[#666671]">{recipe.description}</p>
+        <button
+          aria-pressed={selected}
+          className={joinClasses(
+            "mt-4 inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-xl border px-3 text-sm font-bold outline-none transition focus-visible:ring-2 focus-visible:ring-[#242429]/35",
+            selected ? "border-[#315a9f] bg-[#315a9f] text-white" : "border-[#d5d8df] bg-[#fafafb] text-[#35353f] hover:border-[#777b86] hover:bg-white",
+          )}
+          onClick={onApply}
+          type="button"
+        >
+          <SparkleIcon />
+          {selected ? "현재 조합" : "이 조합 적용"}
+        </button>
+      </div>
+    </article>
+  );
+}
+
 /**
  * 실제 vault 카탈로그에서 브랜드를 선택하는 진입 화면입니다.
  * Brand Mix & Match는 팔레트/타이포그래피 출처와 물성/동작 출처를 독립적으로 선택해 ThemeBridge로 전달합니다.
@@ -60,6 +220,7 @@ export function ShowcaseLayout() {
   const [mixEnabled, setMixEnabled] = useState(false);
   const [paletteBrandId, setPaletteBrandId] = useState<ShowcaseBrandId>("29cm");
   const [materialBrandId, setMaterialBrandId] = useState<ShowcaseBrandId>("toss");
+  const [activeRecipeId, setActiveRecipeId] = useState<string | null>(null);
 
   const paletteBrand = SHOWCASE_BRANDS.find((brand) => brand.id === paletteBrandId) ?? SHOWCASE_BRANDS[0];
   const materialBrand = SHOWCASE_BRANDS.find((brand) => brand.id === materialBrandId) ?? SHOWCASE_BRANDS[0];
@@ -70,6 +231,23 @@ export function ShowcaseLayout() {
         materialBrandId,
       }
     : undefined;
+
+  function applyRecipe(recipe: GalleryRecipe) {
+    setPaletteBrandId(recipe.paletteBrandId);
+    setMaterialBrandId(recipe.materialBrandId);
+    setActiveRecipeId(recipe.id);
+    setMixEnabled(true);
+  }
+
+  function updatePaletteBrand(value: ShowcaseBrandId) {
+    setPaletteBrandId(value);
+    setActiveRecipeId(null);
+  }
+
+  function updateMaterialBrand(value: ShowcaseBrandId) {
+    setMaterialBrandId(value);
+    setActiveRecipeId(null);
+  }
 
   if (selectedBrandId) {
     return <ComponentViewer brandId={selectedBrandId} onBack={() => setSelectedBrandId(null)} themeBridge={themeBridge} />;
@@ -96,8 +274,8 @@ export function ShowcaseLayout() {
                 <p className="mt-1 text-xs font-medium text-[#777780]">실물 브랜드 전시대</p>
               </div>
               <div className="rounded-xl bg-[#f7f7f8] px-4 py-3">
-                <p className="text-2xl font-bold tracking-[-0.04em]">10</p>
-                <p className="mt-1 text-xs font-medium text-[#777780]">브랜드별 핵심 컴포넌트</p>
+                <p className="text-2xl font-bold tracking-[-0.04em]">{GALLERY_RECIPES.length}</p>
+                <p className="mt-1 text-xs font-medium text-[#777780]">검증된 조합 recipe</p>
               </div>
             </div>
           </div>
@@ -130,8 +308,8 @@ export function ShowcaseLayout() {
           </div>
 
           <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-[1fr_1fr_1.1fr]">
-            <BrandSelect id="palette-brand" label="스타일 출처 · 팔레트와 타이포그래피" onChange={setPaletteBrandId} value={paletteBrandId} />
-            <BrandSelect id="material-brand" label="물성 출처 · 깊이와 인터랙션" onChange={setMaterialBrandId} value={materialBrandId} />
+            <BrandSelect id="palette-brand" label="스타일 출처 · 팔레트와 타이포그래피" onChange={updatePaletteBrand} value={paletteBrandId} />
+            <BrandSelect id="material-brand" label="물성 출처 · 깊이와 인터랙션" onChange={updateMaterialBrand} value={materialBrandId} />
             <div className="rounded-xl border border-white/85 bg-white/70 px-4 py-3 backdrop-blur">
               <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#707887]">Current recipe</p>
               <p className="mt-1 text-sm font-bold text-[#272b35]">{paletteBrand.name} style × {materialBrand.name} material</p>
@@ -140,7 +318,39 @@ export function ShowcaseLayout() {
           </div>
         </section>
 
-        <section aria-labelledby="brand-catalog-title" className="mt-8">
+        <section aria-labelledby="mix-gallery-title" className="mt-8">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <div className="inline-flex items-center gap-2 text-sm font-semibold text-[#5f6472]">
+                <GalleryIcon />
+                ThemeBridge gallery
+              </div>
+              <h2 className="mt-1 text-2xl font-bold tracking-[-0.04em]" id="mix-gallery-title">조합을 먼저 보고, 한 번에 적용하세요.</h2>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-[#6c6f7b]">카드의 왼쪽 visual은 스타일 출처의 색·텍스트 성격을, 표면의 곡률·그림자·떠오름은 물성 출처를 시각화합니다. 적용 버튼은 위 ThemeBridge recipe를 즉시 바꿉니다.</p>
+            </div>
+            <p className="text-sm font-semibold text-[#5f6472]">{activeRecipeId ? "선택한 recipe가 ThemeBridge에 적용되어 있습니다." : "8개의 추천 recipe를 비교할 수 있습니다."}</p>
+          </div>
+
+          <div className="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+            {GALLERY_RECIPES.map((recipe) => {
+              const recipePaletteBrand = SHOWCASE_BRANDS.find((brand) => brand.id === recipe.paletteBrandId) ?? SHOWCASE_BRANDS[0];
+              const recipeMaterialBrand = SHOWCASE_BRANDS.find((brand) => brand.id === recipe.materialBrandId) ?? SHOWCASE_BRANDS[0];
+
+              return (
+                <GalleryRecipeCard
+                  key={recipe.id}
+                  materialBrand={recipeMaterialBrand}
+                  onApply={() => applyRecipe(recipe)}
+                  paletteBrand={recipePaletteBrand}
+                  recipe={recipe}
+                  selected={activeRecipeId === recipe.id}
+                />
+              );
+            })}
+          </div>
+        </section>
+
+        <section aria-labelledby="brand-catalog-title" className="mt-10">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="text-sm font-semibold text-[#6b6b75]">Live vault catalog</p>
