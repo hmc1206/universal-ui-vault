@@ -17,6 +17,22 @@ export type ShowcaseBrandId =
   | "upstage"
   | "goodchoice";
 
+export type ThemeSourceId = ShowcaseBrandId | "custom";
+
+export interface CustomBrandDNA {
+  accent: string;
+  descriptor: string;
+  displayFont: string;
+  id: "custom";
+  ink: string;
+  material: "crisp" | "elastic" | "soft";
+  name: string;
+  radius: string;
+  sansFont: string;
+  shadow: "ambient" | "sharp" | "soft";
+  surface: string;
+}
+
 export type ComponentId =
   | "Button"
   | "Input"
@@ -60,10 +76,11 @@ export interface ShowcaseBrand {
 }
 
 export interface ThemeBridge {
-  /** paletteBrandId의 색상·타이포그래피 표면과 materialBrandId의 깊이·반응을 전시 컨테이너에만 합성합니다. */
+  /** paletteBrandId의 색상·타이포그래피 표면과 materialBrandId의 깊이·반응을 전시 전용 skin layer에 합성합니다. */
+  customBrand?: CustomBrandDNA;
   enabled: boolean;
-  paletteBrandId: ShowcaseBrandId;
-  materialBrandId: ShowcaseBrandId;
+  paletteBrandId: ThemeSourceId;
+  materialBrandId: ThemeSourceId;
 }
 
 export interface ComponentViewerProps {

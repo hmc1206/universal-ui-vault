@@ -1,5 +1,6 @@
-import { SHOWCASE_BRANDS } from "./showcase.catalog";
-import type { ShowcaseBrandId, ThemeBridge } from "./showcase.types";
+import { DEFAULT_CUSTOM_BRAND, getCustomPaletteOption, getCustomRadiusClass, getCustomShadowClass } from "./custom-brand";
+import { getThemeSource } from "./themebridge.sources";
+import type { CustomBrandDNA, ShowcaseBrandId, ThemeBridge } from "./showcase.types";
 
 interface PaletteSkin {
   accentClass: string;
@@ -135,19 +136,55 @@ const MATERIAL_SKINS: Record<ShowcaseBrandId, MaterialSkin> = {
   goodchoice: { controlClass: "[&_button]:!rounded-2xl [&_input]:!rounded-2xl [&_select]:!rounded-2xl [&_[role=tab]]:!rounded-2xl [&_button]:!shadow-[0_18px_30px_rgba(249,66,57,0.24)] [&_button]:hover:!-translate-y-1 [&_button]:!transition-all", frameClass: "rounded-2xl shadow-[0_24px_42px_rgba(249,66,57,0.22)]", label: "travel ticket lift" },
 };
 
+function getCustomPaletteSkin(customBrand: CustomBrandDNA): PaletteSkin {
+  const palette = getCustomPaletteOption(customBrand);
+  return {
+    accentClass: palette.accentClass,
+    controlClass: palette.controlClass,
+    frameClass: palette.frameClass,
+    surfaceClass: palette.surfaceClass,
+  };
+}
+
+function getCustomMaterialSkin(customBrand: CustomBrandDNA): MaterialSkin {
+  const radiusControl = {
+    "8px": "[&_button]:!rounded-lg [&_input]:!rounded-lg [&_select]:!rounded-lg [&_[role=tab]]:!rounded-lg",
+    "14px": "[&_button]:!rounded-[14px] [&_input]:!rounded-[14px] [&_select]:!rounded-[14px] [&_[role=tab]]:!rounded-[14px]",
+    "20px": "[&_button]:!rounded-[20px] [&_input]:!rounded-[20px] [&_select]:!rounded-[20px] [&_[role=tab]]:!rounded-[20px]",
+    "28px": "[&_button]:!rounded-[28px] [&_input]:!rounded-[28px] [&_select]:!rounded-[28px] [&_[role=tab]]:!rounded-[28px]",
+  }[customBrand.radius] ?? "[&_button]:!rounded-[20px] [&_input]:!rounded-[20px] [&_select]:!rounded-[20px] [&_[role=tab]]:!rounded-[20px]";
+  const shadowControl = {
+    ambient: "[&_button]:!shadow-[0_14px_28px_rgba(124,58,237,0.28)]",
+    sharp: "[&_button]:!shadow-[0_8px_0_rgba(23,17,31,0.24)]",
+    soft: "[&_button]:!shadow-[0_20px_38px_rgba(124,58,237,0.20)]",
+  }[customBrand.shadow] ?? "[&_button]:!shadow-[0_14px_28px_rgba(124,58,237,0.28)]";
+  const responseControl = {
+    crisp: "[&_button]:hover:!translate-x-0.5 [&_button]:active:!translate-y-0.5 [&_button]:!transition-all",
+    elastic: "[&_button]:hover:!-translate-y-1 [&_button]:active:!scale-[0.97] [&_button]:!transition-all",
+    soft: "[&_button]:hover:!-translate-y-0.5 [&_button]:!transition-all",
+  }[customBrand.material] ?? "[&_button]:hover:!-translate-y-0.5 [&_button]:!transition-all";
+
+  return {
+    controlClass: `${radiusControl} ${shadowControl} ${responseControl}`,
+    frameClass: `${getCustomRadiusClass(customBrand.radius)} ${getCustomShadowClass(customBrand.shadow)}`,
+    label: `${customBrand.material} ${customBrand.shadow} custom material`,
+  };
+}
+
 export function getThemeBridgeSkin(themeBridge: ThemeBridge): ThemeBridgeSkin {
-  const palette = PALETTE_SKINS[themeBridge.paletteBrandId];
-  const material = MATERIAL_SKINS[themeBridge.materialBrandId];
-  const paletteBrand = SHOWCASE_BRANDS.find((brand) => brand.id === themeBridge.paletteBrandId);
-  const materialBrand = SHOWCASE_BRANDS.find((brand) => brand.id === themeBridge.materialBrandId);
+  const customBrand = themeBridge.customBrand ?? DEFAULT_CUSTOM_BRAND;
+  const palette = themeBridge.paletteBrandId === "custom" ? getCustomPaletteSkin(customBrand) : PALETTE_SKINS[themeBridge.paletteBrandId];
+  const material = themeBridge.materialBrandId === "custom" ? getCustomMaterialSkin(customBrand) : MATERIAL_SKINS[themeBridge.materialBrandId];
+  const paletteBrand = getThemeSource(themeBridge.paletteBrandId, customBrand);
+  const materialBrand = getThemeSource(themeBridge.materialBrandId, customBrand);
 
   return {
     controlClass: `${palette.controlClass} ${material.controlClass}`,
     frameClass: `${palette.frameClass} ${material.frameClass}`,
-    label: `${paletteBrand?.name ?? themeBridge.paletteBrandId} palette × ${material.label}`,
-    materialName: materialBrand?.name ?? themeBridge.materialBrandId,
+    label: `${paletteBrand.name} palette × ${material.label}`,
+    materialName: materialBrand.name,
     paletteBadgeClass: palette.accentClass,
-    paletteName: paletteBrand?.name ?? themeBridge.paletteBrandId,
+    paletteName: paletteBrand.name,
     surfaceClass: palette.surfaceClass,
   };
 }

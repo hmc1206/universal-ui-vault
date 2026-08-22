@@ -1,6 +1,9 @@
 import { useState } from "react";
+import { getCustomPaletteOption, DEFAULT_CUSTOM_BRAND } from "./custom-brand";
 import { BRAND_TOKEN_VALUES, getComponentImportSnippet, getTailwindConfigSnippet, SHOWCASE_BRANDS, SHOWCASE_COMPONENTS, THEME_BRIDGE_TYPOGRAPHY_CLASSES } from "./showcase.catalog";
 import { ComponentComparison } from "./showcase.preview";
+import { getThemeBridgeSkin } from "./themebridge.skin";
+import { getThemeSource } from "./themebridge.sources";
 import type { ComponentId, ComponentViewerProps } from "./showcase.types";
 import { copyToClipboard, joinClasses } from "./showcase.utils";
 import { VAULT_COMPONENTS } from "./vault.registry";
@@ -35,13 +38,20 @@ export function ComponentViewer({ brandId, onBack, themeBridge }: ComponentViewe
 
   const brand = matchedBrand;
   const isThemeBridgeEnabled = Boolean(themeBridge?.enabled);
-  const paletteTokens = BRAND_TOKEN_VALUES[isThemeBridgeEnabled ? themeBridge!.paletteBrandId : brand.id];
-  const materialTokens = BRAND_TOKEN_VALUES[isThemeBridgeEnabled ? themeBridge!.materialBrandId : brand.id];
   const paletteBrandId = isThemeBridgeEnabled ? themeBridge!.paletteBrandId : brand.id;
   const materialBrandId = isThemeBridgeEnabled ? themeBridge!.materialBrandId : brand.id;
-  const paletteBrand = SHOWCASE_BRANDS.find((item) => item.id === paletteBrandId) ?? brand;
-  const materialBrand = SHOWCASE_BRANDS.find((item) => item.id === materialBrandId) ?? brand;
-  const bridgeTypographyClass = THEME_BRIDGE_TYPOGRAPHY_CLASSES[paletteBrandId];
+  const customBrand = themeBridge?.customBrand ?? DEFAULT_CUSTOM_BRAND;
+  const customPalette = getCustomPaletteOption(customBrand);
+  const themeSkin = isThemeBridgeEnabled ? getThemeBridgeSkin(themeBridge!) : undefined;
+  const paletteTokens = paletteBrandId === "custom"
+    ? { paletteBorderClass: customPalette.frameClass, paletteButtonClass: customPalette.accentClass, paletteInkClass: "text-current", paletteSurfaceClass: customPalette.surfaceClass }
+    : BRAND_TOKEN_VALUES[paletteBrandId];
+  const materialTokens = materialBrandId === "custom"
+    ? { materialClass: themeSkin?.frameClass ?? "rounded-[20px] shadow-[0_14px_28px_rgba(124,58,237,0.28)]" }
+    : BRAND_TOKEN_VALUES[materialBrandId];
+  const paletteBrand = isThemeBridgeEnabled ? getThemeSource(paletteBrandId, customBrand) : brand;
+  const materialBrand = isThemeBridgeEnabled ? getThemeSource(materialBrandId, customBrand) : brand;
+  const bridgeTypographyClass = paletteBrandId === "custom" ? customBrand.sansFont : THEME_BRIDGE_TYPOGRAPHY_CLASSES[paletteBrandId];
 
   async function handleCopy(componentId: ComponentId) {
     try {

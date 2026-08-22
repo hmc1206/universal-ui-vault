@@ -1,8 +1,9 @@
 import { useState } from "react";
+import { DEFAULT_CUSTOM_BRAND, loadCustomBrand, resetCustomBrand, saveCustomBrand } from "./custom-brand";
 import { BrandCatalog } from "./BrandCatalog";
 import ComponentViewer from "./ComponentViewer";
 import { SHOWCASE_BRANDS } from "./showcase.catalog";
-import type { ShowcaseBrandId, ThemeBridge } from "./showcase.types";
+import type { CustomBrandDNA, ShowcaseBrandId, ThemeBridge, ThemeSourceId } from "./showcase.types";
 import { GALLERY_RECIPES, type GalleryRecipe } from "./themebridge.gallery-data";
 import { ThemeBridgePanel } from "./ThemeBridgePanel";
 
@@ -22,12 +23,14 @@ function LayersIcon() {
 export function ShowcaseLayout() {
   const [selectedBrandId, setSelectedBrandId] = useState<ShowcaseBrandId | null>(null);
   const [mixEnabled, setMixEnabled] = useState(false);
-  const [paletteBrandId, setPaletteBrandId] = useState<ShowcaseBrandId>("29cm");
-  const [materialBrandId, setMaterialBrandId] = useState<ShowcaseBrandId>("toss");
+  const [paletteBrandId, setPaletteBrandId] = useState<ThemeSourceId>("29cm");
+  const [materialBrandId, setMaterialBrandId] = useState<ThemeSourceId>("toss");
   const [activeRecipeId, setActiveRecipeId] = useState<string | null>(null);
+  const [customBrand, setCustomBrand] = useState<CustomBrandDNA>(() => loadCustomBrand());
+  const [customBrandSaved, setCustomBrandSaved] = useState(false);
 
   const themeBridge: ThemeBridge | undefined = mixEnabled
-    ? { enabled: true, paletteBrandId, materialBrandId }
+    ? { customBrand, enabled: true, paletteBrandId, materialBrandId }
     : undefined;
 
   function applyRecipe(recipe: GalleryRecipe) {
@@ -37,14 +40,30 @@ export function ShowcaseLayout() {
     setMixEnabled(true);
   }
 
-  function updatePaletteBrand(value: ShowcaseBrandId) {
+  function updatePaletteBrand(value: ThemeSourceId) {
     setPaletteBrandId(value);
     setActiveRecipeId(null);
   }
 
-  function updateMaterialBrand(value: ShowcaseBrandId) {
+  function updateMaterialBrand(value: ThemeSourceId) {
     setMaterialBrandId(value);
     setActiveRecipeId(null);
+  }
+
+  function updateCustomBrand(nextBrand: CustomBrandDNA) {
+    setCustomBrand(nextBrand);
+    setCustomBrandSaved(false);
+  }
+
+  function persistCustomBrand() {
+    saveCustomBrand(customBrand);
+    setCustomBrandSaved(true);
+  }
+
+  function restoreCustomBrand() {
+    resetCustomBrand();
+    setCustomBrand(DEFAULT_CUSTOM_BRAND);
+    setCustomBrandSaved(false);
   }
 
   if (selectedBrandId) {
@@ -81,9 +100,14 @@ export function ShowcaseLayout() {
 
         <ThemeBridgePanel
           activeRecipeId={activeRecipeId}
+          customBrand={customBrand}
+          customBrandSaved={customBrandSaved}
           materialBrandId={materialBrandId}
           mixEnabled={mixEnabled}
           onApplyRecipe={applyRecipe}
+          onCustomBrandChange={updateCustomBrand}
+          onCustomBrandReset={restoreCustomBrand}
+          onCustomBrandSave={persistCustomBrand}
           onMaterialBrandChange={updateMaterialBrand}
           onPaletteBrandChange={updatePaletteBrand}
           onToggleMix={() => setMixEnabled((value) => !value)}

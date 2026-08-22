@@ -1,7 +1,9 @@
 import { useState } from "react";
+import { CustomBrandBuilder } from "./CustomBrandBuilder";
 import { SHOWCASE_BRANDS } from "./showcase.catalog";
 import { GALLERY_RECIPES, MATERIAL_LABELS, MATERIAL_MOTION_RECIPES, MATERIAL_PREVIEW_CLASSES, type GalleryRecipe } from "./themebridge.gallery-data";
-import type { ShowcaseBrand, ShowcaseBrandId } from "./showcase.types";
+import { getThemeSource, getThemeSourceOptions, type ThemeBridgeSource } from "./themebridge.sources";
+import type { CustomBrandDNA, ShowcaseBrand, ThemeSourceId } from "./showcase.types";
 import { joinClasses } from "./showcase.utils";
 
 function SparkleIcon() {
@@ -24,19 +26,19 @@ function GalleryIcon() {
   );
 }
 
-function BrandSelect({ id, label, value, onChange }: { id: string; label: string; value: ShowcaseBrandId; onChange: (value: ShowcaseBrandId) => void }) {
+function BrandSelect({ id, label, onChange, sources, value }: { id: string; label: string; onChange: (value: ThemeSourceId) => void; sources: ThemeBridgeSource[]; value: ThemeSourceId }) {
   return (
     <label className="grid gap-2 text-sm font-semibold text-[#34343c]" htmlFor={id}>
       {label}
       <select
         className="min-h-11 rounded-xl border border-[#d9d9df] bg-white px-3 text-sm font-medium text-[#242429] outline-none transition focus-visible:border-[#242429] focus-visible:ring-2 focus-visible:ring-[#242429]/25"
         id={id}
-        onChange={(event) => onChange(event.target.value as ShowcaseBrandId)}
+        onChange={(event) => onChange(event.target.value as ThemeSourceId)}
         value={value}
       >
-        {SHOWCASE_BRANDS.map((brand) => (
+        {sources.map((brand) => (
           <option key={brand.id} value={brand.id}>
-            {brand.name}
+            {brand.isCustom ? `${brand.name} · custom` : brand.name}
           </option>
         ))}
       </select>
@@ -111,27 +113,38 @@ function GalleryRecipeCard({ recipe, paletteBrand, materialBrand, selected, onAp
 
 export interface ThemeBridgePanelProps {
   activeRecipeId: string | null;
-  materialBrandId: ShowcaseBrandId;
+  materialBrandId: ThemeSourceId;
   mixEnabled: boolean;
   onApplyRecipe: (recipe: GalleryRecipe) => void;
-  onMaterialBrandChange: (brandId: ShowcaseBrandId) => void;
-  onPaletteBrandChange: (brandId: ShowcaseBrandId) => void;
+  customBrand: CustomBrandDNA;
+  customBrandSaved: boolean;
+  onCustomBrandChange: (brand: CustomBrandDNA) => void;
+  onCustomBrandReset: () => void;
+  onCustomBrandSave: () => void;
+  onMaterialBrandChange: (brandId: ThemeSourceId) => void;
+  onPaletteBrandChange: (brandId: ThemeSourceId) => void;
   onToggleMix: () => void;
-  paletteBrandId: ShowcaseBrandId;
+  paletteBrandId: ThemeSourceId;
 }
 
 export function ThemeBridgePanel({
   activeRecipeId,
+  customBrand,
+  customBrandSaved,
   materialBrandId,
   mixEnabled,
   onApplyRecipe,
+  onCustomBrandChange,
+  onCustomBrandReset,
+  onCustomBrandSave,
   onMaterialBrandChange,
   onPaletteBrandChange,
   onToggleMix,
   paletteBrandId,
 }: ThemeBridgePanelProps) {
-  const paletteBrand = SHOWCASE_BRANDS.find((brand) => brand.id === paletteBrandId) ?? SHOWCASE_BRANDS[0];
-  const materialBrand = SHOWCASE_BRANDS.find((brand) => brand.id === materialBrandId) ?? SHOWCASE_BRANDS[0];
+  const sources = getThemeSourceOptions(customBrand);
+  const paletteBrand = getThemeSource(paletteBrandId, customBrand);
+  const materialBrand = getThemeSource(materialBrandId, customBrand);
 
   return (
     <>
@@ -162,8 +175,8 @@ export function ThemeBridgePanel({
         </div>
 
         <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-[1fr_1fr_1.1fr]">
-          <BrandSelect id="palette-brand" label="스타일 출처 · 팔레트와 타이포그래피" onChange={onPaletteBrandChange} value={paletteBrandId} />
-          <BrandSelect id="material-brand" label="물성 출처 · 깊이와 인터랙션" onChange={onMaterialBrandChange} value={materialBrandId} />
+          <BrandSelect id="palette-brand" label="스타일 출처 · 팔레트와 타이포그래피" onChange={onPaletteBrandChange} sources={sources} value={paletteBrandId} />
+          <BrandSelect id="material-brand" label="물성 출처 · 깊이와 인터랙션" onChange={onMaterialBrandChange} sources={sources} value={materialBrandId} />
           <div className="rounded-xl border border-white/85 bg-white/70 px-4 py-3 backdrop-blur">
             <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#707887]">Current recipe</p>
             <p className="mt-1 text-sm font-bold text-[#272b35]">{paletteBrand.name} style × {materialBrand.name} material</p>
@@ -171,6 +184,8 @@ export function ThemeBridgePanel({
           </div>
         </div>
       </section>
+
+      <CustomBrandBuilder brand={customBrand} onChange={onCustomBrandChange} onReset={onCustomBrandReset} onSave={onCustomBrandSave} saved={customBrandSaved} />
 
       <section aria-labelledby="mix-gallery-title" className="mt-8">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
