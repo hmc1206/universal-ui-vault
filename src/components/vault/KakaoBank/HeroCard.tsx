@@ -1,85 +1,53 @@
 import type { ReactNode } from "react";
 
-export interface KakaoBankHeroCardAction {
-  /** 서비스 안내의 다음 행동을 말하는 짧은 레이블입니다. */
+export interface KakaoBankHeroAction {
   label: string;
-  /** 행동을 실행할 함수입니다. */
   onClick?: () => void;
-  /** 공개 Corporate Action 또는 Resource Download 기하를 선택합니다. */
-  variant?: "corporate" | "resource";
+  href?: string;
 }
 
 export interface KakaoBankHeroCardProps {
-  /** 작은 서비스 분류 또는 맥락입니다. */
   eyebrow?: ReactNode;
-  /** 서비스 카테고리를 직접적으로 말하는 대형 제목입니다. */
-  title: ReactNode;
-  /** 누구에게 어떤 정보를 제공하는지 설명하는 본문입니다. */
+  title?: ReactNode;
   description?: ReactNode;
-  /** 제품 또는 서비스 이미지를 담는 별도 시각 영역입니다. */
+  actions?: KakaoBankHeroAction[];
+  primaryAction?: KakaoBankHeroAction;
+  secondaryAction?: KakaoBankHeroAction;
   media?: ReactNode;
-  /** 사용자가 이어서 할 수 있는 행동입니다. */
-  actions?: KakaoBankHeroCardAction[];
-  /** 공식 identity 맥락에서만 표시할 Yellow 마커입니다. */
-  showIdentityMarker?: boolean;
-  /** 카드 바깥 컨테이너에 추가할 Tailwind 클래스입니다. */
+  visual?: ReactNode;
   className?: string;
 }
 
-const actionClasses: Record<NonNullable<KakaoBankHeroCardAction["variant"]>, string> = {
-  corporate: "h-[42px] rounded-md bg-black px-[18px] text-[15px] font-semibold leading-5 text-white hover:brightness-95 active:translate-y-px",
-  resource: "h-[43px] rounded-md bg-black pl-5 pr-4 text-base font-normal leading-6 text-white hover:brightness-95 active:translate-y-px",
-};
-
-function joinClasses(...classes: Array<string | undefined | false>) {
+function joinClasses(...classes: Array<string | false | undefined | null>) {
   return classes.filter(Boolean).join(" ");
 }
 
-/**
- * KakaoBank 공개 웹의 흰 캔버스·#f7f7f7 section·검정 우선 타이포그래피·대형 Korean hierarchy를 적용한 히어로 카드입니다.
- * #FFE300 마커는 보호된 공식 identity 맥락에서만 선택적으로 표시하며, Yellow CTA나 native banking UI를 만들지 않습니다.
- */
-export function KakaoBankHeroCard({
-  actions = [],
-  className,
-  description,
-  eyebrow,
-  media,
-  showIdentityMarker = false,
-  title,
-}: KakaoBankHeroCardProps) {
-  return (
-    <section className={joinClasses("overflow-hidden bg-[#f7f7f7] font-[Pretendard_Variable,Pretendard,system-ui,sans-serif] text-black", className)}>
-      <div className="grid min-h-[420px] items-center gap-10 px-5 py-16 sm:px-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.8fr)] lg:px-16 lg:py-24">
-        <div className="min-w-0">
-          {showIdentityMarker ? <span aria-hidden="true" className="mb-6 block h-3 w-3 bg-[#FFE300]" /> : null}
-          {eyebrow ? <p className="mb-4 text-base font-normal leading-6 tracking-[-0.02em] text-[#444444]">{eyebrow}</p> : null}
-          <h1 className="max-w-4xl text-[42px] font-bold leading-[52.08px] tracking-[-0.84px] text-black sm:text-[56px] sm:leading-[68px] lg:text-[90px] lg:font-extrabold lg:leading-[117px] lg:tracking-[-0.9px]">
-            {title}
-          </h1>
-          {description ? <div className="mt-6 max-w-2xl text-base font-normal leading-6 tracking-[-0.02em] text-[#444444]">{description}</div> : null}
-          {actions.length > 0 ? (
-            <div className="mt-8 flex flex-wrap gap-3">
-              {actions.map((action) => (
-                <button
-                  className={joinClasses(
-                    "inline-flex items-center justify-center border border-transparent font-[Pretendard_Variable,Pretendard,system-ui,sans-serif] tracking-[-0.02em] outline-none transition-[filter,transform] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black",
-                    actionClasses[action.variant ?? "corporate"],
-                  )}
-                  key={action.label}
-                  onClick={action.onClick}
-                  type="button"
-                >
-                  {action.label}
-                </button>
-              ))}
-            </div>
-          ) : null}
-        </div>
+function Action({ action, primary }: { action: KakaoBankHeroAction; primary: boolean }) {
+  const className = joinClasses("inline-flex min-h-11 items-center justify-center px-4 text-sm font-semibold transition-all duration-300 ease-out", primary ? "rounded-2xl border border-[#171717] bg-[#ffe300] text-[#171717] hover:-translate-y-0.5 active:translate-y-0" : "rounded-2xl border border-current bg-white/10 text-current hover:bg-white/20");
+  return action.href ? <a className={className} href={action.href}>{action.label}</a> : <button className={className} onClick={action.onClick} type="button">{action.label}</button>;
+}
 
-        <div className="flex min-h-64 items-center justify-center bg-white p-8 sm:min-h-80 lg:min-h-96">
-          {media ?? <span className="text-center text-base font-normal leading-6 text-[#888888]">서비스 이미지는<br />이곳에 별도로 배치하세요</span>}
+/** KakaoBank의 복잡한 숫자도 한눈에 읽히는 가벼운 금융 경험를 넓은 콘텐츠 프레임에 담는 hero component입니다. */
+export function KakaoBankHeroCard({ actions, className, description = "복잡한 숫자도 한눈에 읽히는 가벼운 금융 경험", eyebrow = "BALANCE / TODAY", media, primaryAction, secondaryAction, title = "KakaoBank의 다음 장면을 시작하세요.", visual }: KakaoBankHeroCardProps) {
+  const resolvedActions = actions ?? [primaryAction, secondaryAction].filter(Boolean) as KakaoBankHeroAction[];
+  const showcase = visual ?? media ?? (
+    <div aria-hidden="true" className="relative h-48 overflow-hidden border border-current/20 bg-white/20 p-5">
+      <div className="h-full w-3/5 border-2 border-dashed border-[#171717] bg-white/60" />
+      <div className="absolute bottom-5 right-5 h-20 w-20 rounded-full bg-[#171717]/30" />
+      <span className="absolute right-5 top-5 text-xs font-bold tracking-[0.18em]">{String(eyebrow)}</span>
+    </div>
+  );
+
+  return (
+    <section className={joinClasses("relative overflow-hidden p-6 font-sans rounded-[32px] bg-[#ffe300] shadow-[0_14px_0_#171717] hover:shadow-[0_8px_0_#171717]", className)}>
+      <div className="relative z-10 grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-end">
+        <div>
+          <p className="text-xs font-bold tracking-[0.16em] text-[#171717]">{eyebrow}</p>
+          <h1 className="mt-4 text-3xl font-black leading-[1.05] tracking-[-0.05em] sm:text-4xl">{title}</h1>
+          <p className="mt-4 max-w-xl text-sm leading-6 opacity-75">{description}</p>
+          {resolvedActions.length ? <div className="mt-6 flex flex-wrap gap-2">{resolvedActions.map((action, index) => <Action action={action} key={`${action.label}-${index}`} primary={index === 0} />)}</div> : null}
         </div>
+        <div className="relative">{showcase}</div>
       </div>
     </section>
   );

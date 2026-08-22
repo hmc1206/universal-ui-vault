@@ -1,140 +1,45 @@
-import { useId, type MouseEvent, type ReactNode } from "react";
+import { useEffect, useId, type ReactNode } from "react";
 
-export interface BaeminModalAction {
-  /** 행동을 직접 설명하는 짧은 레이블입니다. */
-  label: string;
-  /** 행동을 실행할 함수입니다. */
-  onClick: (event: MouseEvent<HTMLButtonElement>) => void;
-  /** 행동의 시각적 우선순위입니다. */
-  variant?: "primary" | "light" | "outline";
-}
-
+export interface BaeminModalAction { label: string; onClick?: () => void; }
 export interface BaeminModalProps {
-  /** 모달을 화면에 표시합니다. */
   open: boolean;
-  /** 모달의 핵심 질문 또는 제목입니다. */
   title: ReactNode;
-  /** 제목 아래에 표시할 간결한 맥락입니다. */
   description?: ReactNode;
-  /** 본문 콘텐츠입니다. */
   children?: ReactNode;
-  /** 주요 또는 보조 행동입니다. */
   actions?: BaeminModalAction[];
-  /** 딤 영역 또는 닫기 버튼에서 실행할 함수입니다. */
+  footer?: ReactNode;
   onClose?: () => void;
-  /** 닫기 버튼을 표시합니다. */
   dismissible?: boolean;
-  /** 딤 영역을 눌렀을 때 닫습니다. */
   closeOnBackdrop?: boolean;
-  /** 모달 패널에 추가할 Tailwind 클래스입니다. */
+  showCloseButton?: boolean;
   className?: string;
 }
 
-const actionClasses: Record<NonNullable<BaeminModalAction["variant"]>, string> = {
-  primary: "border border-[#0cefd3] bg-[#0cefd3] text-[#222222] hover:border-[#62f4e2] hover:bg-[#62f4e2]",
-  light: "border border-transparent bg-[#f3f4f5] text-[#232324] hover:bg-[#e7e8e9]",
-  outline: "border border-[#a6a7a9] bg-white text-[#232324] hover:bg-[#f3f4f5]",
-};
+function joinClasses(...classes: Array<string | false | undefined | null>) { return classes.filter(Boolean).join(" "); }
 
-function joinClasses(...classes: Array<string | undefined | false>) {
-  return classes.filter(Boolean).join(" ");
-}
-
-function CloseIcon() {
-  return (
-    <svg aria-hidden="true" className="h-4 w-4" fill="none" viewBox="0 0 16 16">
-      <path d="m4.5 4.5 7 7m0-7-7 7" stroke="currentColor" strokeLinecap="round" strokeWidth="1.7" />
-    </svg>
-  );
-}
-
-/**
- * 배달의민족의 명료한 확인 흐름을 위한 독립형 제어형 모달입니다.
- * 공개된 고정 모션 토큰이 없으므로 패널과 딤에 짧은 지역 전환만 적용하고, 그림자 대신 테두리와 딤으로 깊이를 만듭니다.
- */
-export function BaeminModal({
-  actions = [],
-  children,
-  className,
-  closeOnBackdrop = true,
-  description,
-  dismissible = true,
-  onClose,
-  open,
-  title,
-}: BaeminModalProps) {
+/** Baemin의 집중된 결정을 위한 overlay dialog입니다. */
+export function BaeminModal({ actions, children, className, closeOnBackdrop = true, description, dismissible = true, footer, onClose, open, showCloseButton = true, title }: BaeminModalProps) {
   const titleId = useId();
-  const generatedDescriptionId = useId();
-  const descriptionId = description ? generatedDescriptionId : undefined;
-
-  function handleBackdropMouseDown(event: MouseEvent<HTMLDivElement>) {
-    if (closeOnBackdrop && onClose && event.target === event.currentTarget) {
-      onClose();
-    }
-  }
-
-  if (!open) {
-    return null;
-  }
+  useEffect(() => {
+    if (!open || !onClose) return undefined;
+    const handleKeydown = (event: KeyboardEvent) => { if (event.key === "Escape") onClose(); };
+    window.addEventListener("keydown", handleKeydown);
+    return () => window.removeEventListener("keydown", handleKeydown);
+  }, [onClose, open]);
+  if (!open) return null;
+  const close = onClose ?? (() => undefined);
 
   return (
-    <div
-      aria-describedby={descriptionId}
-      aria-labelledby={titleId}
-      aria-modal="true"
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4 font-[BAEMINWORK,system-ui,sans-serif] transition-opacity duration-200 ease-out motion-reduce:transition-none sm:items-center"
-      onMouseDown={handleBackdropMouseDown}
-      role="dialog"
-    >
-      <div
-        className={joinClasses(
-          "w-full max-w-md translate-y-0 rounded-2xl border border-[#e1e1e1] bg-white p-6 transition-transform duration-200 ease-out motion-reduce:transition-none",
-          className,
-        )}
-      >
-        <div className="flex items-start gap-4">
-          <div className="min-w-0 flex-1">
-            <h2 className="text-2xl font-bold leading-8 tracking-[-0.03em] text-[#232324]" id={titleId}>
-              {title}
-            </h2>
-            {description ? (
-              <p className="mt-3 text-base font-normal leading-6 tracking-[-0.02em] text-[#6c6d6f]" id={descriptionId}>
-                {description}
-              </p>
-            ) : null}
-          </div>
-          {dismissible && onClose ? (
-            <button
-              aria-label="대화상자 닫기"
-              className="-mr-2 -mt-2 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-[#6c6d6f] outline-none transition-[background-color,color] duration-200 hover:bg-[#f3f4f5] hover:text-[#232324] focus-visible:ring-2 focus-visible:ring-[#0cefd3]/40"
-              onClick={onClose}
-              type="button"
-            >
-              <CloseIcon />
-            </button>
-          ) : null}
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 font-sans font-black" role="presentation">
+      <button aria-label="대화상자 닫기" className="absolute inset-0 bg-black/45 backdrop-blur-[2px]" onClick={closeOnBackdrop ? close : undefined} type="button" />
+      <section aria-labelledby={titleId} aria-modal="true" className={joinClasses("relative z-10 w-full max-w-md overflow-hidden rounded-[28px] border-[3px] border-[#222222] bg-[#f8fffc] shadow-[0_24px_60px_rgba(0,0,0,0.2)]", className)} role="dialog">
+        <div className="flex items-start justify-between gap-5 border-b border-[#222222] p-6">
+          <div><p className="text-[10px] font-bold tracking-[0.16em] text-[#222222]">오늘 뭐 먹지?</p><h2 className="mt-2 text-2xl font-black tracking-[-0.04em] text-[#222222]" id={titleId}>{title}</h2>{description ? <p className="mt-2 text-sm leading-6 text-[#52615e]">{description}</p> : null}</div>
+          {(dismissible && showCloseButton) ? <button aria-label="대화상자 닫기" className="h-9 w-9 rounded-[28px] border border-[#222222] text-sm font-bold" onClick={close} type="button">×</button> : null}
         </div>
-
-        {children ? <div className="mt-5 text-sm leading-6 tracking-[-0.02em] text-[#6c6d6f]">{children}</div> : null}
-
-        {actions.length > 0 ? (
-          <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-            {actions.map((action) => (
-              <button
-                className={joinClasses(
-                  "inline-flex h-[52px] items-center justify-center rounded-lg px-[22px] text-base font-bold leading-[1.4] tracking-[-0.02em] outline-none transition-[background-color,border-color,color,transform] duration-200 ease-out active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#0cefd3] focus-visible:ring-offset-2",
-                  actionClasses[action.variant ?? "primary"],
-                )}
-                key={action.label}
-                onClick={action.onClick}
-                type="button"
-              >
-                {action.label}
-              </button>
-            ))}
-          </div>
-        ) : null}
-      </div>
+        {children ? <div className="p-6 text-sm leading-6 text-[#222222]">{children}</div> : null}
+        {footer || actions ? <div className="flex flex-wrap justify-end gap-2 border-t border-[#222222] p-4">{footer ?? actions?.map((action, index) => <button className={joinClasses("min-h-10 px-4 text-sm font-bold", index === actions.length - 1 ? "rounded-[18px] border-[3px] border-[#222222] bg-[#0cefd3] text-[#222222] shadow-[4px_4px_0_#222222] hover:-translate-y-0.5 active:translate-x-1 active:translate-y-1 active:shadow-none" : "rounded-[28px] border border-[#222222] bg-white")} key={`${action.label}-${index}`} onClick={action.onClick} type="button">{action.label}</button>)}</div> : null}
+      </section>
     </div>
   );
 }

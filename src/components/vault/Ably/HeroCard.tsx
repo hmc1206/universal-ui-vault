@@ -1,89 +1,53 @@
 import type { ReactNode } from "react";
 
-export interface AblyHeroCardAction {
-  /** 방문자가 다음으로 할 수 있는 행동을 말하는 레이블입니다. */
+export interface AblyHeroAction {
   label: string;
-  /** 행동을 실행할 함수입니다. */
   onClick?: () => void;
-  /** ABLY Team primary 또는 soft action을 선택합니다. */
-  variant?: "primary" | "soft";
+  href?: string;
 }
 
 export interface AblyHeroCardProps {
-  /** 스토리의 짧은 분류입니다. */
   eyebrow?: ReactNode;
-  /** 회사/브랜드 스토리를 설명하는 대형 제목입니다. */
-  title: ReactNode;
-  /** 제목 아래에 표시할 설명입니다. */
+  title?: ReactNode;
   description?: ReactNode;
-  /** 사진, 일러스트, 영상 등을 담는 미디어 영역입니다. */
+  actions?: AblyHeroAction[];
+  primaryAction?: AblyHeroAction;
+  secondaryAction?: AblyHeroAction;
   media?: ReactNode;
-  /** 방문자가 이어서 할 수 있는 행동입니다. */
-  actions?: AblyHeroCardAction[];
-  /** pale peach 또는 white story surface를 선택합니다. */
-  tone?: "peach" | "white";
-  /** 카드 바깥 컨테이너에 추가할 Tailwind 클래스입니다. */
+  visual?: ReactNode;
   className?: string;
 }
 
-const toneClasses: Record<NonNullable<AblyHeroCardProps["tone"]>, string> = {
-  peach: "bg-[#fff2ea]",
-  white: "bg-white",
-};
-
-const actionClasses: Record<NonNullable<AblyHeroCardAction["variant"]>, string> = {
-  primary: "h-14 w-40 rounded-xl bg-[#ff5160] px-6 text-lg font-semibold leading-6 text-white hover:brightness-95 active:translate-y-px",
-  soft: "h-12 min-w-[160px] rounded-xl bg-[#fff2ea] px-6 text-base font-semibold leading-5 text-[#ff5160] hover:bg-[#ffe6dc] active:translate-y-px",
-};
-
-function joinClasses(...classes: Array<string | undefined | false>) {
+function joinClasses(...classes: Array<string | false | undefined | null>) {
   return classes.filter(Boolean).join(" ");
 }
 
-/**
- * ABLY Team의 48px editorial heading, pale peach surface, 12px story card, 0 4px 48px rgba(0,0,0,.08) shadow를 적용한 히어로 카드입니다.
- * 이는 Consumer native commerce 카드가 아니라 회사/미션 스토리 표면에만 맞춘 컴포넌트입니다.
- */
-export function AblyHeroCard({
-  actions = [],
-  className,
-  description,
-  eyebrow,
-  media,
-  title,
-  tone = "peach",
-}: AblyHeroCardProps) {
-  return (
-    <section className={joinClasses("overflow-hidden rounded-xl font-[Pretendard,system-ui,sans-serif] text-[#1f1f1f] shadow-[0_4px_48px_rgba(0,0,0,0.08)]", toneClasses[tone], className)}>
-      <div className="grid min-h-[440px] gap-10 p-8 sm:p-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)] lg:items-center lg:p-16">
-        <div className="min-w-0">
-          {eyebrow ? <p className="mb-4 text-base font-semibold leading-5 tracking-[-0.3px] text-[#ff5160]">{eyebrow}</p> : null}
-          <h1 className="max-w-3xl text-[40px] font-semibold leading-[56px] tracking-[-0.3px] sm:text-[48px] sm:leading-[64px]">
-            {title}
-          </h1>
-          {description ? <div className="mt-6 max-w-xl text-base font-normal leading-6 tracking-[-0.3px] text-[#757575]">{description}</div> : null}
-          {actions.length > 0 ? (
-            <div className="mt-8 flex flex-wrap gap-3">
-              {actions.map((action) => (
-                <button
-                  className={joinClasses(
-                    "inline-flex items-center justify-center border border-transparent font-[Pretendard,system-ui,sans-serif] tracking-[-0.02em] outline-none transition-[filter,background-color,transform] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1f1f1f]",
-                    actionClasses[action.variant ?? "primary"],
-                  )}
-                  key={action.label}
-                  onClick={action.onClick}
-                  type="button"
-                >
-                  {action.label}
-                </button>
-              ))}
-            </div>
-          ) : null}
-        </div>
+function Action({ action, primary }: { action: AblyHeroAction; primary: boolean }) {
+  const className = joinClasses("inline-flex min-h-11 items-center justify-center px-4 text-sm font-semibold transition-all duration-200 ease-out", primary ? "rounded-3xl border border-[#ff5160] bg-[#ff5160] text-white hover:scale-105 active:scale-95" : "rounded-3xl border border-current bg-white/10 text-current hover:bg-white/20");
+  return action.href ? <a className={className} href={action.href}>{action.label}</a> : <button className={className} onClick={action.onClick} type="button">{action.label}</button>;
+}
 
-        <div className="flex min-h-64 items-center justify-center overflow-hidden rounded-xl bg-white p-6 sm:min-h-80 lg:min-h-96">
-          {media ?? <span className="text-center text-base font-normal leading-6 tracking-[-0.3px] text-[#757575]">미션을 보여주는 이미지나<br />스토리 미디어를 배치하세요</span>}
+/** Ably의 좋아하는 것을 빠르게 발견하고 함께 나누는 쇼핑를 넓은 콘텐츠 프레임에 담는 hero component입니다. */
+export function AblyHeroCard({ actions, className, description = "좋아하는 것을 빠르게 발견하고 함께 나누는 쇼핑", eyebrow = "STYLE DROP", media, primaryAction, secondaryAction, title = "Ably의 다음 장면을 시작하세요.", visual }: AblyHeroCardProps) {
+  const resolvedActions = actions ?? [primaryAction, secondaryAction].filter(Boolean) as AblyHeroAction[];
+  const showcase = visual ?? media ?? (
+    <div aria-hidden="true" className="relative h-48 overflow-hidden border border-current/20 bg-white/20 p-5">
+      <div className="h-full w-3/5 border-2 border-dashed border-[#ff5160] bg-white/60" />
+      <div className="absolute bottom-5 right-5 h-20 w-20 rounded-full bg-[#ff5160]/30" />
+      <span className="absolute right-5 top-5 text-xs font-bold tracking-[0.18em]">{String(eyebrow)}</span>
+    </div>
+  );
+
+  return (
+    <section className={joinClasses("relative overflow-hidden p-6 font-sans rounded-[36px] border border-[#ffd5db] bg-[#fff2f4] before:absolute before:-right-3 before:-top-3 before:h-7 before:w-7 before:rounded-full before:bg-[#ff5160]/20", className)}>
+      <div className="relative z-10 grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-end">
+        <div>
+          <p className="text-xs font-bold tracking-[0.16em] text-[#ff5160]">{eyebrow}</p>
+          <h1 className="mt-4 text-3xl font-black leading-[1.05] tracking-[-0.05em] sm:text-4xl">{title}</h1>
+          <p className="mt-4 max-w-xl text-sm leading-6 opacity-75">{description}</p>
+          {resolvedActions.length ? <div className="mt-6 flex flex-wrap gap-2">{resolvedActions.map((action, index) => <Action action={action} key={`${action.label}-${index}`} primary={index === 0} />)}</div> : null}
         </div>
+        <div className="relative">{showcase}</div>
       </div>
     </section>
   );

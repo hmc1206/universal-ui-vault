@@ -1,91 +1,53 @@
 import type { ReactNode } from "react";
 
-export interface SamsungHeroCardAction {
-  /** 행동을 직접 설명하는 짧은 레이블입니다. */
+export interface SamsungHeroAction {
   label: string;
-  /** 행동을 실행할 함수입니다. */
   onClick?: () => void;
-  /** 블랙 채움 또는 외곽선 CTA를 선택합니다. */
-  variant?: "contained" | "outlined";
+  href?: string;
 }
 
 export interface SamsungHeroCardProps {
-  /** 작은 분류 레이블입니다. */
   eyebrow?: ReactNode;
-  /** 제품 또는 서비스의 핵심 제목입니다. */
-  title: ReactNode;
-  /** 제목을 보완하는 구체적인 한두 문장입니다. */
+  title?: ReactNode;
   description?: ReactNode;
-  /** 제품 시각물을 담는 영역입니다. */
+  actions?: SamsungHeroAction[];
+  primaryAction?: SamsungHeroAction;
+  secondaryAction?: SamsungHeroAction;
   media?: ReactNode;
-  /** 제공하는 행동 목록입니다. */
-  actions?: SamsungHeroCardAction[];
-  /** 카드 바깥 컨테이너에 추가할 Tailwind 클래스입니다. */
+  visual?: ReactNode;
   className?: string;
 }
 
-function joinClasses(...classes: Array<string | undefined | false>) {
+function joinClasses(...classes: Array<string | false | undefined | null>) {
   return classes.filter(Boolean).join(" ");
 }
 
-const actionClasses: Record<NonNullable<SamsungHeroCardAction["variant"]>, string> = {
-  contained: "border-[#000000] bg-[#000000] text-[#ffffff] hover:bg-[#333333] active:bg-[#000000]",
-  outlined: "border-[#000000] bg-transparent text-[#000000] hover:bg-[#f7f7f7] active:bg-[#eeeeee]",
-};
+function Action({ action, primary }: { action: SamsungHeroAction; primary: boolean }) {
+  const className = joinClasses("inline-flex min-h-11 items-center justify-center px-4 text-sm font-semibold transition-all duration-300 ease-out", primary ? "relative overflow-hidden rounded-2xl border border-[#007aff] bg-[#007aff] text-white after:absolute after:inset-0 after:scale-0 after:rounded-full after:bg-white/25 after:transition-transform after:duration-500 hover:after:scale-150 active:scale-[0.98]" : "rounded-2xl border border-current bg-white/10 text-current hover:bg-white/20");
+  return action.href ? <a className={className} href={action.href}>{action.label}</a> : <button className={className} onClick={action.onClick} type="button">{action.label}</button>;
+}
 
-/**
- * 삼성전자 AI 제품 페이지에서 관측된 흰색 20px 미디어 표면과 Sharp Sans 24px 제목 역할을 반영한 히어로 카드입니다.
- * 카드 자체의 그림자는 현재 증거에 없으므로 사용하지 않습니다.
- */
-export function SamsungHeroCard({
-  actions = [],
-  className,
-  description,
-  eyebrow,
-  media,
-  title,
-}: SamsungHeroCardProps) {
+/** Samsung의 손에 닿는 곳에 중요한 정보를 정돈해 둡니다를 넓은 콘텐츠 프레임에 담는 hero component입니다. */
+export function SamsungHeroCard({ actions, className, description = "손에 닿는 곳에 중요한 정보를 정돈해 둡니다", eyebrow = "ONE UI / READY", media, primaryAction, secondaryAction, title = "Samsung의 다음 장면을 시작하세요.", visual }: SamsungHeroCardProps) {
+  const resolvedActions = actions ?? [primaryAction, secondaryAction].filter(Boolean) as SamsungHeroAction[];
+  const showcase = visual ?? media ?? (
+    <div aria-hidden="true" className="relative h-48 overflow-hidden border border-current/20 bg-white/20 p-5">
+      <div className="h-full w-3/5 border-2 border-dashed border-[#007aff] bg-white/60" />
+      <div className="absolute bottom-5 right-5 h-20 w-20 rounded-full bg-[#007aff]/30" />
+      <span className="absolute right-5 top-5 text-xs font-bold tracking-[0.18em]">{String(eyebrow)}</span>
+    </div>
+  );
+
   return (
-    <section className={joinClasses("overflow-hidden bg-[#f7f7f7] font-[SamsungOneKorean,sans-serif] text-[#000000]", className)}>
-      <div className="mx-auto grid max-w-6xl items-center gap-8 px-6 py-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:px-8 lg:py-14">
-        <div className="order-2 min-w-0 lg:order-1">
-          {eyebrow ? <p className="mb-3 text-sm font-bold leading-5 tracking-[-0.02em] text-[#707070]">{eyebrow}</p> : null}
-          <h1 className="font-[SamsungSharpSans,Samsung\ Sharp\ Sans,sans-serif] text-3xl font-bold leading-10 tracking-[-0.04em] text-[#000000] sm:text-[40px] sm:leading-[1.15]">
-            {title}
-          </h1>
-          {description ? (
-            <div className="mt-5 max-w-xl text-base font-normal leading-[1.45] tracking-[-0.02em] text-[#707070]">
-              {description}
-            </div>
-          ) : null}
-          {actions.length > 0 ? (
-            <div className="mt-7 flex flex-wrap gap-3">
-              {actions.map((action) => (
-                <button
-                  className={joinClasses(
-                    "inline-flex h-10 items-center justify-center rounded-[20px] border px-6 pb-[9px] pt-2.5 font-[SamsungOneKorean,sans-serif] text-sm font-bold leading-[19px] tracking-[-0.02em] outline-none transition-[background-color,border-color,color,transform] duration-150 ease-out focus-visible:ring-2 focus-visible:ring-[#007aff] focus-visible:ring-offset-2 active:scale-[0.98]",
-                    actionClasses[action.variant ?? "contained"],
-                  )}
-                  key={action.label}
-                  onClick={action.onClick}
-                  type="button"
-                >
-                  {action.label}
-                </button>
-              ))}
-            </div>
-          ) : null}
+    <section className={joinClasses("relative overflow-hidden p-6 font-sans rounded-[28px] bg-gradient-to-b from-[#e8f2ff] to-white before:absolute before:inset-x-0 before:top-0 before:h-16 before:rounded-b-[32px] before:bg-[#007aff] before:content-['']", className)}>
+      <div className="relative z-10 grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-end">
+        <div>
+          <p className="text-xs font-bold tracking-[0.16em] text-[#007aff]">{eyebrow}</p>
+          <h1 className="mt-4 text-3xl font-black leading-[1.05] tracking-[-0.05em] sm:text-4xl">{title}</h1>
+          <p className="mt-4 max-w-xl text-sm leading-6 opacity-75">{description}</p>
+          {resolvedActions.length ? <div className="mt-6 flex flex-wrap gap-2">{resolvedActions.map((action, index) => <Action action={action} key={`${action.label}-${index}`} primary={index === 0} />)}</div> : null}
         </div>
-
-        <div className="order-1 min-h-64 overflow-hidden rounded-[20px] bg-[#ffffff] lg:order-2 lg:min-h-[330px]">
-          {media ?? (
-            <div className="flex h-full min-h-64 items-center justify-center p-8 lg:min-h-[330px]">
-              <div className="flex h-44 w-44 items-center justify-center rounded-full border border-[#dddddd] bg-[#f7f7f7] font-[SamsungSharpSans,Samsung\ Sharp\ Sans,sans-serif] text-2xl font-bold tracking-[-0.04em] text-[#000000]">
-                Samsung
-              </div>
-            </div>
-          )}
-        </div>
+        <div className="relative">{showcase}</div>
       </div>
     </section>
   );

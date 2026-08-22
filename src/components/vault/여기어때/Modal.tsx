@@ -1,131 +1,45 @@
-import { useId, type MouseEvent, type ReactNode } from "react";
+import { useEffect, useId, type ReactNode } from "react";
 
-export interface GoodChoiceModalAction {
-  /** 예약 또는 확인의 다음 행동을 말하는 짧은 레이블입니다. */
-  label: string;
-  /** 행동을 실행할 함수입니다. */
-  onClick: (event: MouseEvent<HTMLButtonElement>) => void;
-  /** Cyan 핵심 행동, 외곽선 보조 행동, red 주의 행동을 선택합니다. */
-  variant?: "primary" | "outline" | "danger";
-}
-
+export interface GoodChoiceModalAction { label: string; onClick?: () => void; }
 export interface GoodChoiceModalProps {
-  /** 모달을 화면에 표시합니다. */
   open: boolean;
-  /** 대화상자의 핵심 질문 또는 제목입니다. */
   title: ReactNode;
-  /** 제목 아래에 표시할 구체적인 맥락입니다. */
   description?: ReactNode;
-  /** 본문 콘텐츠입니다. */
   children?: ReactNode;
-  /** 주요 또는 보조 행동입니다. */
   actions?: GoodChoiceModalAction[];
-  /** 딤 영역 또는 닫기 버튼에서 실행할 함수입니다. */
+  footer?: ReactNode;
   onClose?: () => void;
-  /** 닫기 버튼을 표시합니다. */
   dismissible?: boolean;
-  /** 딤 영역을 눌렀을 때 닫습니다. */
   closeOnBackdrop?: boolean;
-  /** 모달 패널에 추가할 Tailwind 클래스입니다. */
+  showCloseButton?: boolean;
   className?: string;
 }
 
-const actionClasses: Record<NonNullable<GoodChoiceModalAction["variant"]>, string> = {
-  primary: "border-[#1D8BFF] bg-[#1D8BFF] text-white hover:brightness-95 active:translate-y-px",
-  outline: "border-[#E6E6E6] bg-white text-[#222222] hover:bg-[#E3F0FF] active:translate-y-px",
-  danger: "border-[#F94239] bg-[#F94239] text-white hover:brightness-95 active:translate-y-px",
-};
+function joinClasses(...classes: Array<string | false | undefined | null>) { return classes.filter(Boolean).join(" "); }
 
-function joinClasses(...classes: Array<string | undefined | false>) {
-  return classes.filter(Boolean).join(" ");
-}
-
-function CloseIcon() {
-  return (
-    <svg aria-hidden="true" className="h-5 w-5" fill="none" viewBox="0 0 20 20">
-      <path d="m5.5 5.5 9 9m0-9-9 9" stroke="currentColor" strokeLinecap="round" strokeWidth="1.8" />
-    </svg>
-  );
-}
-
-/**
- * 여기어때 YDS의 Dialog Raised 역할, 20px 모듈 반경, Cyan 800 행동을 적용한 제어형 모달입니다.
- * 공개 자료에 Raised의 수치값은 없으므로 Tailwind의 shadow-lg는 용도 역할을 표현하는 지역 구현입니다.
- */
-export function GoodChoiceModal({
-  actions = [],
-  children,
-  className,
-  closeOnBackdrop = true,
-  description,
-  dismissible = true,
-  onClose,
-  open,
-  title,
-}: GoodChoiceModalProps) {
+/** 여기어때의 집중된 결정을 위한 overlay dialog입니다. */
+export function GoodChoiceModal({ actions, children, className, closeOnBackdrop = true, description, dismissible = true, footer, onClose, open, showCloseButton = true, title }: GoodChoiceModalProps) {
   const titleId = useId();
-  const generatedDescriptionId = useId();
-  const descriptionId = description ? generatedDescriptionId : undefined;
-
-  function handleBackdropMouseDown(event: MouseEvent<HTMLDivElement>) {
-    if (closeOnBackdrop && onClose && event.target === event.currentTarget) {
-      onClose();
-    }
-  }
-
-  if (!open) {
-    return null;
-  }
+  useEffect(() => {
+    if (!open || !onClose) return undefined;
+    const handleKeydown = (event: KeyboardEvent) => { if (event.key === "Escape") onClose(); };
+    window.addEventListener("keydown", handleKeydown);
+    return () => window.removeEventListener("keydown", handleKeydown);
+  }, [onClose, open]);
+  if (!open) return null;
+  const close = onClose ?? (() => undefined);
 
   return (
-    <div
-      aria-describedby={descriptionId}
-      aria-labelledby={titleId}
-      aria-modal="true"
-      className="fixed inset-0 z-50 flex items-end justify-center bg-[#222222]/40 p-4 font-[Pretendard,system-ui,sans-serif] sm:items-center"
-      onMouseDown={handleBackdropMouseDown}
-      role="dialog"
-    >
-      <div className={joinClasses("w-full max-w-md rounded-[20px] bg-white p-6 shadow-lg sm:p-8", className)}>
-        <div className="flex items-start gap-4">
-          <div className="min-w-0 flex-1">
-            <h2 className="text-2xl font-bold leading-8 tracking-[-0.04em] text-[#222222]" id={titleId}>
-              {title}
-            </h2>
-            {description ? <div className="mt-3 text-base font-normal leading-6 tracking-[-0.02em] text-[#737373]" id={descriptionId}>{description}</div> : null}
-          </div>
-          {dismissible && onClose ? (
-            <button
-              aria-label="대화상자 닫기"
-              className="-mr-2 -mt-2 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-[#737373] outline-none transition-colors duration-150 hover:bg-[#E3F0FF] hover:text-[#222222] focus-visible:ring-2 focus-visible:ring-[#1D8BFF]"
-              onClick={onClose}
-              type="button"
-            >
-              <CloseIcon />
-            </button>
-          ) : null}
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 font-sans" role="presentation">
+      <button aria-label="대화상자 닫기" className="absolute inset-0 bg-black/45 backdrop-blur-[2px]" onClick={closeOnBackdrop ? close : undefined} type="button" />
+      <section aria-labelledby={titleId} aria-modal="true" className={joinClasses("relative z-10 w-full max-w-md overflow-hidden rounded-2xl border border-[#ffd2cf] bg-white shadow-[0_24px_60px_rgba(0,0,0,0.2)]", className)} role="dialog">
+        <div className="flex items-start justify-between gap-5 border-b border-[#ffd2cf] p-6">
+          <div><p className="text-[10px] font-bold tracking-[0.16em] text-[#f94239]">TRIP TICKET</p><h2 className="mt-2 text-2xl font-black tracking-[-0.04em] text-[#222222]" id={titleId}>{title}</h2>{description ? <p className="mt-2 text-sm leading-6 text-[#737373]">{description}</p> : null}</div>
+          {(dismissible && showCloseButton) ? <button aria-label="대화상자 닫기" className="h-9 w-9 rounded-2xl border border-[#ffd2cf] text-sm font-bold" onClick={close} type="button">×</button> : null}
         </div>
-
-        {children ? <div className="mt-6 text-base font-normal leading-6 tracking-[-0.02em] text-[#737373]">{children}</div> : null}
-
-        {actions.length > 0 ? (
-          <div className="mt-8 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-            {actions.map((action) => (
-              <button
-                className={joinClasses(
-                  "inline-flex h-11 items-center justify-center rounded-lg border px-4 font-[Pretendard,system-ui,sans-serif] text-base font-semibold leading-6 tracking-[-0.02em] outline-none transition-[background-color,border-color,filter,transform] duration-150 ease-out focus-visible:ring-2 focus-visible:ring-[#1D8BFF] focus-visible:ring-offset-2",
-                  actionClasses[action.variant ?? "primary"],
-                )}
-                key={action.label}
-                onClick={action.onClick}
-                type="button"
-              >
-                {action.label}
-              </button>
-            ))}
-          </div>
-        ) : null}
-      </div>
+        {children ? <div className="p-6 text-sm leading-6 text-[#222222]">{children}</div> : null}
+        {footer || actions ? <div className="flex flex-wrap justify-end gap-2 border-t border-[#ffd2cf] p-4">{footer ?? actions?.map((action, index) => <button className={joinClasses("min-h-10 px-4 text-sm font-bold", index === actions.length - 1 ? "rounded-xl border border-[#f94239] bg-[#f94239] text-white shadow-[0_7px_0_#bd2f28] hover:-translate-y-0.5 active:translate-y-1 active:shadow-none" : "rounded-2xl border border-[#ffd2cf] bg-white")} key={`${action.label}-${index}`} onClick={action.onClick} type="button">{action.label}</button>)}</div> : null}
+      </section>
     </div>
   );
 }

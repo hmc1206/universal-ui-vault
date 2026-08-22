@@ -1,86 +1,41 @@
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 
-export type SamsungButtonVariant = "contained" | "outlined" | "text";
+export type SamsungButtonVariant = "primary" | "secondary" | "outline";
 export type SamsungButtonSize = "sm" | "md" | "lg";
 
 export interface SamsungButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "children"> {
-  /** 버튼 안에 표시할 레이블 또는 콘텐츠입니다. */
   children: ReactNode;
-  /** 공개 웹 CTA의 표면 유형입니다. */
   variant?: SamsungButtonVariant;
-  /** 버튼 크기입니다. sm은 측정된 40px 홈페이지 CTA 기하를 사용합니다. */
   size?: SamsungButtonSize;
-  /** 레이블 앞에 표시할 아이콘입니다. */
-  leadingIcon?: ReactNode;
-  /** 레이블 뒤에 표시할 아이콘입니다. */
-  trailingIcon?: ReactNode;
-  /** 진행 중 상태를 표시합니다. */
   loading?: boolean;
-  /** 전체 너비로 확장합니다. */
   fullWidth?: boolean;
 }
 
-const variantClasses: Record<SamsungButtonVariant, string> = {
-  contained: "border-[#000000] bg-[#000000] text-[#ffffff] hover:bg-[#333333] active:bg-[#000000]",
-  outlined: "border-[#000000] bg-transparent text-[#000000] hover:bg-[#f7f7f7] active:bg-[#eeeeee]",
-  text: "border-transparent bg-transparent text-[#000000] hover:bg-[#f7f7f7] active:bg-[#eeeeee]",
-};
-
 const sizeClasses: Record<SamsungButtonSize, string> = {
-  sm: "h-10 rounded-[20px] px-6 pb-[9px] pt-2.5 text-sm font-bold leading-[19px]",
-  md: "h-11 rounded-[22px] px-7 text-sm font-bold leading-5",
-  lg: "h-12 rounded-[24px] px-8 text-base font-bold leading-5",
+  sm: "min-h-9 px-3 text-sm",
+  md: "min-h-12 px-5 text-base",
+  lg: "min-h-14 px-6 text-lg",
 };
 
-function joinClasses(...classes: Array<string | undefined | false>) {
+function joinClasses(...classes: Array<string | false | undefined | null>) {
   return classes.filter(Boolean).join(" ");
 }
 
-function LoadingSpinner() {
-  return (
-    <svg aria-hidden="true" className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
-      <circle className="opacity-25" cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2.5" />
-      <path className="opacity-90" d="M21 12a9 9 0 0 0-9-9" stroke="currentColor" strokeLinecap="round" strokeWidth="2.5" />
-    </svg>
-  );
-}
-
-/**
- * 삼성전자 한국 공개 웹의 블랙 40px CTA와 외곽선 CTA를 바탕으로 한 독립형 버튼입니다.
- * SamsungOneKorean은 프로젝트에서 적법하게 로드된 경우에만 우선 적용되며, 웹폰트 파일은 포함하지 않습니다.
- */
-export function SamsungButton({
-  children,
-  className,
-  disabled,
-  fullWidth = false,
-  leadingIcon,
-  loading = false,
-  size = "sm",
-  trailingIcon,
-  type = "button",
-  variant = "contained",
-  ...buttonProps
-}: SamsungButtonProps) {
+/** Samsung의 손에 닿는 곳에 중요한 정보를 정돈해 둡니다를 행동 표면에 반영한 독립형 버튼입니다. */
+export function SamsungButton({ children, className, disabled, fullWidth = false, loading = false, size = "md", type = "button", variant = "primary", ...props }: SamsungButtonProps) {
   const isDisabled = disabled || loading;
+  const variantClass = variant === "primary" ? "relative overflow-hidden rounded-2xl border border-[#007aff] bg-[#007aff] text-white after:absolute after:inset-0 after:scale-0 after:rounded-full after:bg-white/25 after:transition-transform after:duration-500 hover:after:scale-150 active:scale-[0.98]" : variant === "secondary" ? "rounded-2xl border border-[#dbe3f0] bg-white text-[#111111] hover:bg-[#ffffff]" : "rounded-2xl border border-current bg-transparent text-[#111111] hover:bg-black/5";
 
   return (
     <button
-      {...buttonProps}
+      {...props}
       aria-busy={loading || undefined}
-      className={joinClasses(
-        "inline-flex shrink-0 items-center justify-center gap-2 border font-[SamsungOneKorean,sans-serif] tracking-[-0.02em] outline-none transition-[background-color,border-color,color,transform] duration-150 ease-out focus-visible:ring-2 focus-visible:ring-[#007aff] focus-visible:ring-offset-2 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-45",
-        variantClasses[variant],
-        sizeClasses[size],
-        fullWidth && "w-full",
-        className,
-      )}
+      className={joinClasses("inline-flex items-center justify-center gap-2 font-sans transition-all duration-300 ease-out outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#007aff] disabled:cursor-not-allowed disabled:opacity-45", sizeClasses[size], variantClass, fullWidth && "w-full", className)}
       disabled={isDisabled}
       type={type}
     >
-      {loading ? <LoadingSpinner /> : leadingIcon ? <span aria-hidden="true" className="inline-flex shrink-0">{leadingIcon}</span> : null}
-      <span className="truncate">{children}</span>
-      {!loading && trailingIcon ? <span aria-hidden="true" className="inline-flex shrink-0">{trailingIcon}</span> : null}
+      {loading ? <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-current border-t-transparent" /> : null}
+      <span>{children}</span>
     </button>
   );
 }

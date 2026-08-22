@@ -1,106 +1,12 @@
-import { useId, type KeyboardEvent, type ReactNode } from "react";
+import { type ReactNode } from "react";
 
-export interface TwentyNineCmTabItem {
-  /** 탭을 구분하는 고유 값입니다. */
-  value: string;
-  /** 화면에 표시할 탭 레이블입니다. */
-  label: ReactNode;
-  /** 선택할 수 없는 탭인지 나타냅니다. */
-  disabled?: boolean;
-}
+export interface TwentyNineCmTabItem { value: string; label: ReactNode; disabled?: boolean; }
+export interface TwentyNineCmTabsProps { tabs: TwentyNineCmTabItem[]; value: string; onChange: (value: string) => void; layout?: "fill" | "hug" | "scroll"; ariaLabel?: string; className?: string; }
+function joinClasses(...classes: Array<string | false | undefined | null>) { return classes.filter(Boolean).join(" "); }
 
-export interface TwentyNineCmTabsProps {
-  /** 탭 목록입니다. */
-  tabs: TwentyNineCmTabItem[];
-  /** 현재 선택한 탭 값입니다. */
-  value: string;
-  /** 탭이 바뀌었을 때 실행할 함수입니다. */
-  onChange: (value: string) => void;
-  /** 균등 너비 또는 콘텐츠 너비 레이아웃을 선택합니다. */
-  layout?: "fill" | "hug";
-  /** 탭 목록의 접근성 레이블입니다. */
-  ariaLabel?: string;
-  /** 탭 목록 컨테이너에 추가할 Tailwind 클래스입니다. */
-  className?: string;
-}
-
-function joinClasses(...classes: Array<string | undefined | false>) {
-  return classes.filter(Boolean).join(" ");
-}
-
-/**
- * 29CM의 검정 잉크·#dddddd outline·에디토리얼/커머스 타이포그래피 분리를 활용한 탭 확장 컴포넌트입니다.
- * 공개 캡처에는 탭의 고유 기하가 없으므로, 활성 하단선은 선택을 명확히 보이는 지역 확장입니다.
- */
-export function TwentyNineCmTabs({
-  ariaLabel = "상품 카테고리",
-  className,
-  layout = "hug",
-  onChange,
-  tabs,
-  value,
-}: TwentyNineCmTabsProps) {
-  const tabsId = useId();
-
-  function handleKeyDown(event: KeyboardEvent<HTMLButtonElement>, currentIndex: number) {
-    if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") {
-      return;
-    }
-
-    event.preventDefault();
-    const direction = event.key === "ArrowRight" ? 1 : -1;
-    let nextIndex = currentIndex;
-
-    for (let step = 0; step < tabs.length; step += 1) {
-      nextIndex = (nextIndex + direction + tabs.length) % tabs.length;
-      const nextTab = tabs[nextIndex];
-
-      if (!nextTab.disabled) {
-        onChange(nextTab.value);
-        break;
-      }
-    }
-  }
-
-  return (
-    <div
-      aria-label={ariaLabel}
-      className={joinClasses(
-        "flex min-w-0 border-b border-[#dddddd] font-[Pretendard_Variable,Pretendard,system-ui,sans-serif]",
-        layout === "fill" ? "w-full" : "w-fit max-w-full overflow-x-auto",
-        className,
-      )}
-      role="tablist"
-    >
-      {tabs.map((tab, index) => {
-        const isSelected = tab.value === value;
-        const tabId = `${tabsId}-tab-${tab.value}`;
-        const panelId = `${tabsId}-panel-${tab.value}`;
-
-        return (
-          <button
-            aria-controls={panelId}
-            aria-selected={isSelected}
-            className={joinClasses(
-              "relative -mb-px inline-flex h-12 shrink-0 items-center justify-center border-b-2 px-4 text-sm font-bold leading-5 tracking-[-0.02em] outline-none transition-[border-color,color] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-black disabled:cursor-not-allowed disabled:border-transparent disabled:text-[#5d5d5d]",
-              layout === "fill" && "flex-1",
-              isSelected ? "border-black text-black" : "border-transparent text-[#5d5d5d] hover:text-black",
-            )}
-            disabled={tab.disabled}
-            id={tabId}
-            key={tab.value}
-            onClick={() => onChange(tab.value)}
-            onKeyDown={(event) => handleKeyDown(event, index)}
-            role="tab"
-            tabIndex={isSelected ? 0 : -1}
-            type="button"
-          >
-            <span className="truncate">{tab.label}</span>
-          </button>
-        );
-      })}
-    </div>
-  );
+/** 29CM의 navigation pulse를 선택 상태에 담은 tab control입니다. */
+export function TwentyNineCmTabs({ ariaLabel = "콘텐츠 탭", className, layout = "hug", onChange, tabs, value }: TwentyNineCmTabsProps) {
+  return <div aria-label={ariaLabel} className={joinClasses("flex gap-1 overflow-x-auto p-1 rounded-none border border-[#d8d8d8] bg-white font-sans", layout === "fill" && "w-full", className)} role="tablist">{tabs.map((tab) => { const active = tab.value === value; return <button aria-selected={active} className={joinClasses("min-h-10 shrink-0 px-4 text-sm font-bold rounded-none transition-all duration-300 ease-out", layout === "fill" && "flex-1", active ? "bg-[#111111] text-white shadow-[0_4px_12px_rgba(0,0,0,0.12)]" : "text-[#666666] hover:bg-[#f7f7f7]")} disabled={tab.disabled} key={tab.value} onClick={() => onChange(tab.value)} role="tab" type="button">{tab.label}</button>; })}</div>;
 }
 
 export default TwentyNineCmTabs;

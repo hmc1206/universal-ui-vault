@@ -1,130 +1,53 @@
-import type { HTMLAttributes, MouseEvent, ReactNode } from "react";
+import type { ReactNode } from "react";
 
 export interface BaeminHeroAction {
-  /** 다음 행동을 직접 설명하는 짧은 레이블입니다. */
   label: string;
-  /** 링크로 이동할 때 사용할 주소입니다. */
+  onClick?: () => void;
   href?: string;
-  /** 버튼 동작일 때 실행할 함수입니다. */
-  onClick?: (event: MouseEvent<HTMLButtonElement>) => void;
 }
 
-export interface BaeminHeroCardProps extends Omit<HTMLAttributes<HTMLElement>, "title"> {
-  /** 카드 위에 표시할 짧은 분류입니다. */
-  eyebrow?: string;
-  /** 한 화면에서 한 가지를 말하는 제목입니다. */
+export interface BaeminHeroCardProps {
+  eyebrow?: ReactNode;
   title?: ReactNode;
-  /** 빠르고 이해하기 쉬운 맥락을 전달하는 설명입니다. */
   description?: ReactNode;
-  /** 대표 행동입니다. */
+  actions?: BaeminHeroAction[];
   primaryAction?: BaeminHeroAction;
-  /** 보조 행동입니다. */
   secondaryAction?: BaeminHeroAction;
-  /** 기본 시각 구성을 대체할 콘텐츠입니다. */
+  media?: ReactNode;
   visual?: ReactNode;
+  className?: string;
 }
 
-function joinClasses(...classes: Array<string | undefined | false>) {
+function joinClasses(...classes: Array<string | false | undefined | null>) {
   return classes.filter(Boolean).join(" ");
 }
 
-function ArrowRightIcon() {
-  return (
-    <svg aria-hidden="true" className="h-4 w-4" fill="none" viewBox="0 0 24 24">
-      <path d="M5 12h13m-5-5 5 5-5 5" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
-    </svg>
-  );
+function Action({ action, primary }: { action: BaeminHeroAction; primary: boolean }) {
+  const className = joinClasses("inline-flex min-h-11 items-center justify-center px-4 text-sm font-semibold transition-all duration-200 ease-out", primary ? "rounded-[18px] border-[3px] border-[#222222] bg-[#0cefd3] text-[#222222] shadow-[4px_4px_0_#222222] hover:-translate-y-0.5 active:translate-x-1 active:translate-y-1 active:shadow-none" : "rounded-[28px] border border-current bg-white/10 text-current hover:bg-white/20");
+  return action.href ? <a className={className} href={action.href}>{action.label}</a> : <button className={className} onClick={action.onClick} type="button">{action.label}</button>;
 }
 
-function SparkIcon() {
-  return (
-    <svg aria-hidden="true" className="h-7 w-7" fill="none" viewBox="0 0 24 24">
-      <path d="M12 2.8c.9 5 3.2 7.3 8.2 8.2-5 1-7.3 3.2-8.2 8.2-1-5-3.2-7.3-8.2-8.2 5-.9 7.3-3.2 8.2-8.2Z" stroke="currentColor" strokeLinejoin="round" strokeWidth="1.7" />
-    </svg>
-  );
-}
-
-function HeroAction({ action, primary }: { action: BaeminHeroAction; primary: boolean }) {
-  const className = joinClasses(
-    "inline-flex h-[52px] items-center justify-center gap-2 rounded-lg px-[22px] font-[BAEMINWORK,system-ui,sans-serif] text-base font-bold leading-[1.4] tracking-[-0.02em] outline-none transition-[background-color,border-color,color,transform] duration-200 ease-out active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#0cefd3] focus-visible:ring-offset-2",
-    primary
-      ? "border border-[#0cefd3] bg-[#0cefd3] text-[#222222] hover:border-[#62f4e2] hover:bg-[#62f4e2]"
-      : "border border-[#a6a7a9] bg-white text-[#232324] hover:bg-[#f3f4f5]",
-  );
-
-  if (action.href) {
-    return (
-      <a className={className} href={action.href}>
-        <span>{action.label}</span>
-        <ArrowRightIcon />
-      </a>
-    );
-  }
-
-  return (
-    <button className={className} onClick={action.onClick} type="button">
-      <span>{action.label}</span>
-      <ArrowRightIcon />
-    </button>
-  );
-}
-
-function DefaultVisual() {
-  return (
-    <div aria-hidden="true" className="relative grid h-full min-h-[320px] place-items-center overflow-hidden bg-[#f6f6f6] p-8">
-      <div className="absolute -right-12 -top-12 h-48 w-48 rounded-full border-[20px] border-[#0cefd3]" />
-      <div className="absolute -bottom-16 -left-16 h-40 w-40 rounded-full bg-[#0cefd3]" />
-      <div className="relative w-full max-w-[320px] rounded-2xl border border-[#e1e1e1] bg-white p-6">
-        <div className="flex items-center justify-between">
-          <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-[#0cefd3] text-[#222222]"><SparkIcon /></span>
-          <span className="rounded-full bg-[#f3f4f5] px-3 py-1.5 text-xs font-bold text-[#6c6d6f]">빠르게 고르기</span>
-        </div>
-        <div className="mt-8 h-5 w-3/4 rounded bg-[#222222]" />
-        <div className="mt-3 h-4 w-full rounded bg-[#e6e6e6]" />
-        <div className="mt-2 h-4 w-2/3 rounded bg-[#eeeeee]" />
-        <div className="mt-8 h-[54px] rounded-xl bg-[#0cefd3]" />
-      </div>
+/** Baemin의 친근하고 시원한 한 끼의 흐름을 바로 시작하세요를 넓은 콘텐츠 프레임에 담는 hero component입니다. */
+export function BaeminHeroCard({ actions, className, description = "친근하고 시원한 한 끼의 흐름을 바로 시작하세요", eyebrow = "오늘 뭐 먹지?", media, primaryAction, secondaryAction, title = "Baemin의 다음 장면을 시작하세요.", visual }: BaeminHeroCardProps) {
+  const resolvedActions = actions ?? [primaryAction, secondaryAction].filter(Boolean) as BaeminHeroAction[];
+  const showcase = visual ?? media ?? (
+    <div aria-hidden="true" className="relative h-48 overflow-hidden border border-current/20 bg-white/20 p-5">
+      <div className="h-full w-3/5 border-2 border-dashed border-[#222222] bg-white/60" />
+      <div className="absolute bottom-5 right-5 h-20 w-20 rounded-full bg-[#222222]/30" />
+      <span className="absolute right-5 top-5 text-xs font-bold tracking-[0.18em]">{String(eyebrow)}</span>
     </div>
   );
-}
 
-/**
- * 배달의민족 2.0의 밝은 민트와 명료한 제품 커뮤니케이션을 담은 독립형 히어로 카드입니다.
- * WORK 글꼴이 프로젝트에 적법하게 로드된 경우 우선 적용되며, 이 파일은 글꼴 파일을 포함하거나 대체하지 않습니다.
- */
-export function BaeminHeroCard({
-  className,
-  description = "지금 필요한 한 끼를 쉽고 빠르게 골라보세요.",
-  eyebrow = "오늘의 한 끼",
-  primaryAction = { label: "메뉴 보러 가기" },
-  secondaryAction = { label: "내 주변 보기" },
-  title = "먹고 싶은 마음, 바로 이어가요.",
-  visual,
-  ...sectionProps
-}: BaeminHeroCardProps) {
   return (
-    <section
-      {...sectionProps}
-      className={joinClasses(
-        "grid overflow-hidden rounded-2xl border border-[#e1e1e1] bg-white font-[BAEMINWORK,system-ui,sans-serif] md:min-h-[520px] md:grid-cols-2",
-        className,
-      )}
-    >
-      <div className="flex flex-col justify-center px-6 py-12 sm:px-10 sm:py-16 lg:px-16">
-        <p className="text-sm font-bold tracking-[-0.02em] text-[#232324]">{eyebrow}</p>
-        <h1 className="mt-4 max-w-[640px] text-[42px] font-extrabold leading-[1.4] tracking-[-0.04em] text-[#222222] sm:text-5xl lg:text-[60px]">
-          {title}
-        </h1>
-        <p className="mt-5 max-w-[480px] text-base font-normal leading-6 tracking-[-0.02em] text-[#6c6d6f]">
-          {description}
-        </p>
-        <div className="mt-8 flex flex-wrap gap-3">
-          {primaryAction ? <HeroAction action={primaryAction} primary /> : null}
-          {secondaryAction ? <HeroAction action={secondaryAction} primary={false} /> : null}
+    <section className={joinClasses("relative overflow-hidden p-6 font-sans font-black rounded-[36px] border-[3px] border-[#222222] bg-[#0cefd3] after:absolute after:bottom-4 after:right-5 after:h-10 after:w-16 after:rounded-full after:border-[3px] after:border-[#222222] after:content-['']", className)}>
+      <div className="relative z-10 grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-end">
+        <div>
+          <p className="text-xs font-bold tracking-[0.16em] text-[#222222]">{eyebrow}</p>
+          <h1 className="mt-4 text-3xl font-black leading-[1.05] tracking-[-0.05em] sm:text-4xl">{title}</h1>
+          <p className="mt-4 max-w-xl text-sm leading-6 opacity-75">{description}</p>
+          {resolvedActions.length ? <div className="mt-6 flex flex-wrap gap-2">{resolvedActions.map((action, index) => <Action action={action} key={`${action.label}-${index}`} primary={index === 0} />)}</div> : null}
         </div>
-      </div>
-      <div className="min-h-[320px] border-t border-[#e1e1e1] md:border-l md:border-t-0">
-        {visual ?? <DefaultVisual />}
+        <div className="relative">{showcase}</div>
       </div>
     </section>
   );

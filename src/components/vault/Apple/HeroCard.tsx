@@ -1,133 +1,53 @@
 import type { ReactNode } from "react";
 
 export interface AppleHeroAction {
-  /** 사용자에게 보이는 짧은 행동 레이블입니다. */
   label: string;
-  /** 링크 목적지입니다. */
-  href?: string;
-  /** 버튼 동작이 필요할 때 실행할 함수입니다. */
   onClick?: () => void;
+  href?: string;
 }
 
 export interface AppleHeroCardProps {
-  /** 작은 맥락 레이블입니다. */
   eyebrow?: ReactNode;
-  /** 대형 제품 또는 기능 제목입니다. */
-  title: ReactNode;
-  /** 제목을 보조하는 짧은 설명입니다. */
+  title?: ReactNode;
   description?: ReactNode;
-  /** 검증된 primary marketing action입니다. */
+  actions?: AppleHeroAction[];
   primaryAction?: AppleHeroAction;
-  /** 검증된 outline marketing action입니다. */
   secondaryAction?: AppleHeroAction;
-  /** 제품 이미지를 제공할 때 사용할 주소입니다. */
-  imageSrc?: string;
-  /** 제품 이미지의 대체 텍스트입니다. */
-  imageAlt?: string;
-  /** 밝은 fog 또는 몰입형 dark 표면을 선택합니다. */
-  surface?: "fog" | "dark";
-  /** 최상위 영역에 추가할 Tailwind 클래스입니다. */
+  media?: ReactNode;
+  visual?: ReactNode;
   className?: string;
 }
 
-function joinClasses(...classes: Array<string | undefined | false>) {
+function joinClasses(...classes: Array<string | false | undefined | null>) {
   return classes.filter(Boolean).join(" ");
 }
 
-function HeroActionLink({
-  action,
-  dark,
-  primary,
-}: {
-  action: AppleHeroAction;
-  dark: boolean;
-  primary: boolean;
-}) {
-  const classes = joinClasses(
-    "inline-flex min-h-11 items-center justify-center rounded-[980px] px-[21px] py-[11px] font-['SF_Pro_Text'] text-[17px] font-normal leading-[22px] tracking-[-0.01em] outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2",
-    primary
-      ? "border border-[#0071e3] bg-[#0071e3] text-white focus-visible:outline-[#0071e3]"
-      : dark
-        ? "border border-[#2997ff] bg-transparent text-[#2997ff] focus-visible:outline-[#2997ff]"
-        : "border border-[#0066cc] bg-transparent text-[#0066cc] focus-visible:outline-[#0066cc]",
-  );
-
-  if (action.href) {
-    return (
-      <a className={classes} href={action.href} onClick={action.onClick}>
-        {action.label}
-      </a>
-    );
-  }
-
-  return (
-    <button className={classes} onClick={action.onClick} type="button">
-      {action.label}
-    </button>
-  );
+function Action({ action, primary }: { action: AppleHeroAction; primary: boolean }) {
+  const className = joinClasses("inline-flex min-h-11 items-center justify-center px-4 text-sm font-semibold transition-all duration-500 ease-out", primary ? "rounded-full border-[0.5px] border-white/70 bg-[#0071e3] text-white shadow-[0_10px_30px_rgba(0,113,227,0.18)] hover:brightness-110 active:scale-[0.98]" : "rounded-[22px] border border-current bg-white/10 text-current hover:bg-white/20");
+  return action.href ? <a className={className} href={action.href}>{action.label}</a> : <button className={className} onClick={action.onClick} type="button">{action.label}</button>;
 }
 
-/**
- * apple.com public marketing의 content-first composition, SF Pro Display 56px hierarchy,
- * #f5f5f7/#000 surface 및 distinct 44px pill action을 적용한 hero component입니다.
- * hover와 motion은 캡처에 없으므로 공식 Apple interaction으로 표현하지 않습니다.
- * focus-visible outline은 접근성을 위한 지역 확장입니다.
- */
-export function AppleHeroCard({
-  className,
-  description,
-  eyebrow,
-  imageAlt = "제품 이미지",
-  imageSrc,
-  primaryAction,
-  secondaryAction,
-  surface = "fog",
-  title,
-}: AppleHeroCardProps) {
-  const isDark = surface === "dark";
-  const textColor = isDark ? "text-white" : "text-[#1d1d1f]";
-  const mutedColor = isDark ? "text-[#f5f5f7]" : "text-[#515154]";
+/** Apple의 정밀한 도구가 일을 방해하지 않고 자연스럽게 이어집니다를 넓은 콘텐츠 프레임에 담는 hero component입니다. */
+export function AppleHeroCard({ actions, className, description = "정밀한 도구가 일을 방해하지 않고 자연스럽게 이어집니다", eyebrow = "DESIGNED TO FEEL NATURAL", media, primaryAction, secondaryAction, title = "Apple의 다음 장면을 시작하세요.", visual }: AppleHeroCardProps) {
+  const resolvedActions = actions ?? [primaryAction, secondaryAction].filter(Boolean) as AppleHeroAction[];
+  const showcase = visual ?? media ?? (
+    <div aria-hidden="true" className="relative h-48 overflow-hidden border border-current/20 bg-white/20 p-5">
+      <div className="h-full w-3/5 border-2 border-dashed border-[#2997ff] bg-white/60" />
+      <div className="absolute bottom-5 right-5 h-20 w-20 rounded-full bg-[#2997ff]/30" />
+      <span className="absolute right-5 top-5 text-xs font-bold tracking-[0.18em]">{String(eyebrow)}</span>
+    </div>
+  );
 
   return (
-    <section
-      className={joinClasses(
-        "overflow-hidden rounded-none font-['SF_Pro_Text'] sm:rounded-2xl",
-        isDark ? "bg-black" : "bg-[#f5f5f7]",
-        className,
-      )}
-    >
-      <div className="mx-auto grid max-w-[1440px] items-center gap-8 px-6 py-14 sm:px-10 md:min-h-[560px] md:grid-cols-2 md:px-14 md:py-16 lg:px-20">
-        <div className="relative z-10 max-w-xl">
-          {eyebrow ? <p className={joinClasses("mb-3 text-sm font-normal leading-[18px] tracking-[-0.01em]", mutedColor)}>{eyebrow}</p> : null}
-          <h1 className={joinClasses("font-['SF_Pro_Display'] text-[42px] font-semibold leading-[1.07] tracking-[-0.025em] sm:text-[56px] sm:leading-[60px]", textColor)}>
-            {title}
-          </h1>
-          {description ? (
-            <p className={joinClasses("mt-5 max-w-lg text-[17px] font-normal leading-[25px] tracking-[-0.022em]", mutedColor)}>{description}</p>
-          ) : null}
-          {primaryAction || secondaryAction ? (
-            <div className="mt-7 flex flex-wrap items-center gap-3">
-              {primaryAction ? <HeroActionLink action={primaryAction} dark={isDark} primary /> : null}
-              {secondaryAction ? <HeroActionLink action={secondaryAction} dark={isDark} primary={false} /> : null}
-            </div>
-          ) : null}
+    <section className={joinClasses("relative overflow-hidden p-6 font-['SF_Pro_Display'] rounded-[32px] border-[0.5px] border-white/80 bg-gradient-to-br from-white/90 to-[#dfe8f8]/70 backdrop-blur-xl shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]", className)}>
+      <div className="relative z-10 grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-end">
+        <div>
+          <p className="text-xs font-bold tracking-[0.16em] text-[#2997ff]">{eyebrow}</p>
+          <h1 className="mt-4 text-3xl font-black leading-[1.05] tracking-[-0.05em] sm:text-4xl">{title}</h1>
+          <p className="mt-4 max-w-xl text-sm leading-6 opacity-75">{description}</p>
+          {resolvedActions.length ? <div className="mt-6 flex flex-wrap gap-2">{resolvedActions.map((action, index) => <Action action={action} key={`${action.label}-${index}`} primary={index === 0} />)}</div> : null}
         </div>
-        <div className="relative flex min-h-64 items-center justify-center overflow-hidden md:min-h-[400px]">
-          {imageSrc ? (
-            <img alt={imageAlt} className="h-full max-h-[440px] w-full object-contain" src={imageSrc} />
-          ) : (
-            <div
-              aria-hidden="true"
-              className={joinClasses(
-                "relative aspect-[4/5] w-[min(72vw,330px)] rounded-[2.75rem] border p-3",
-                isDark ? "border-white/25 bg-[#1d1d1f]" : "border-[#6e6e73]/30 bg-white",
-              )}
-            >
-              <div className={joinClasses("h-full w-full rounded-[2.1rem]", isDark ? "bg-gradient-to-br from-[#515154] to-black" : "bg-gradient-to-br from-white to-[#d2d2d7]")} />
-              <div className={joinClasses("absolute left-1/2 top-5 h-1.5 w-16 -translate-x-1/2 rounded-full", isDark ? "bg-black" : "bg-[#1d1d1f]")} />
-            </div>
-          )}
-        </div>
+        <div className="relative">{showcase}</div>
       </div>
     </section>
   );

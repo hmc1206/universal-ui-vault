@@ -1,85 +1,53 @@
 import type { ReactNode } from "react";
 
-export interface LikelionHeroCardAction {
-  /** 다음 학습 행동을 말하는 짧은 레이블입니다. */
+export interface LikelionHeroAction {
   label: string;
-  /** 행동을 실행할 함수입니다. */
   onClick?: () => void;
-  /** 계정 필 또는 검색 주목 행동을 선택합니다. */
-  variant?: "account" | "search";
+  href?: string;
 }
 
 export interface LikelionHeroCardProps {
-  /** 작은 맥락 레이블입니다. */
   eyebrow?: ReactNode;
-  /** 실습 또는 학습 과제를 명확히 말하는 제목입니다. */
-  title: ReactNode;
-  /** 다음에 무엇을 할지 설명하는 짧은 안내입니다. */
+  title?: ReactNode;
   description?: ReactNode;
-  /** 프로모션 시각물을 담는 영역입니다. */
+  actions?: LikelionHeroAction[];
+  primaryAction?: LikelionHeroAction;
+  secondaryAction?: LikelionHeroAction;
   media?: ReactNode;
-  /** 사용자가 이어서 할 수 있는 행동입니다. */
-  actions?: LikelionHeroCardAction[];
-  /** 카드 바깥 컨테이너에 추가할 Tailwind 클래스입니다. */
+  visual?: ReactNode;
   className?: string;
 }
 
-function joinClasses(...classes: Array<string | undefined | false>) {
+function joinClasses(...classes: Array<string | false | undefined | null>) {
   return classes.filter(Boolean).join(" ");
 }
 
-const actionClasses: Record<NonNullable<LikelionHeroCardAction["variant"]>, string> = {
-  account: "border-[#d4d4d4] bg-transparent text-[#222222] hover:bg-white/60 active:bg-white/60",
-  search: "border-[#ff6000] bg-transparent text-[#ff6000] hover:bg-white/60 active:bg-white/60",
-};
+function Action({ action, primary }: { action: LikelionHeroAction; primary: boolean }) {
+  const className = joinClasses("inline-flex min-h-11 items-center justify-center px-4 text-sm font-semibold transition-all duration-200 ease-out", primary ? "rounded-xl border border-[#222222] bg-[#ff6000] text-white hover:translate-x-1 active:translate-y-px" : "rounded-xl border border-current bg-white/10 text-current hover:bg-white/20");
+  return action.href ? <a className={className} href={action.href}>{action.label}</a> : <button className={className} onClick={action.onClick} type="button">{action.label}</button>;
+}
 
-/**
- * 멋쟁이사자처럼 홈페이지에서 관측된 #fcf4ee, 16px 반경, 40px 패딩, 310px 프로모션 타일을 확장한 히어로 카드입니다.
- * 주황색은 일반 CTA가 아니라 과정 탐색·주목 행동을 표시할 때만 사용합니다.
- */
-export function LikelionHeroCard({
-  actions = [],
-  className,
-  description,
-  eyebrow,
-  media,
-  title,
-}: LikelionHeroCardProps) {
+/** Likelion의 배우고 만들고 실행하며 성장하는 빌더의 다음 줄를 넓은 콘텐츠 프레임에 담는 hero component입니다. */
+export function LikelionHeroCard({ actions, className, description = "배우고 만들고 실행하며 성장하는 빌더의 다음 줄", eyebrow = "BUILD / RUN", media, primaryAction, secondaryAction, title = "Likelion의 다음 장면을 시작하세요.", visual }: LikelionHeroCardProps) {
+  const resolvedActions = actions ?? [primaryAction, secondaryAction].filter(Boolean) as LikelionHeroAction[];
+  const showcase = visual ?? media ?? (
+    <div aria-hidden="true" className="relative h-48 overflow-hidden border border-current/20 bg-white/20 p-5">
+      <div className="h-full w-3/5 border-2 border-dashed border-[#ff6000] bg-white/60" />
+      <div className="absolute bottom-5 right-5 h-20 w-20 rounded-full bg-[#ff6000]/30" />
+      <span className="absolute right-5 top-5 text-xs font-bold tracking-[0.18em]">{String(eyebrow)}</span>
+    </div>
+  );
+
   return (
-    <section className={joinClasses("min-h-[310px] overflow-hidden rounded-2xl bg-[#fcf4ee] p-10 font-[inherit] text-[#222222]", className)}>
-      <div className="grid min-h-[230px] items-center gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.75fr)] lg:gap-12">
-        <div className="min-w-0">
-          {eyebrow ? <p className="mb-3 text-base font-normal leading-6 tracking-[-0.02em] text-[#737373]">{eyebrow}</p> : null}
-          <h1 className="text-[32px] font-bold leading-[48px] tracking-[-0.04em] text-[#222222]">{title}</h1>
-          {description ? <div className="mt-4 max-w-xl text-base font-normal leading-6 tracking-[-0.02em] text-[#737373]">{description}</div> : null}
-          {actions.length > 0 ? (
-            <div className="mt-7 flex flex-wrap gap-3">
-              {actions.map((action) => (
-                <button
-                  className={joinClasses(
-                    "inline-flex h-[43px] items-center justify-center rounded-full border px-4 font-[inherit] text-base font-normal leading-6 tracking-[-0.02em] outline-none transition-[background-color,border-color,color,transform] duration-150 ease-out focus-visible:ring-2 focus-visible:ring-[#2563eb] focus-visible:ring-offset-2 active:scale-[0.98]",
-                    actionClasses[action.variant ?? "account"],
-                  )}
-                  key={action.label}
-                  onClick={action.onClick}
-                  type="button"
-                >
-                  {action.label}
-                </button>
-              ))}
-            </div>
-          ) : null}
+    <section className={joinClasses("relative overflow-hidden p-6 font-mono rounded-2xl border border-[#222222] bg-[#fcf4ee] before:absolute before:left-5 before:top-4 before:font-mono before:text-[#ff6000] before:content-['>_']", className)}>
+      <div className="relative z-10 grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-end">
+        <div>
+          <p className="text-xs font-bold tracking-[0.16em] text-[#ff6000]">{eyebrow}</p>
+          <h1 className="mt-4 text-3xl font-black leading-[1.05] tracking-[-0.05em] sm:text-4xl">{title}</h1>
+          <p className="mt-4 max-w-xl text-sm leading-6 opacity-75">{description}</p>
+          {resolvedActions.length ? <div className="mt-6 flex flex-wrap gap-2">{resolvedActions.map((action, index) => <Action action={action} key={`${action.label}-${index}`} primary={index === 0} />)}</div> : null}
         </div>
-
-        <div className="flex min-h-40 items-center justify-center rounded-2xl border border-[#e5e5e5] bg-white/60 p-6">
-          {media ?? (
-            <div className="text-center text-xl font-semibold leading-[30px] tracking-[-0.03em] text-[#222222]">
-              아이디어를
-              <br />
-              직접 만들어 보세요
-            </div>
-          )}
-        </div>
+        <div className="relative">{showcase}</div>
       </div>
     </section>
   );

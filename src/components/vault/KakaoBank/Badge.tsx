@@ -1,64 +1,20 @@
 import type { HTMLAttributes, ReactNode } from "react";
 
-export type KakaoBankBadgeVariant = "identity" | "neutral" | "section";
-export type KakaoBankBadgeSize = "sm" | "md";
-
 export interface KakaoBankBadgeProps extends HTMLAttributes<HTMLSpanElement> {
-  /** 배지에 표시할 서비스 또는 정보 레이블입니다. */
   children: ReactNode;
-  /** 보호된 identity, 중립 정보, pale-gray section 레이블을 선택합니다. */
-  variant?: KakaoBankBadgeVariant;
-  /** 배지 크기입니다. */
-  size?: KakaoBankBadgeSize;
-  /** 레이블 앞에 표시할 아이콘 또는 점입니다. */
-  leadingIcon?: ReactNode;
-  /** 상태를 말로 보완하는 접근성 레이블입니다. */
-  statusLabel?: string;
+  tone?: string;
+  variant?: string;
+  size?: "sm" | "md" | "lg";
 }
 
-const variantClasses: Record<KakaoBankBadgeVariant, string> = {
-  identity: "border border-transparent bg-[#FFE300] text-black",
-  neutral: "border border-[#e6e6e6] bg-white text-black",
-  section: "border border-transparent bg-[#f7f7f7] text-[#444444]",
-};
-
-const sizeClasses: Record<KakaoBankBadgeSize, string> = {
-  sm: "min-h-6 rounded-none px-2 text-xs font-normal leading-4",
-  md: "min-h-8 rounded-none px-3 text-sm font-normal leading-5",
-};
-
-function joinClasses(...classes: Array<string | undefined | false>) {
+function joinClasses(...classes: Array<string | false | undefined | null>) {
   return classes.filter(Boolean).join(" ");
 }
 
-/**
- * KakaoBank 공개 웹의 #FFE300 identity 역할, 흰 캔버스, #f7f7f7 section, #e6e6e6 divider를 구분한 배지 확장 컴포넌트입니다.
- * identity variant는 보호된 브랜드 식별 맥락에만 사용하며, Yellow를 앱 상태나 일반 금융 행동의 의미색으로 전용하지 않습니다.
- */
-export function KakaoBankBadge({
-  children,
-  className,
-  leadingIcon,
-  size = "sm",
-  statusLabel,
-  variant = "neutral",
-  ...spanProps
-}: KakaoBankBadgeProps) {
-  return (
-    <span
-      {...spanProps}
-      aria-label={statusLabel}
-      className={joinClasses(
-        "inline-flex max-w-full items-center justify-center gap-1.5 font-[Pretendard_Variable,Pretendard,system-ui,sans-serif] tracking-[-0.02em]",
-        variantClasses[variant],
-        sizeClasses[size],
-        className,
-      )}
-    >
-      {leadingIcon ? <span aria-hidden="true" className="inline-flex shrink-0">{leadingIcon}</span> : null}
-      <span className="truncate">{children}</span>
-    </span>
-  );
+/** KakaoBank의 콘텐츠 분류 리듬을 담는 standalone badge입니다. */
+export function KakaoBankBadge({ children, className, size = "md", tone, variant, ...props }: KakaoBankBadgeProps) {
+  const sizeClass = size === "sm" ? "px-2 py-0.5 text-[10px]" : size === "lg" ? "px-3 py-1.5 text-sm" : "px-2.5 py-1 text-xs";
+  return <span {...props} className={joinClasses("inline-flex items-center gap-1 border border-[#ece2a0] bg-white font-bold text-[#171717] rounded-2xl", sizeClass, tone === "accent" || variant === "filled" ? "border-[#171717] bg-[#171717] text-white" : "", className)}>{children}</span>;
 }
 
 export default KakaoBankBadge;

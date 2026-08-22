@@ -1,171 +1,36 @@
-import { useId, useMemo, useState, type ReactNode } from "react";
+import { useId, type ChangeEvent, type ReactNode } from "react";
 
-export interface LikelionSelectOption {
-  /** 옵션을 구분하는 값입니다. */
-  value: string;
-  /** 화면에 표시할 옵션 이름입니다. */
-  label: ReactNode;
-  /** 선택할 수 없는 옵션인지 나타냅니다. */
-  disabled?: boolean;
-  /** 옵션 아래에 표시할 짧은 설명입니다. */
-  description?: string;
-}
-
+export interface LikelionSelectOption { value: string; label: string; disabled?: boolean; }
 export interface LikelionSelectProps {
-  /** 선택 필드 위에 표시할 레이블입니다. */
-  label?: string;
-  /** 현재 선택한 값입니다. */
+  label?: ReactNode;
   value?: string;
-  /** 선택이 바뀌었을 때 실행할 함수입니다. */
   onChange?: (value: string, option: LikelionSelectOption) => void;
-  /** 고를 수 있는 옵션입니다. */
   options: LikelionSelectOption[];
-  /** 값이 없을 때 표시할 안내입니다. */
   placeholder?: string;
-  /** 입력을 돕는 짧은 설명입니다. */
-  description?: string;
-  /** 다시 확인이 필요한 경우 표시할 안내입니다. */
-  error?: string;
-  /** 선택 필드를 비활성화합니다. */
+  description?: ReactNode;
+  error?: ReactNode;
+  errorMessage?: ReactNode;
   disabled?: boolean;
-  /** 필수 선택 항목을 표시합니다. */
   required?: boolean;
-  /** 최상위 컨테이너에 추가할 Tailwind 클래스입니다. */
   className?: string;
 }
 
-function joinClasses(...classes: Array<string | undefined | false>) {
-  return classes.filter(Boolean).join(" ");
-}
+function joinClasses(...classes: Array<string | false | undefined | null>) { return classes.filter(Boolean).join(" "); }
 
-function ChevronDownIcon({ open }: { open: boolean }) {
-  return (
-    <svg aria-hidden="true" className={joinClasses("h-5 w-5 transition-transform duration-150 ease-out", open && "rotate-180")} fill="none" viewBox="0 0 24 24">
-      <path d="m7 10 5 5-5 5" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" transform="rotate(90 12 12)" />
-    </svg>
-  );
-}
-
-function CheckIcon() {
-  return (
-    <svg aria-hidden="true" className="h-4 w-4" fill="none" viewBox="0 0 24 24">
-      <path d="m5 12 4.2 4.2L19 6.5" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
-    </svg>
-  );
-}
-
-/**
- * 멋쟁이사자처럼 홈페이지의 헤어라인·따뜻한 표면·관측된 검색 포커스 색을 활용한 셀렉트 확장 컴포넌트입니다.
- * 공식 홈 캡처에 셀렉트 고유 기하가 없으므로, 이 파일은 과정 탐색 맥락을 위한 명시적 확장입니다.
- */
-export function LikelionSelect({
-  className,
-  description,
-  disabled = false,
-  error,
-  label,
-  onChange,
-  options,
-  placeholder = "선택해 주세요",
-  required = false,
-  value,
-}: LikelionSelectProps) {
-  const [isOpen, setIsOpen] = useState(false);
-  const selectId = useId();
-  const descriptionId = description ? `${selectId}-description` : undefined;
-  const errorId = error ? `${selectId}-error` : undefined;
-  const selectedOption = useMemo(() => options.find((option) => option.value === value), [options, value]);
-  const describedBy = [descriptionId, errorId].filter(Boolean).join(" ") || undefined;
-
-  function handleOptionClick(option: LikelionSelectOption) {
-    if (option.disabled) {
-      return;
-    }
-
-    onChange?.(option.value, option);
-    setIsOpen(false);
+/** Likelion의 선택 구조와 focus rhythm을 담은 native-accessible select입니다. */
+export function LikelionSelect({ className, description, disabled = false, error, errorMessage, label, onChange, options, placeholder = "옵션을 선택하세요", required = false, value = "", ...props }: LikelionSelectProps) {
+  const id = useId();
+  const feedback = error ?? errorMessage ?? description;
+  function handleChange(event: ChangeEvent<HTMLSelectElement>) {
+    const option = options.find((item) => item.value === event.target.value) ?? { value: event.target.value, label: event.target.value };
+    if (onChange) (onChange as (value: string, option: LikelionSelectOption) => void)(event.target.value, option);
   }
-
   return (
-    <div className={joinClasses("relative w-full font-[inherit]", className)}>
-      {label ? (
-        <label className="mb-2 block text-base font-semibold leading-6 tracking-[-0.02em] text-[#222222]" htmlFor={selectId}>
-          {label}
-          {required ? <span className="ml-1 text-[#ff6000]" aria-hidden="true">*</span> : null}
-        </label>
-      ) : null}
-
-      <button
-        aria-controls={`${selectId}-listbox`}
-        aria-describedby={describedBy}
-        aria-expanded={isOpen}
-        aria-haspopup="listbox"
-        aria-invalid={error ? true : undefined}
-        className={joinClasses(
-          "flex h-12 w-full items-center justify-between gap-3 rounded-lg border bg-white px-4 text-left text-base font-normal leading-6 tracking-[-0.02em] outline-none transition-[border-color,box-shadow,background-color] duration-150 ease-out",
-          error
-            ? "border-[#ff6000]"
-            : "border-[#e5e5e5] hover:bg-[#fcf4ee] focus-visible:border-[#2563eb] focus-visible:ring-2 focus-visible:ring-[#2563eb]/20",
-          disabled && "cursor-not-allowed border-[#e5e5e5] bg-[#fcf4ee] text-[#a3a3a3]",
-        )}
-        disabled={disabled}
-        id={selectId}
-        onClick={() => setIsOpen((open) => !open)}
-        type="button"
-      >
-        <span className={joinClasses("min-w-0 flex-1 truncate", !selectedOption && "text-[#a3a3a3]")}>
-          {selectedOption?.label ?? placeholder}
-        </span>
-        <span aria-hidden="true" className={joinClasses("shrink-0 text-[#737373]", disabled && "text-[#a3a3a3]")}>
-          <ChevronDownIcon open={isOpen} />
-        </span>
-      </button>
-
-      <div
-        className={joinClasses(
-          "absolute left-0 right-0 top-[calc(100%+8px)] z-20 origin-top overflow-hidden rounded-xl border border-[#e5e5e5] bg-white transition-[opacity,transform] duration-150 ease-out motion-reduce:transition-none",
-          isOpen ? "scale-y-100 opacity-100" : "pointer-events-none scale-y-95 opacity-0",
-        )}
-      >
-        <div aria-label={label ?? "옵션"} className="max-h-64 overflow-y-auto py-1" id={`${selectId}-listbox`} role="listbox">
-          {options.map((option) => {
-            const isSelected = option.value === value;
-
-            return (
-              <button
-                aria-selected={isSelected}
-                className={joinClasses(
-                  "flex w-full items-center gap-3 px-4 py-3 text-left outline-none transition-colors duration-150",
-                  isSelected ? "bg-[#fcf4ee] text-[#222222]" : "text-[#222222] hover:bg-[#fcf4ee]",
-                  option.disabled && "cursor-not-allowed bg-white text-[#a3a3a3] hover:bg-white",
-                )}
-                disabled={option.disabled}
-                key={option.value}
-                onClick={() => handleOptionClick(option)}
-                role="option"
-                type="button"
-              >
-                <span className="min-w-0 flex-1">
-                  <span className="block truncate text-base font-semibold leading-6 tracking-[-0.02em]">{option.label}</span>
-                  {option.description ? <span className="mt-1 block truncate text-sm font-normal leading-5 text-[#737373]">{option.description}</span> : null}
-                </span>
-                {isSelected ? <span aria-hidden="true" className="shrink-0 text-[#ff6000]"><CheckIcon /></span> : null}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {error ? (
-        <p aria-live="polite" className="mt-2 text-sm font-normal leading-5 tracking-[-0.02em] text-[#ff6000]" id={errorId}>
-          {error}
-        </p>
-      ) : description ? (
-        <p className="mt-2 text-sm font-normal leading-5 tracking-[-0.02em] text-[#737373]" id={descriptionId}>
-          {description}
-        </p>
-      ) : null}
-    </div>
+    <label className={joinClasses("block font-mono", className)} htmlFor={id}>
+      {label ? <span className="mb-2 block text-sm font-bold text-[#222222]">{label}{required ? <span className="ml-1 text-[#ff6000]">*</span> : null}</span> : null}
+      <span className="relative block"><select {...props} aria-invalid={Boolean(error || errorMessage) || undefined} className="min-h-12 w-full appearance-none rounded-xl border border-[#f4c6a7] bg-white px-4 pr-11 text-sm font-semibold text-[#222222] outline-none transition-all duration-200 ease-out focus:border-[#ff6000] focus:ring-2 focus:ring-[#ff6000]/20" disabled={disabled} id={id} onChange={handleChange} value={value}><option disabled value="">{placeholder}</option>{options.map((option) => <option disabled={option.disabled} key={option.value} value={option.value}>{option.label}</option>)}</select><span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[#ff6000]">⌄</span></span>
+      {feedback ? <span className="mt-2 block text-xs text-[#67564a]">{feedback}</span> : null}
+    </label>
   );
 }
 

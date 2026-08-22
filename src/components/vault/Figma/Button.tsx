@@ -1,80 +1,41 @@
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 
-export type FigmaButtonVariant = "primary" | "indigo" | "outline";
+export type FigmaButtonVariant = "primary" | "secondary" | "outline";
 export type FigmaButtonSize = "sm" | "md" | "lg";
 
-export interface FigmaButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  /** 공개 Figma page에서 관측된 action surface입니다. */
-  variant?: FigmaButtonVariant;
-  /** md는 49px public action, sm/lg는 재사용을 위한 지역 확장입니다. */
-  size?: FigmaButtonSize;
-  /** 버튼 내용입니다. */
+export interface FigmaButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "children"> {
   children: ReactNode;
-  /** 진행 중 상태를 화면 읽기 도구에 알립니다. */
+  variant?: FigmaButtonVariant;
+  size?: FigmaButtonSize;
   loading?: boolean;
+  fullWidth?: boolean;
 }
 
-const geometryClasses: Record<FigmaButtonVariant, Record<FigmaButtonSize, string>> = {
-  primary: {
-    sm: "min-h-10 px-4 py-2 text-sm leading-5",
-    md: "min-h-[49px] px-[21px] py-3 text-base leading-[23px]",
-    lg: "min-h-14 px-6 py-4 text-lg leading-6",
-  },
-  indigo: {
-    sm: "min-h-10 px-4 py-2 text-base leading-5",
-    md: "min-h-[49px] px-5 py-3 text-lg leading-[23px]",
-    lg: "min-h-14 px-6 py-4 text-xl leading-6",
-  },
-  outline: {
-    sm: "min-h-10 px-4 py-2 text-sm leading-5",
-    md: "min-h-[49px] px-[21px] py-3 text-base leading-[23px]",
-    lg: "min-h-14 px-6 py-4 text-lg leading-6",
-  },
+const sizeClasses: Record<FigmaButtonSize, string> = {
+  sm: "min-h-9 px-3 text-sm",
+  md: "min-h-12 px-5 text-base",
+  lg: "min-h-14 px-6 text-lg",
 };
 
-const variantClasses: Record<FigmaButtonVariant, string> = {
-  primary: "border border-black bg-black text-white font-[330]",
-  indigo: "border border-[#4d49fc] bg-[#4d49fc] text-white font-[480]",
-  outline: "border border-black bg-transparent text-black font-[330]",
-};
-
-function joinClasses(...classes: Array<string | undefined | false>) {
+function joinClasses(...classes: Array<string | false | undefined | null>) {
   return classes.filter(Boolean).join(" ");
 }
 
-/**
- * Figma public pages의 49px action, 8px radius, black/white primary,
- * #4d49fc alternate action, transparent outline 및 dashed #0d99ff focus를 반영합니다.
- * md가 검증된 public action입니다. sm/lg와 disabled presentation은 요청된 재사용을 위한 지역 확장이며,
- * hover/pressed visual은 캡처에 없으므로 공식 Figma 상태로 표현하지 않습니다.
- */
-export function FigmaButton({
-  children,
-  className,
-  loading = false,
-  size = "md",
-  type = "button",
-  variant = "primary",
-  ...buttonProps
-}: FigmaButtonProps) {
-  const isDisabled = Boolean(buttonProps.disabled || loading);
+/** Figma의 정밀한 선택과 협업의 맥락을 같은 캔버스에 남깁니다를 행동 표면에 반영한 독립형 버튼입니다. */
+export function FigmaButton({ children, className, disabled, fullWidth = false, loading = false, size = "md", type = "button", variant = "primary", ...props }: FigmaButtonProps) {
+  const isDisabled = disabled || loading;
+  const variantClass = variant === "primary" ? "rounded-sm border border-[#5b5b5b] bg-white text-[#2c2c2c] hover:bg-[#e5e5e5] active:translate-y-px" : variant === "secondary" ? "rounded-sm border border-[#4d4d4d] bg-white text-[#ffffff] hover:bg-[#2c2c2c]" : "rounded-sm border border-current bg-transparent text-[#ffffff] hover:bg-black/5";
 
   return (
     <button
-      {...buttonProps}
+      {...props}
       aria-busy={loading || undefined}
-      className={joinClasses(
-        "inline-flex items-center justify-center rounded-lg font-['figmaSans'] tracking-[-0.009em] outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-dashed focus-visible:outline-offset-2 focus-visible:outline-[#0d99ff]",
-        geometryClasses[variant][size],
-        variantClasses[variant],
-        isDisabled && "cursor-not-allowed opacity-55",
-        className,
-      )}
+      className={joinClasses("inline-flex items-center justify-center gap-2 font-['figmaSans'] transition-all duration-150 ease-out outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0d99ff] disabled:cursor-not-allowed disabled:opacity-45", sizeClasses[size], variantClass, fullWidth && "w-full", className)}
       disabled={isDisabled}
       type={type}
     >
-      {loading ? <span className="sr-only">처리 중: </span> : null}
-      {children}
+      {loading ? <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-current border-t-transparent" /> : null}
+      <span>{children}</span>
     </button>
   );
 }

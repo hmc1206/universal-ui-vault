@@ -1,121 +1,16 @@
 import { useId, useState, type ReactNode } from "react";
 
-export interface MusinsaAccordionItem {
-  /** 항목을 구분하는 고유 값입니다. */
-  value: string;
-  /** 접힌 상태에서 표시할 제목입니다. */
-  title: ReactNode;
-  /** 펼쳤을 때 표시할 상세 내용입니다. */
-  content: ReactNode;
-  /** 항목을 펼칠 수 없는 상태인지 나타냅니다. */
-  disabled?: boolean;
-}
+export interface MusinsaAccordionItem { value: string; title: ReactNode; content: ReactNode; disabled?: boolean; }
+export interface MusinsaAccordionProps { items: MusinsaAccordionItem[]; defaultOpenValues?: string[]; openValues?: string[]; onOpenValuesChange?: (values: string[]) => void; allowMultiple?: boolean; className?: string; }
+function joinClasses(...classes: Array<string | false | undefined | null>) { return classes.filter(Boolean).join(" "); }
 
-export interface MusinsaAccordionProps {
-  /** 아코디언 항목 목록입니다. */
-  items: MusinsaAccordionItem[];
-  /** 처음 펼쳐둘 항목 값입니다. */
-  defaultOpenValues?: string[];
-  /** 제어형으로 사용할 펼친 항목 값입니다. */
-  openValues?: string[];
-  /** 펼친 항목이 바뀌었을 때 실행할 함수입니다. */
-  onOpenValuesChange?: (values: string[]) => void;
-  /** 여러 항목을 동시에 펼칠지 결정합니다. */
-  allowMultiple?: boolean;
-  /** 최상위 컨테이너에 추가할 Tailwind 클래스입니다. */
-  className?: string;
-}
-
-function joinClasses(...classes: Array<string | undefined | false>) {
-  return classes.filter(Boolean).join(" ");
-}
-
-function ChevronDownIcon({ open }: { open: boolean }) {
-  return (
-    <svg
-      aria-hidden="true"
-      className={joinClasses("h-5 w-5 shrink-0 text-[#666666] transition-transform motion-reduce:transition-none", open && "rotate-180 text-black")}
-      fill="none"
-      viewBox="0 0 24 24"
-    >
-      <path d="m7 10 5 5-5 5" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" transform="rotate(90 12 12)" />
-    </svg>
-  );
-}
-
-/**
- * 무신사 storefront의 white canvas, #ebebeb line, black foreground, 14px Pretendard 밀도를 활용한 아코디언 확장입니다.
- * 공개 자료에는 accordion 상태와 모션이 없으므로, 펼침 기능은 요청된 재사용을 위한 지역 확장입니다.
- */
-export function MusinsaAccordion({
-  allowMultiple = false,
-  className,
-  defaultOpenValues = [],
-  items,
-  onOpenValuesChange,
-  openValues,
-}: MusinsaAccordionProps) {
-  const [uncontrolledOpenValues, setUncontrolledOpenValues] = useState<string[]>(defaultOpenValues);
-  const accordionId = useId();
-  const activeValues = openValues ?? uncontrolledOpenValues;
-
-  function handleToggle(value: string) {
-    const isOpen = activeValues.includes(value);
-    let nextValues: string[];
-
-    if (isOpen) {
-      nextValues = activeValues.filter((openValue) => openValue !== value);
-    } else if (allowMultiple) {
-      nextValues = [...activeValues, value];
-    } else {
-      nextValues = [value];
-    }
-
-    if (openValues === undefined) {
-      setUncontrolledOpenValues(nextValues);
-    }
-
-    onOpenValuesChange?.(nextValues);
-  }
-
-  return (
-    <div className={joinClasses("divide-y divide-[#ebebeb] border border-[#ebebeb] bg-white font-[Pretendard,Apple_SD_Gothic_Neo,sans-serif]", className)}>
-      {items.map((item) => {
-        const isOpen = activeValues.includes(item.value);
-        const buttonId = `${accordionId}-button-${item.value}`;
-        const panelId = `${accordionId}-panel-${item.value}`;
-
-        return (
-          <div key={item.value}>
-            <h3>
-              <button
-                aria-controls={panelId}
-                aria-expanded={isOpen}
-                className="flex min-h-12 w-full items-center justify-between gap-4 px-3 py-3 text-left text-sm font-normal leading-[21px] text-black outline-none transition-colors hover:bg-[#f7f7f7] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-black disabled:cursor-not-allowed disabled:text-[#666666]"
-                disabled={item.disabled}
-                id={buttonId}
-                onClick={() => handleToggle(item.value)}
-                type="button"
-              >
-                <span className="min-w-0 flex-1">{item.title}</span>
-                <ChevronDownIcon open={isOpen} />
-              </button>
-            </h3>
-            <div
-              aria-labelledby={buttonId}
-              className={joinClasses("overflow-hidden", isOpen ? "block" : "hidden")}
-              id={panelId}
-              role="region"
-            >
-              <div className="border-t border-[#ebebeb] bg-white px-3 py-4 text-sm font-normal leading-[21px] text-[#666666]">
-                {item.content}
-              </div>
-            </div>
-          </div>
-        );
-      })}
-    </div>
-  );
+/** Musinsa의 정보 위계를 필요할 때만 열어 보이는 accordion입니다. */
+export function MusinsaAccordion({ allowMultiple = false, className, defaultOpenValues = [], items, onOpenValuesChange, openValues }: MusinsaAccordionProps) {
+  const [localValues, setLocalValues] = useState(defaultOpenValues);
+  const values = openValues ?? localValues;
+  const id = useId();
+  function toggle(value: string) { const next = values.includes(value) ? values.filter((item) => item !== value) : allowMultiple ? [...values, value] : [value]; if (openValues === undefined) setLocalValues(next); onOpenValuesChange?.(next); }
+  return <div className={joinClasses("overflow-hidden rounded-none border border-[#111111] bg-white font-sans font-black", className)}>{items.map((item, index) => { const open = values.includes(item.value); const panelId = `${id}-${item.value}`; return <div className={index ? "border-t border-[#111111]" : ""} key={item.value}><button aria-controls={panelId} aria-expanded={open} className="flex min-h-12 w-full items-center justify-between gap-4 px-4 text-left text-sm font-bold text-[#000000]" disabled={item.disabled} onClick={() => toggle(item.value)} type="button"><span>{item.title}</span><span className={joinClasses("text-[#000000] transition-all duration-150 ease-out", open && "rotate-180")}>⌄</span></button><div className={joinClasses("grid transition-all duration-150 ease-out", open ? "grid-rows-[1fr]" : "grid-rows-[0fr]")} id={panelId}><div className="min-h-0 overflow-hidden"><p className="border-t border-[#111111] px-4 py-4 text-sm leading-6 text-[#666666]">{item.content}</p></div></div></div>; })}</div>;
 }
 
 export default MusinsaAccordion;

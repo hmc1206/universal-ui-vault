@@ -1,130 +1,45 @@
-import { useId, type MouseEvent, type ReactNode } from "react";
+import { useEffect, useId, type ReactNode } from "react";
 
-export interface MusinsaModalAction {
-  /** 방문자가 다음으로 할 수 있는 행동을 말하는 레이블입니다. */
-  label: string;
-  /** 행동을 실행할 함수입니다. */
-  onClick: (event: MouseEvent<HTMLButtonElement>) => void;
-  /** outline 또는 ink 행동을 선택합니다. */
-  variant?: "outline" | "ink";
-}
-
+export interface MusinsaModalAction { label: string; onClick?: () => void; }
 export interface MusinsaModalProps {
-  /** 모달을 화면에 표시합니다. */
   open: boolean;
-  /** 대화상자의 핵심 질문 또는 제목입니다. */
   title: ReactNode;
-  /** 제목 아래에 표시할 구체적인 맥락입니다. */
   description?: ReactNode;
-  /** 본문 콘텐츠입니다. */
   children?: ReactNode;
-  /** 주요 또는 보조 행동입니다. */
   actions?: MusinsaModalAction[];
-  /** 딤 영역 또는 닫기 버튼에서 실행할 함수입니다. */
+  footer?: ReactNode;
   onClose?: () => void;
-  /** 닫기 버튼을 표시합니다. */
   dismissible?: boolean;
-  /** 딤 영역을 눌렀을 때 닫습니다. */
   closeOnBackdrop?: boolean;
-  /** 모달 패널에 추가할 Tailwind 클래스입니다. */
+  showCloseButton?: boolean;
   className?: string;
 }
 
-const actionClasses: Record<NonNullable<MusinsaModalAction["variant"]>, string> = {
-  outline: "h-9 rounded-none border border-[#ebebeb] bg-white px-3 text-sm font-normal leading-[21px] text-black hover:bg-[#f7f7f7] active:translate-y-px",
-  ink: "h-9 rounded-none border border-black bg-black px-3 text-sm font-normal leading-[21px] text-white hover:opacity-80 active:translate-y-px",
-};
+function joinClasses(...classes: Array<string | false | undefined | null>) { return classes.filter(Boolean).join(" "); }
 
-function joinClasses(...classes: Array<string | undefined | false>) {
-  return classes.filter(Boolean).join(" ");
-}
-
-function CloseIcon() {
-  return (
-    <svg aria-hidden="true" className="h-5 w-5" fill="none" viewBox="0 0 20 20">
-      <path d="m5.5 5.5 9 9m0-9-9 9" stroke="currentColor" strokeLinecap="round" strokeWidth="1.8" />
-    </svg>
-  );
-}
-
-/**
- * 무신사 storefront의 white canvas, black foreground, #ebebeb line, flat/no-shadow treatment을 활용한 모달 확장입니다.
- * 공개 캡처에는 dialog/sheet geometry가 없으므로, 이는 native commerce modal이 아니라 정보 확인용 지역 확장입니다.
- */
-export function MusinsaModal({
-  actions = [],
-  children,
-  className,
-  closeOnBackdrop = true,
-  description,
-  dismissible = true,
-  onClose,
-  open,
-  title,
-}: MusinsaModalProps) {
+/** Musinsa의 집중된 결정을 위한 overlay dialog입니다. */
+export function MusinsaModal({ actions, children, className, closeOnBackdrop = true, description, dismissible = true, footer, onClose, open, showCloseButton = true, title }: MusinsaModalProps) {
   const titleId = useId();
-  const generatedDescriptionId = useId();
-  const descriptionId = description ? generatedDescriptionId : undefined;
-
-  function handleBackdropMouseDown(event: MouseEvent<HTMLDivElement>) {
-    if (closeOnBackdrop && onClose && event.target === event.currentTarget) {
-      onClose();
-    }
-  }
-
-  if (!open) {
-    return null;
-  }
+  useEffect(() => {
+    if (!open || !onClose) return undefined;
+    const handleKeydown = (event: KeyboardEvent) => { if (event.key === "Escape") onClose(); };
+    window.addEventListener("keydown", handleKeydown);
+    return () => window.removeEventListener("keydown", handleKeydown);
+  }, [onClose, open]);
+  if (!open) return null;
+  const close = onClose ?? (() => undefined);
 
   return (
-    <div
-      aria-describedby={descriptionId}
-      aria-labelledby={titleId}
-      aria-modal="true"
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4 font-[Pretendard,Apple_SD_Gothic_Neo,sans-serif] sm:items-center"
-      onMouseDown={handleBackdropMouseDown}
-      role="dialog"
-    >
-      <div className={joinClasses("w-full max-w-md rounded-none border border-[#ebebeb] bg-white p-6 sm:p-8", className)}>
-        <div className="flex items-start gap-4">
-          <div className="min-w-0 flex-1">
-            <h2 className="text-base font-medium leading-[22px] text-black" id={titleId}>
-              {title}
-            </h2>
-            {description ? <div className="mt-3 text-sm font-normal leading-[21px] text-[#666666]" id={descriptionId}>{description}</div> : null}
-          </div>
-          {dismissible && onClose ? (
-            <button
-              aria-label="대화상자 닫기"
-              className="-mr-2 -mt-2 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-none text-[#666666] outline-none transition-opacity hover:opacity-70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
-              onClick={onClose}
-              type="button"
-            >
-              <CloseIcon />
-            </button>
-          ) : null}
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 font-sans font-black" role="presentation">
+      <button aria-label="대화상자 닫기" className="absolute inset-0 bg-black/45 backdrop-blur-[2px]" onClick={closeOnBackdrop ? close : undefined} type="button" />
+      <section aria-labelledby={titleId} aria-modal="true" className={joinClasses("relative z-10 w-full max-w-md overflow-hidden rounded-none border border-black bg-white shadow-[0_24px_60px_rgba(0,0,0,0.2)]", className)} role="dialog">
+        <div className="flex items-start justify-between gap-5 border-b border-[#111111] p-6">
+          <div><p className="text-[10px] font-bold tracking-[0.16em] text-[#000000]">MUSINSA STANDARD</p><h2 className="mt-2 text-2xl font-black tracking-[-0.04em] text-[#000000]" id={titleId}>{title}</h2>{description ? <p className="mt-2 text-sm leading-6 text-[#666666]">{description}</p> : null}</div>
+          {(dismissible && showCloseButton) ? <button aria-label="대화상자 닫기" className="h-9 w-9 rounded-none border border-[#111111] text-sm font-bold" onClick={close} type="button">×</button> : null}
         </div>
-
-        {children ? <div className="mt-6 text-sm font-normal leading-[21px] text-[#666666]">{children}</div> : null}
-
-        {actions.length > 0 ? (
-          <div className="mt-8 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-            {actions.map((action) => (
-              <button
-                className={joinClasses(
-                  "inline-flex items-center justify-center font-[Pretendard,Apple_SD_Gothic_Neo,sans-serif] outline-none transition-[background-color,opacity,transform] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black",
-                  actionClasses[action.variant ?? "ink"],
-                )}
-                key={action.label}
-                onClick={action.onClick}
-                type="button"
-              >
-                {action.label}
-              </button>
-            ))}
-          </div>
-        ) : null}
-      </div>
+        {children ? <div className="p-6 text-sm leading-6 text-[#000000]">{children}</div> : null}
+        {footer || actions ? <div className="flex flex-wrap justify-end gap-2 border-t border-[#111111] p-4">{footer ?? actions?.map((action, index) => <button className={joinClasses("min-h-10 px-4 text-sm font-bold", index === actions.length - 1 ? "rounded-none border border-black bg-black text-white hover:bg-white hover:text-black active:translate-y-px" : "rounded-none border border-[#111111] bg-white")} key={`${action.label}-${index}`} onClick={action.onClick} type="button">{action.label}</button>)}</div> : null}
+      </section>
     </div>
   );
 }

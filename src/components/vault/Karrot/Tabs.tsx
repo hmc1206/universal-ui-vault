@@ -1,106 +1,12 @@
-import { useId, type KeyboardEvent, type ReactNode } from "react";
+import { type ReactNode } from "react";
 
-export interface KarrotTabItem {
-  /** 탭을 구분하는 고유 값입니다. */
-  value: string;
-  /** 화면에 표시할 탭 레이블입니다. */
-  label: ReactNode;
-  /** 선택할 수 없는 탭인지 나타냅니다. */
-  disabled?: boolean;
-}
+export interface KarrotTabItem { value: string; label: ReactNode; disabled?: boolean; }
+export interface KarrotTabsProps { tabs: KarrotTabItem[]; value: string; onChange: (value: string) => void; layout?: "fill" | "hug" | "scroll"; ariaLabel?: string; className?: string; }
+function joinClasses(...classes: Array<string | false | undefined | null>) { return classes.filter(Boolean).join(" "); }
 
-export interface KarrotTabsProps {
-  /** 탭 목록입니다. */
-  tabs: KarrotTabItem[];
-  /** 현재 선택한 탭 값입니다. */
-  value: string;
-  /** 탭이 바뀌었을 때 실행할 함수입니다. */
-  onChange: (value: string) => void;
-  /** 균등 너비 또는 콘텐츠 너비 레이아웃을 선택합니다. */
-  layout?: "fill" | "hug";
-  /** 탭 목록의 접근성 레이블입니다. */
-  ariaLabel?: string;
-  /** 탭 목록 컨테이너에 추가할 Tailwind 클래스입니다. */
-  className?: string;
-}
-
-function joinClasses(...classes: Array<string | undefined | false>) {
-  return classes.filter(Boolean).join(" ");
-}
-
-/**
- * 당근 SEED의 명확한 선택 인디케이터를 갖춘 독립형 탭 네비게이션입니다.
- * 선택선은 150ms 동안 전환되며, 좌우 화살표로 인접한 활성 탭을 선택할 수 있습니다.
- */
-export function KarrotTabs({
-  ariaLabel = "카테고리",
-  className,
-  layout = "hug",
-  onChange,
-  tabs,
-  value,
-}: KarrotTabsProps) {
-  const tabsId = useId();
-
-  function handleKeyDown(event: KeyboardEvent<HTMLButtonElement>, currentIndex: number) {
-    if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") {
-      return;
-    }
-
-    event.preventDefault();
-    const direction = event.key === "ArrowRight" ? 1 : -1;
-    let nextIndex = currentIndex;
-
-    for (let step = 0; step < tabs.length; step += 1) {
-      nextIndex = (nextIndex + direction + tabs.length) % tabs.length;
-      const nextTab = tabs[nextIndex];
-
-      if (!nextTab.disabled) {
-        onChange(nextTab.value);
-        break;
-      }
-    }
-  }
-
-  return (
-    <div
-      aria-label={ariaLabel}
-      className={joinClasses(
-        "flex min-w-0 border-b border-[#eaebee]",
-        layout === "fill" ? "w-full" : "w-fit max-w-full overflow-x-auto",
-        className,
-      )}
-      role="tablist"
-    >
-      {tabs.map((tab, index) => {
-        const isSelected = tab.value === value;
-        const tabId = `${tabsId}-tab-${tab.value}`;
-        const panelId = `${tabsId}-panel-${tab.value}`;
-
-        return (
-          <button
-            aria-controls={panelId}
-            aria-selected={isSelected}
-            className={joinClasses(
-              "relative -mb-px inline-flex h-12 shrink-0 items-center justify-center border-b-2 px-4 text-[15px] font-semibold tracking-[-0.02em] outline-none transition-[border-color,color] duration-150 ease-[cubic-bezier(0.4,0,0.2,1)] focus-visible:ring-2 focus-visible:ring-[#ff6f0f] focus-visible:ring-inset disabled:cursor-not-allowed disabled:border-transparent disabled:text-[#b8bdc6]",
-              layout === "fill" && "flex-1",
-              isSelected ? "border-[#ff6f0f] text-[#212124]" : "border-transparent text-[#868b94] hover:text-[#51545a]",
-            )}
-            disabled={tab.disabled}
-            id={tabId}
-            key={tab.value}
-            onClick={() => onChange(tab.value)}
-            onKeyDown={(event) => handleKeyDown(event, index)}
-            role="tab"
-            tabIndex={isSelected ? 0 : -1}
-            type="button"
-          >
-            <span className="truncate">{tab.label}</span>
-          </button>
-        );
-      })}
-    </div>
-  );
+/** Karrot의 navigation pulse를 선택 상태에 담은 tab control입니다. */
+export function KarrotTabs({ ariaLabel = "콘텐츠 탭", className, layout = "hug", onChange, tabs, value }: KarrotTabsProps) {
+  return <div aria-label={ariaLabel} className={joinClasses("flex gap-1 overflow-x-auto p-1 rounded-3xl border border-[#ffe1d0] bg-white font-sans", layout === "fill" && "w-full", className)} role="tablist">{tabs.map((tab) => { const active = tab.value === value; return <button aria-selected={active} className={joinClasses("min-h-10 shrink-0 px-4 text-sm font-bold rounded-3xl transition-all duration-200 ease-out", layout === "fill" && "flex-1", active ? "bg-[#ff6f0f] text-white shadow-[0_4px_12px_rgba(0,0,0,0.12)]" : "text-[#868b94] hover:bg-[#fff5f0]")} disabled={tab.disabled} key={tab.value} onClick={() => onChange(tab.value)} role="tab" type="button">{tab.label}</button>; })}</div>;
 }
 
 export default KarrotTabs;

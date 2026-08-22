@@ -1,140 +1,45 @@
-import { useId, type MouseEvent, type ReactNode } from "react";
+import { useEffect, useId, type ReactNode } from "react";
 
-export interface KakaoModalAction {
-  /** 행동을 직접 설명하는 짧은 레이블입니다. */
-  label: string;
-  /** 행동을 실행할 함수입니다. */
-  onClick: (event: MouseEvent<HTMLButtonElement>) => void;
-  /** 행동의 시각적 우선순위입니다. */
-  variant?: "marketing" | "surface" | "outline";
-}
-
+export interface KakaoModalAction { label: string; onClick?: () => void; }
 export interface KakaoModalProps {
-  /** 모달을 화면에 표시합니다. */
   open: boolean;
-  /** 모달의 핵심 질문 또는 제목입니다. */
   title: ReactNode;
-  /** 제목 아래에 표시할 간결한 맥락입니다. */
   description?: ReactNode;
-  /** 본문 콘텐츠입니다. */
   children?: ReactNode;
-  /** 주요 또는 보조 행동입니다. */
   actions?: KakaoModalAction[];
-  /** 딤 영역 또는 닫기 버튼에서 실행할 함수입니다. */
+  footer?: ReactNode;
   onClose?: () => void;
-  /** 닫기 버튼을 표시합니다. */
   dismissible?: boolean;
-  /** 딤 영역을 눌렀을 때 닫습니다. */
   closeOnBackdrop?: boolean;
-  /** 모달 패널에 추가할 Tailwind 클래스입니다. */
+  showCloseButton?: boolean;
   className?: string;
 }
 
-const actionClasses: Record<NonNullable<KakaoModalAction["variant"]>, string> = {
-  marketing: "border border-[#fae100] bg-[#fae100] text-[#333333] hover:border-[#f3d900] hover:bg-[#f3d900]",
-  surface: "border border-transparent bg-[#eeeeee] text-black hover:bg-[#e3e3e3]",
-  outline: "border border-[#dbdbdb] bg-white text-[#333333] hover:bg-[#eeeeee]",
-};
+function joinClasses(...classes: Array<string | false | undefined | null>) { return classes.filter(Boolean).join(" "); }
 
-function joinClasses(...classes: Array<string | undefined | false>) {
-  return classes.filter(Boolean).join(" ");
-}
-
-function CloseIcon() {
-  return (
-    <svg aria-hidden="true" className="h-4 w-4" fill="none" viewBox="0 0 16 16">
-      <path d="m4.5 4.5 7 7m0-7-7 7" stroke="currentColor" strokeLinecap="round" strokeWidth="1.7" />
-    </svg>
-  );
-}
-
-/**
- * 카카오 기업 웹의 밝은 패널과 마케팅 옐로 행동을 담은 독립형 제어형 모달입니다.
- * 공식 고정 모션 토큰이 없으므로 그림자 대신 테두리와 다크 딤으로 깊이를 만들고, 짧은 지역 전환만 적용합니다.
- */
-export function KakaoModal({
-  actions = [],
-  children,
-  className,
-  closeOnBackdrop = true,
-  description,
-  dismissible = true,
-  onClose,
-  open,
-  title,
-}: KakaoModalProps) {
+/** Kakao의 집중된 결정을 위한 overlay dialog입니다. */
+export function KakaoModal({ actions, children, className, closeOnBackdrop = true, description, dismissible = true, footer, onClose, open, showCloseButton = true, title }: KakaoModalProps) {
   const titleId = useId();
-  const generatedDescriptionId = useId();
-  const descriptionId = description ? generatedDescriptionId : undefined;
-
-  function handleBackdropMouseDown(event: MouseEvent<HTMLDivElement>) {
-    if (closeOnBackdrop && onClose && event.target === event.currentTarget) {
-      onClose();
-    }
-  }
-
-  if (!open) {
-    return null;
-  }
+  useEffect(() => {
+    if (!open || !onClose) return undefined;
+    const handleKeydown = (event: KeyboardEvent) => { if (event.key === "Escape") onClose(); };
+    window.addEventListener("keydown", handleKeydown);
+    return () => window.removeEventListener("keydown", handleKeydown);
+  }, [onClose, open]);
+  if (!open) return null;
+  const close = onClose ?? (() => undefined);
 
   return (
-    <div
-      aria-describedby={descriptionId}
-      aria-labelledby={titleId}
-      aria-modal="true"
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4 font-[KakaoSmall,system-ui,sans-serif] transition-opacity duration-200 ease-out motion-reduce:transition-none sm:items-center"
-      onMouseDown={handleBackdropMouseDown}
-      role="dialog"
-    >
-      <div
-        className={joinClasses(
-          "w-full max-w-md translate-y-0 rounded-2xl border border-[#dbdbdb] bg-white p-6 transition-transform duration-200 ease-out motion-reduce:transition-none",
-          className,
-        )}
-      >
-        <div className="flex items-start gap-4">
-          <div className="min-w-0 flex-1">
-            <h2 className="font-[KakaoBig,system-ui,sans-serif] text-[28px] font-bold leading-[1.5] tracking-[-0.03em] text-[#111111]" id={titleId}>
-              {title}
-            </h2>
-            {description ? (
-              <p className="mt-3 text-sm font-normal leading-6 tracking-[-0.02em] text-[#555555]" id={descriptionId}>
-                {description}
-              </p>
-            ) : null}
-          </div>
-          {dismissible && onClose ? (
-            <button
-              aria-label="대화상자 닫기"
-              className="-mr-2 -mt-2 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-[#888888] outline-none transition-[background-color,color] duration-200 hover:bg-[#eeeeee] hover:text-[#333333] focus-visible:ring-2 focus-visible:ring-[#fae100]/60"
-              onClick={onClose}
-              type="button"
-            >
-              <CloseIcon />
-            </button>
-          ) : null}
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 font-sans" role="presentation">
+      <button aria-label="대화상자 닫기" className="absolute inset-0 bg-black/45 backdrop-blur-[2px]" onClick={closeOnBackdrop ? close : undefined} type="button" />
+      <section aria-labelledby={titleId} aria-modal="true" className={joinClasses("relative z-10 w-full max-w-md overflow-hidden rounded-[22px] border border-[#e8d000] bg-white shadow-[0_24px_60px_rgba(0,0,0,0.2)]", className)} role="dialog">
+        <div className="flex items-start justify-between gap-5 border-b border-[#e8d000] p-6">
+          <div><p className="text-[10px] font-bold tracking-[0.16em] text-[#3c1e1e]">TALK TOGETHER</p><h2 className="mt-2 text-2xl font-black tracking-[-0.04em] text-[#3c1e1e]" id={titleId}>{title}</h2>{description ? <p className="mt-2 text-sm leading-6 text-[#6b5353]">{description}</p> : null}</div>
+          {(dismissible && showCloseButton) ? <button aria-label="대화상자 닫기" className="h-9 w-9 rounded-[22px] border border-[#e8d000] text-sm font-bold" onClick={close} type="button">×</button> : null}
         </div>
-
-        {children ? <div className="mt-5 text-sm leading-6 tracking-[-0.02em] text-[#555555]">{children}</div> : null}
-
-        {actions.length > 0 ? (
-          <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-            {actions.map((action) => (
-              <button
-                className={joinClasses(
-                  "inline-flex h-11 items-center justify-center rounded-full px-5 font-[KakaoSmall,system-ui,sans-serif] text-base font-bold leading-[1.4] tracking-[-0.02em] outline-none transition-[background-color,border-color,color,transform] duration-200 ease-out active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#fae100] focus-visible:ring-offset-2",
-                  actionClasses[action.variant ?? "marketing"],
-                )}
-                key={action.label}
-                onClick={action.onClick}
-                type="button"
-              >
-                {action.label}
-              </button>
-            ))}
-          </div>
-        ) : null}
-      </div>
+        {children ? <div className="p-6 text-sm leading-6 text-[#3c1e1e]">{children}</div> : null}
+        {footer || actions ? <div className="flex flex-wrap justify-end gap-2 border-t border-[#e8d000] p-4">{footer ?? actions?.map((action, index) => <button className={joinClasses("min-h-10 px-4 text-sm font-bold", index === actions.length - 1 ? "rounded-[22px] border border-[#fae100] bg-[#fae100] text-[#3c1e1e] hover:brightness-95 active:scale-[0.97]" : "rounded-[22px] border border-[#e8d000] bg-white")} key={`${action.label}-${index}`} onClick={action.onClick} type="button">{action.label}</button>)}</div> : null}
+      </section>
     </div>
   );
 }

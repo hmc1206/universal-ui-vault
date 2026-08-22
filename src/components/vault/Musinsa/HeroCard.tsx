@@ -1,68 +1,55 @@
 import type { ReactNode } from "react";
 
-export interface MusinsaHeroCardAction {
-  /** 관찰 가능한 다음 탐색 행동을 말하는 레이블입니다. */
+export interface MusinsaHeroAction {
   label: string;
-  /** 행동을 실행할 함수입니다. */
   onClick?: () => void;
+  href?: string;
 }
 
 export interface MusinsaHeroCardProps {
-  /** 정사각형 제품/에디토리얼 미디어 영역입니다. */
-  media?: ReactNode;
-  /** 제품 또는 콘텐츠를 직접적으로 식별하는 제목입니다. */
-  title: ReactNode;
-  /** 브랜드, 카테고리, 짧은 설명처럼 보조 정보를 표시합니다. */
+  eyebrow?: ReactNode;
+  title?: ReactNode;
   description?: ReactNode;
-  /** 이미지 아래에 추가로 보여줄 정보입니다. */
-  metadata?: ReactNode;
-  /** 사용자가 이어서 할 수 있는 유틸리티 행동입니다. */
-  actions?: MusinsaHeroCardAction[];
-  /** 최상위 컨테이너에 추가할 Tailwind 클래스입니다. */
+  actions?: MusinsaHeroAction[];
+  primaryAction?: MusinsaHeroAction;
+  secondaryAction?: MusinsaHeroAction;
+  media?: ReactNode;
+  visual?: ReactNode;
   className?: string;
 }
 
-function joinClasses(...classes: Array<string | undefined | false>) {
+function joinClasses(...classes: Array<string | false | undefined | null>) {
   return classes.filter(Boolean).join(" ");
 }
 
-/**
- * MUSINSA STANDARD storefront의 Product-image Link(312px, square, 0px radius, 0px padding)와 14px/400 supporting text를 확장한 히어로 카드입니다.
- * 이는 native commerce purchase card가 아니며, 사진과 정보 밀도를 확인하기 위한 storefront 콘텐츠 프레임입니다.
- */
-export function MusinsaHeroCard({
-  actions = [],
-  className,
-  description,
-  media,
-  metadata,
-  title,
-}: MusinsaHeroCardProps) {
+function Action({ action, primary }: { action: MusinsaHeroAction; primary: boolean }) {
+  const className = joinClasses("inline-flex min-h-11 items-center justify-center px-4 text-sm font-semibold transition-all duration-150 ease-out", primary ? "rounded-none border border-black bg-black text-white hover:bg-white hover:text-black active:translate-y-px" : "rounded-none border border-current bg-white/10 text-current hover:bg-white/20");
+  return action.href ? <a className={className} href={action.href}>{action.label}</a> : <button className={className} onClick={action.onClick} type="button">{action.label}</button>;
+}
+
+/** Musinsa의 강한 대비와 선명한 기준으로 룩을 빠르게 선택합니다를 넓은 콘텐츠 프레임에 담는 hero component입니다. */
+export function MusinsaHeroCard({ actions, className, description = "강한 대비와 선명한 기준으로 룩을 빠르게 선택합니다", eyebrow = "MUSINSA STANDARD", media, primaryAction, secondaryAction, title = "Musinsa의 다음 장면을 시작하세요.", visual }: MusinsaHeroCardProps) {
+  const resolvedActions = actions ?? [primaryAction, secondaryAction].filter(Boolean) as MusinsaHeroAction[];
+  const showcase = visual ?? media ?? (
+    <div aria-hidden="true" className="relative h-48 overflow-hidden border border-current/20 bg-white/20 p-5">
+      <div className="h-full w-3/5 border-2 border-dashed border-[#000000] bg-white/60" />
+      <div className="absolute bottom-5 right-5 h-20 w-20 rounded-full bg-[#000000]/30" />
+      <span className="absolute right-5 top-5 text-xs font-bold tracking-[0.18em]">{String(eyebrow)}</span>
+    </div>
+  );
+
   return (
-    <article className={joinClasses("w-full max-w-[312px] font-[Pretendard,Apple_SD_Gothic_Neo,sans-serif] text-black", className)}>
-      <div className="aspect-square w-full overflow-hidden rounded-none bg-[#f7f7f7]">
-        {media ?? <span className="flex h-full w-full items-center justify-center text-sm font-normal leading-[21px] text-[#666666]">이미지 영역</span>}
+    <section className={joinClasses("relative overflow-hidden p-6 font-sans font-black border border-black bg-black text-white before:absolute before:inset-x-0 before:top-0 before:h-1 before:bg-white before:content-['']", className)}>
+      <div className="relative z-10 grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-end">
+        <div>
+          <p className="text-xs font-bold tracking-[0.16em] text-[#000000]">{eyebrow}</p>
+          <h1 className="mt-4 text-3xl font-black leading-[1.05] tracking-[-0.05em] sm:text-4xl">{title}</h1>
+          <p className="mt-4 max-w-xl text-sm leading-6 opacity-75">{description}</p>
+          {resolvedActions.length ? <div className="mt-6 flex flex-wrap gap-2">{resolvedActions.map((action, index) => <Action action={action} key={`${action.label}-${index}`} primary={index === 0} />)}</div> : null}
+        </div>
+        <div className="relative">{showcase}</div>
       </div>
-      <div className="border-b border-[#ebebeb] py-4">
-        <h1 className="text-sm font-normal leading-[21px] text-black">{title}</h1>
-        {description ? <div className="mt-1 text-sm font-normal leading-[21px] text-[#666666]">{description}</div> : null}
-        {metadata ? <div className="mt-2 text-xs font-normal leading-4 text-[#666666]">{metadata}</div> : null}
-        {actions.length > 0 ? (
-          <div className="mt-3 flex flex-wrap gap-1">
-            {actions.map((action) => (
-              <button
-                className="inline-flex h-7 items-center justify-center rounded-none bg-transparent p-1 text-sm font-normal leading-[21px] text-black outline-none transition-[opacity,transform] hover:opacity-70 active:translate-y-px focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
-                key={action.label}
-                onClick={action.onClick}
-                type="button"
-              >
-                {action.label}
-              </button>
-            ))}
-          </div>
-        ) : null}
-      </div>
-    </article>
+    </section>
   );
 }
 
