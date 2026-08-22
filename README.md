@@ -179,6 +179,7 @@ src/
 | [`DESIGN.md`](./DESIGN.md) | vault 컴포넌트 구조·독립성·스타일 계약 |
 | [`TAILWIND_TOKEN_EXPORT_GUIDE.md`](./TAILWIND_TOKEN_EXPORT_GUIDE.md) | 생성 토큰을 다른 React 프로젝트의 Tailwind v3/v4 환경에 적용하는 방법 |
 | [`docs/usage-guide-slides.md`](./docs/usage-guide-slides.md) | 사이트 사용법 슬라이드 원고 |
+| [`docs/Universal-UI-Vault-Usage-Guide.pptx`](./docs/Universal-UI-Vault-Usage-Guide.pptx) | Git에서 바로 내려받을 수 있는 11장 PowerPoint 호환 사용법 슬라이드 |
 
 ## 브랜드·권리 고지
 
