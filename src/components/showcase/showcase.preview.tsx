@@ -242,6 +242,7 @@ function PreviewPane({ children, label, seniorMode, skin }: { children: React.Re
             ? joinClasses("border-2", skin.frameClass, skin.surfaceClass)
             : "border-[#ececf0] bg-white",
       )}
+      style={skin?.style}
     >
       <span className={joinClasses("absolute left-3 top-3 z-10 rounded-full px-2 py-1 text-[10px] font-bold", seniorMode ? "bg-yellow-300 text-black" : skin ? skin.paletteBadgeClass : "bg-[#f1f2f5] text-[#63636d]")}>{label}</span>
       <div className={joinClasses("w-full pt-6", seniorMode ? "min-w-[310px]" : "", skin?.controlClass)}>{children}</div>
@@ -257,7 +258,7 @@ export function ComponentComparison({ brand, component, components, seniorMode, 
   );
 
   if (themeBridge?.enabled) {
-    const skin = getThemeBridgeSkin(themeBridge);
+    const skin = getThemeBridgeSkin(themeBridge, component.id);
     const mixedPane = (
       <PreviewPane label={`혼합 skin · ${skin.label}`} seniorMode={false} skin={skin}>
         <ComponentPreview brand={brand} componentId={component.id} components={components} />

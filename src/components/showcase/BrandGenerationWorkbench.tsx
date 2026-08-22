@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { createBrandGenerationManifest, GENERATED_COMPONENT_DESCRIPTIONS, GENERATED_COMPONENT_IDS, getGeneratedFile, sanitizeGenerationBrief, type BrandGenerationBrief } from "./brand-generator";
 import { copyGenerationText, downloadGeneratedFile, downloadGenerationManifest, loadStoredBrandGeneration, saveStoredBrandGeneration, type StoredBrandGeneration } from "./brand-generation-storage";
+import { getCustomCssVariables } from "./custom-brand";
 import { GeneratedVaultPreview } from "./GeneratedVaultPreview";
 import type { ComponentId, CustomBrandDNA } from "./showcase.types";
 import { joinClasses } from "./showcase.utils";
@@ -164,7 +165,7 @@ export function BrandGenerationWorkbench({ brand, onActivateThemeBridge }: Brand
                   </article>
                   <aside className="rounded-xl border border-[#cbd5ea] bg-white p-4 shadow-[0_12px_28px_rgba(37,57,98,0.08)]">
                     <div className="flex items-center justify-between gap-3"><div><p className="text-xs font-bold uppercase tracking-[0.12em] text-[#66738a]">Live DNA preview</p><h5 className="mt-1 text-base font-bold text-[#263451]">{selectedComponentId}</h5></div><StatusPill tone="accent">session source</StatusPill></div>
-                    <div className="mt-4"><GeneratedVaultPreview brand={brand} componentId={selectedComponentId} /></div>
+                    <div className="mt-4" style={getCustomCssVariables(brand, selectedComponentId)}><GeneratedVaultPreview brand={brand} componentId={selectedComponentId} /></div>
                     <p className="mt-3 text-xs leading-5 text-[#6d788c]">이 프리뷰는 현재 저장된 DNA에서 안전하게 스캔되는 Tailwind 선택지로 렌더링됩니다. 오른쪽 소스는 독립 TSX로 내보낼 전체 구현입니다.</p>
                   </aside>
                 </div>

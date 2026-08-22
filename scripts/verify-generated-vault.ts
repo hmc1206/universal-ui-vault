@@ -4,16 +4,35 @@ import { createBrandGenerationManifest } from "../src/components/showcase/brand-
 
 const fixtureBrand = {
   accent: "#7C3AED",
+  componentOverrides: {
+    Button: { accent: "#5B21B6", density: "compact" as const, enabled: true, radius: "12px", surface: "#F5F3FF" },
+  },
   descriptor: "A safe generated vault fixture",
   displayFont: "font-sans",
+  geometry: { borderWidth: "2px", cardRadius: "24px", controlRadius: "20px", modalRadius: "24px" },
   id: "custom" as const,
   ink: "#17111F",
   material: "elastic" as const,
+  motion: { duration: "260ms", easing: "ease-out" as const, hoverLift: "2px", pressScale: "0.98" },
   name: "Aurora",
   radius: "20px",
   sansFont: "font-sans",
   shadow: "ambient" as const,
   surface: "#F6F1FF",
+  tokens: {
+    border: "#DDD5F4",
+    danger: "#DC2626",
+    focusRing: "#A78BFA",
+    ink: "#17111F",
+    mutedInk: "#6B6477",
+    primary: "#7C3AED",
+    primaryHover: "#6D28D9",
+    primarySoft: "#EDE9FE",
+    success: "#059669",
+    surface: "#F6F1FF",
+    surfaceElevated: "#FFFFFF",
+    warning: "#D97706",
+  },
 };
 
 const outputDirectory = resolve(process.cwd(), ".tmp-generated-vault");

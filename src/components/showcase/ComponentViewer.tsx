@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { getCustomPaletteOption, DEFAULT_CUSTOM_BRAND } from "./custom-brand";
+import { getCustomCssVariables, getCustomPaletteOption, DEFAULT_CUSTOM_BRAND } from "./custom-brand";
 import { BRAND_TOKEN_VALUES, getComponentImportSnippet, getTailwindConfigSnippet, SHOWCASE_BRANDS, SHOWCASE_COMPONENTS, THEME_BRIDGE_TYPOGRAPHY_CLASSES } from "./showcase.catalog";
 import { ComponentComparison } from "./showcase.preview";
 import { getThemeBridgeSkin } from "./themebridge.skin";
@@ -52,6 +52,7 @@ export function ComponentViewer({ brandId, onBack, themeBridge }: ComponentViewe
   const paletteBrand = isThemeBridgeEnabled ? getThemeSource(paletteBrandId, customBrand) : brand;
   const materialBrand = isThemeBridgeEnabled ? getThemeSource(materialBrandId, customBrand) : brand;
   const bridgeTypographyClass = paletteBrandId === "custom" ? customBrand.sansFont : THEME_BRIDGE_TYPOGRAPHY_CLASSES[paletteBrandId];
+  const customSkinStyle = isThemeBridgeEnabled && (paletteBrandId === "custom" || materialBrandId === "custom") ? getCustomCssVariables(customBrand) : undefined;
 
   async function handleCopy(componentId: ComponentId) {
     try {
@@ -74,7 +75,7 @@ export function ComponentViewer({ brandId, onBack, themeBridge }: ComponentViewe
   }
 
   return (
-    <section className={joinClasses("min-h-screen px-4 py-6 sm:px-6 lg:px-10", paletteTokens.paletteSurfaceClass, paletteTokens.paletteInkClass, bridgeTypographyClass)}>
+    <section className={joinClasses("min-h-screen px-4 py-6 sm:px-6 lg:px-10", paletteTokens.paletteSurfaceClass, paletteTokens.paletteInkClass, bridgeTypographyClass)} style={customSkinStyle}>
       <div className="mx-auto max-w-7xl">
         <header className={joinClasses("rounded-2xl border bg-white/80 p-5 backdrop-blur-xl shadow-[0_18px_48px_rgba(29,29,34,0.10)] sm:p-7", paletteTokens.paletteBorderClass)}>
           <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">

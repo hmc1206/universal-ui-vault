@@ -1,24 +1,77 @@
-import type { CustomBrandDNA } from "./showcase.types";
+import type { CSSProperties } from "react";
+import type { ComponentId, CustomBrandDNA, CustomComponentOverride, CustomDensity, CustomEasing, CustomGeometryTokens, CustomMotionTokens, CustomSemanticTokens } from "./showcase.types";
 
-export const CUSTOM_BRAND_STORAGE_KEY = "universal-ui-vault.custom-brand.v1";
+export const CUSTOM_BRAND_STORAGE_KEY = "universal-ui-vault.custom-brand.v2";
+
+export const CUSTOM_COMPONENT_IDS: ComponentId[] = [
+  "Button",
+  "Input",
+  "HeroCard",
+  "Toast",
+  "Badge",
+  "Modal",
+  "Select",
+  "Avatar",
+  "Tabs",
+  "Accordion",
+];
+
+const DEFAULT_TOKENS: CustomSemanticTokens = {
+  border: "#DDD5F4",
+  danger: "#DC2626",
+  focusRing: "#A78BFA",
+  ink: "#17111F",
+  mutedInk: "#6B6477",
+  primary: "#7C3AED",
+  primaryHover: "#6D28D9",
+  primarySoft: "#EDE9FE",
+  success: "#059669",
+  surface: "#F6F1FF",
+  surfaceElevated: "#FFFFFF",
+  warning: "#D97706",
+};
+
+const DEFAULT_GEOMETRY: CustomGeometryTokens = {
+  borderWidth: "1px",
+  cardRadius: "24px",
+  controlRadius: "20px",
+  modalRadius: "24px",
+};
+
+const DEFAULT_MOTION: CustomMotionTokens = {
+  duration: "260ms",
+  easing: "ease-out",
+  hoverLift: "2px",
+  pressScale: "0.98",
+};
 
 export const DEFAULT_CUSTOM_BRAND: CustomBrandDNA = {
-  accent: "#7C3AED",
+  accent: DEFAULT_TOKENS.primary,
+  componentOverrides: {},
   descriptor: "A custom ThemeBridge design DNA",
-  displayFont: "ui-sans-serif",
+  displayFont: "font-sans",
+  geometry: DEFAULT_GEOMETRY,
   id: "custom",
-  ink: "#17111F",
+  ink: DEFAULT_TOKENS.ink,
   material: "soft",
+  motion: DEFAULT_MOTION,
   name: "My Brand",
-  radius: "20px",
-  sansFont: "ui-sans-serif",
+  radius: DEFAULT_GEOMETRY.controlRadius,
+  sansFont: "font-sans",
   shadow: "ambient",
-  surface: "#F6F1FF",
+  surface: DEFAULT_TOKENS.surface,
+  tokens: DEFAULT_TOKENS,
 };
 
 const HEX_COLOR_PATTERN = /^#[0-9a-fA-F]{6}$/;
 const CSS_SIZE_PATTERN = /^(0|[1-9][0-9]?)(px|rem)$/;
+const BORDER_SIZE_PATTERN = /^[1-4]px$/;
+const DURATION_PATTERN = /^([1-9][0-9]{1,3})ms$/;
+const LIFT_PATTERN = /^(0|[1-8])px$/;
+const PRESS_SCALE_PATTERN = /^(0\.(9[0-9]|[1-8][0-9])|1)$/;
 const FONT_CLASS_VALUES = ["font-sans", "font-serif", "font-mono"] as const;
+const EASING_VALUES: CustomEasing[] = ["ease-out", "ease-in-out", "linear"];
+const DENSITY_VALUES: CustomDensity[] = ["compact", "comfortable", "spacious"];
 
 export function isHexColor(value: string) {
   return HEX_COLOR_PATTERN.test(value);
@@ -28,32 +81,95 @@ export function isCssSize(value: string) {
   return CSS_SIZE_PATTERN.test(value);
 }
 
+function sanitizeColor(value: unknown, fallback: string) {
+  return typeof value === "string" && isHexColor(value) ? value.toUpperCase() : fallback;
+}
+
+function sanitizeGeometry(input: Partial<CustomGeometryTokens> | undefined): CustomGeometryTokens {
+  return {
+    borderWidth: typeof input?.borderWidth === "string" && BORDER_SIZE_PATTERN.test(input.borderWidth) ? input.borderWidth : DEFAULT_GEOMETRY.borderWidth,
+    cardRadius: typeof input?.cardRadius === "string" && isCssSize(input.cardRadius) ? input.cardRadius : DEFAULT_GEOMETRY.cardRadius,
+    controlRadius: typeof input?.controlRadius === "string" && isCssSize(input.controlRadius) ? input.controlRadius : DEFAULT_GEOMETRY.controlRadius,
+    modalRadius: typeof input?.modalRadius === "string" && isCssSize(input.modalRadius) ? input.modalRadius : DEFAULT_GEOMETRY.modalRadius,
+  };
+}
+
+function sanitizeMotion(input: Partial<CustomMotionTokens> | undefined): CustomMotionTokens {
+  return {
+    duration: typeof input?.duration === "string" && DURATION_PATTERN.test(input.duration) ? input.duration : DEFAULT_MOTION.duration,
+    easing: EASING_VALUES.includes(input?.easing as CustomEasing) ? input!.easing as CustomEasing : DEFAULT_MOTION.easing,
+    hoverLift: typeof input?.hoverLift === "string" && LIFT_PATTERN.test(input.hoverLift) ? input.hoverLift : DEFAULT_MOTION.hoverLift,
+    pressScale: typeof input?.pressScale === "string" && PRESS_SCALE_PATTERN.test(input.pressScale) ? input.pressScale : DEFAULT_MOTION.pressScale,
+  };
+}
+
+function sanitizeOverrides(input: Partial<Record<ComponentId, CustomComponentOverride>> | undefined): CustomBrandDNA["componentOverrides"] {
+  const overrides: CustomBrandDNA["componentOverrides"] = {};
+
+  for (const componentId of CUSTOM_COMPONENT_IDS) {
+    const candidate = input?.[componentId];
+    if (!candidate) continue;
+
+    overrides[componentId] = {
+      accent: sanitizeColor(candidate.accent, ""),
+      density: DENSITY_VALUES.includes(candidate.density as CustomDensity) ? candidate.density : "comfortable",
+      enabled: Boolean(candidate.enabled),
+      radius: typeof candidate.radius === "string" && isCssSize(candidate.radius) ? candidate.radius : "",
+      surface: sanitizeColor(candidate.surface, ""),
+    };
+  }
+
+  return overrides;
+}
+
 export function sanitizeCustomBrand(input: Partial<CustomBrandDNA>): CustomBrandDNA {
   const name = input.name?.trim().slice(0, 32) || DEFAULT_CUSTOM_BRAND.name;
   const descriptor = input.descriptor?.trim().slice(0, 96) || DEFAULT_CUSTOM_BRAND.descriptor;
+  const geometry = sanitizeGeometry(input.geometry ?? { controlRadius: input.radius });
+  const motion = sanitizeMotion(input.motion);
+  const inputTokens: Partial<CustomSemanticTokens> = input.tokens ?? {};
+  const primary = sanitizeColor(inputTokens.primary, sanitizeColor(input.accent, DEFAULT_TOKENS.primary));
+  const ink = sanitizeColor(inputTokens.ink, sanitizeColor(input.ink, DEFAULT_TOKENS.ink));
+  const surface = sanitizeColor(inputTokens.surface, sanitizeColor(input.surface, DEFAULT_TOKENS.surface));
+  const tokens: CustomSemanticTokens = {
+    border: sanitizeColor(inputTokens.border, DEFAULT_TOKENS.border),
+    danger: sanitizeColor(inputTokens.danger, DEFAULT_TOKENS.danger),
+    focusRing: sanitizeColor(inputTokens.focusRing, DEFAULT_TOKENS.focusRing),
+    ink,
+    mutedInk: sanitizeColor(inputTokens.mutedInk, DEFAULT_TOKENS.mutedInk),
+    primary,
+    primaryHover: sanitizeColor(inputTokens.primaryHover, DEFAULT_TOKENS.primaryHover),
+    primarySoft: sanitizeColor(inputTokens.primarySoft, DEFAULT_TOKENS.primarySoft),
+    success: sanitizeColor(inputTokens.success, DEFAULT_TOKENS.success),
+    surface,
+    surfaceElevated: sanitizeColor(inputTokens.surfaceElevated, DEFAULT_TOKENS.surfaceElevated),
+    warning: sanitizeColor(inputTokens.warning, DEFAULT_TOKENS.warning),
+  };
 
   return {
-    accent: isHexColor(input.accent ?? "") ? input.accent! : DEFAULT_CUSTOM_BRAND.accent,
+    accent: primary,
+    componentOverrides: sanitizeOverrides(input.componentOverrides),
     descriptor,
     displayFont: FONT_CLASS_VALUES.includes(input.displayFont as (typeof FONT_CLASS_VALUES)[number]) ? input.displayFont! : DEFAULT_CUSTOM_BRAND.displayFont,
+    geometry,
     id: "custom",
-    ink: isHexColor(input.ink ?? "") ? input.ink! : DEFAULT_CUSTOM_BRAND.ink,
+    ink,
     material: input.material === "crisp" || input.material === "elastic" || input.material === "soft" ? input.material : DEFAULT_CUSTOM_BRAND.material,
+    motion,
     name,
-    radius: isCssSize(input.radius ?? "") ? input.radius! : DEFAULT_CUSTOM_BRAND.radius,
+    radius: geometry.controlRadius,
     sansFont: FONT_CLASS_VALUES.includes(input.sansFont as (typeof FONT_CLASS_VALUES)[number]) ? input.sansFont! : DEFAULT_CUSTOM_BRAND.sansFont,
     shadow: input.shadow === "ambient" || input.shadow === "sharp" || input.shadow === "soft" ? input.shadow : DEFAULT_CUSTOM_BRAND.shadow,
-    surface: isHexColor(input.surface ?? "") ? input.surface! : DEFAULT_CUSTOM_BRAND.surface,
+    surface,
+    tokens,
   };
 }
 
 export function loadCustomBrand(): CustomBrandDNA {
-  if (typeof window === "undefined") {
-    return DEFAULT_CUSTOM_BRAND;
-  }
+  if (typeof window === "undefined") return DEFAULT_CUSTOM_BRAND;
 
   try {
-    const serialized = window.localStorage.getItem(CUSTOM_BRAND_STORAGE_KEY);
+    const serialized = window.localStorage.getItem(CUSTOM_BRAND_STORAGE_KEY) ?? window.localStorage.getItem("universal-ui-vault.custom-brand.v1");
     return serialized ? sanitizeCustomBrand(JSON.parse(serialized) as Partial<CustomBrandDNA>) : DEFAULT_CUSTOM_BRAND;
   } catch {
     return DEFAULT_CUSTOM_BRAND;
@@ -69,6 +185,7 @@ export function saveCustomBrand(brand: CustomBrandDNA) {
 export function resetCustomBrand() {
   if (typeof window !== "undefined") {
     window.localStorage.removeItem(CUSTOM_BRAND_STORAGE_KEY);
+    window.localStorage.removeItem("universal-ui-vault.custom-brand.v1");
   }
 }
 
@@ -85,12 +202,21 @@ export interface CustomPaletteOption {
   surfaceClass: string;
 }
 
+const CUSTOM_VARIABLE_CLASSES = {
+  accentClass: "bg-[var(--vault-primary,#7C3AED)] text-white",
+  controlClass: "[&_button]:!border-[var(--vault-primary,#7C3AED)] [&_button]:!bg-[var(--vault-primary,#7C3AED)] [&_button]:!text-white [&_button]:hover:!bg-[var(--vault-primary-hover,#6D28D9)] [&_input]:!border-[var(--vault-border,#DDD5F4)] [&_input]:focus:!border-[var(--vault-primary,#7C3AED)] [&_input]:focus:!ring-[var(--vault-focus,#A78BFA)] [&_select]:!border-[var(--vault-border,#DDD5F4)] [&_select]:focus:!border-[var(--vault-primary,#7C3AED)] [&_[role=tab][aria-selected=true]]:!bg-[var(--vault-primary,#7C3AED)] [&_[role=tab][aria-selected=true]]:!text-white",
+  frameClass: "border-[var(--vault-border,#DDD5F4)]",
+  radiusClass: "rounded-[var(--vault-control-radius,20px)]",
+  shadowClass: "shadow-[0_14px_28px_color-mix(in_srgb,var(--vault-primary,#7C3AED)_28%,transparent)]",
+  surfaceClass: "bg-[var(--vault-surface,#F6F1FF)] text-[var(--vault-ink,#17111F)]",
+};
+
 export const CUSTOM_PALETTE_OPTIONS: CustomPaletteOption[] = [
-  { accent: "#7C3AED", accentClass: "bg-[#7C3AED] text-white", controlClass: "[&_button]:!border-[#7C3AED] [&_button]:!bg-[#7C3AED] [&_button]:!text-white [&_input]:!border-[#7C3AED] [&_input]:focus:!ring-[#7C3AED]/40 [&_select]:!border-[#7C3AED] [&_select]:focus:!ring-[#7C3AED]/40 [&_[role=tab][aria-selected=true]]:!bg-[#7C3AED] [&_[role=tab][aria-selected=true]]:!text-white", frameClass: "border-[#7C3AED]", ink: "#17111F", label: "Violet signal", radiusClass: "rounded-[20px]", shadowClass: "shadow-[0_14px_28px_rgba(124,58,237,0.28)]", surface: "#F6F1FF", surfaceClass: "bg-[#F6F1FF] text-[#17111F]" },
-  { accent: "#0F766E", accentClass: "bg-[#0F766E] text-white", controlClass: "[&_button]:!border-[#0F766E] [&_button]:!bg-[#0F766E] [&_button]:!text-white [&_input]:!border-[#0F766E] [&_input]:focus:!ring-[#0F766E]/40 [&_select]:!border-[#0F766E] [&_select]:focus:!ring-[#0F766E]/40 [&_[role=tab][aria-selected=true]]:!bg-[#0F766E] [&_[role=tab][aria-selected=true]]:!text-white", frameClass: "border-[#0F766E]", ink: "#0B2926", label: "Deep teal", radiusClass: "rounded-[20px]", shadowClass: "shadow-[0_14px_28px_rgba(15,118,110,0.26)]", surface: "#ECFDF5", surfaceClass: "bg-[#ECFDF5] text-[#0B2926]" },
-  { accent: "#DB2777", accentClass: "bg-[#DB2777] text-white", controlClass: "[&_button]:!border-[#DB2777] [&_button]:!bg-[#DB2777] [&_button]:!text-white [&_input]:!border-[#DB2777] [&_input]:focus:!ring-[#DB2777]/40 [&_select]:!border-[#DB2777] [&_select]:focus:!ring-[#DB2777]/40 [&_[role=tab][aria-selected=true]]:!bg-[#DB2777] [&_[role=tab][aria-selected=true]]:!text-white", frameClass: "border-[#DB2777]", ink: "#34102A", label: "Magenta pulse", radiusClass: "rounded-[20px]", shadowClass: "shadow-[0_14px_28px_rgba(219,39,119,0.26)]", surface: "#FFF1F8", surfaceClass: "bg-[#FFF1F8] text-[#34102A]" },
-  { accent: "#EA580C", accentClass: "bg-[#EA580C] text-white", controlClass: "[&_button]:!border-[#EA580C] [&_button]:!bg-[#EA580C] [&_button]:!text-white [&_input]:!border-[#EA580C] [&_input]:focus:!ring-[#EA580C]/40 [&_select]:!border-[#EA580C] [&_select]:focus:!ring-[#EA580C]/40 [&_[role=tab][aria-selected=true]]:!bg-[#EA580C] [&_[role=tab][aria-selected=true]]:!text-white", frameClass: "border-[#EA580C]", ink: "#32190A", label: "Warm orange", radiusClass: "rounded-[20px]", shadowClass: "shadow-[0_14px_28px_rgba(234,88,12,0.26)]", surface: "#FFF7ED", surfaceClass: "bg-[#FFF7ED] text-[#32190A]" },
-  { accent: "#1D4ED8", accentClass: "bg-[#1D4ED8] text-white", controlClass: "[&_button]:!border-[#1D4ED8] [&_button]:!bg-[#1D4ED8] [&_button]:!text-white [&_input]:!border-[#1D4ED8] [&_input]:focus:!ring-[#1D4ED8]/40 [&_select]:!border-[#1D4ED8] [&_select]:focus:!ring-[#1D4ED8]/40 [&_[role=tab][aria-selected=true]]:!bg-[#1D4ED8] [&_[role=tab][aria-selected=true]]:!text-white", frameClass: "border-[#1D4ED8]", ink: "#111B37", label: "Cobalt system", radiusClass: "rounded-[20px]", shadowClass: "shadow-[0_14px_28px_rgba(29,78,216,0.26)]", surface: "#EFF6FF", surfaceClass: "bg-[#EFF6FF] text-[#111B37]" },
+  { accent: "#7C3AED", ink: "#17111F", label: "Violet signal", surface: "#F6F1FF", ...CUSTOM_VARIABLE_CLASSES },
+  { accent: "#0F766E", ink: "#0B2926", label: "Deep teal", surface: "#ECFDF5", ...CUSTOM_VARIABLE_CLASSES },
+  { accent: "#DB2777", ink: "#34102A", label: "Magenta pulse", surface: "#FFF1F8", ...CUSTOM_VARIABLE_CLASSES },
+  { accent: "#EA580C", ink: "#32190A", label: "Warm orange", surface: "#FFF7ED", ...CUSTOM_VARIABLE_CLASSES },
+  { accent: "#1D4ED8", ink: "#111B37", label: "Cobalt system", surface: "#EFF6FF", ...CUSTOM_VARIABLE_CLASSES },
 ];
 
 export const CUSTOM_FONT_OPTIONS: Array<{ label: string; value: CustomBrandDNA["sansFont"] }> = [
@@ -118,8 +244,55 @@ export const CUSTOM_MATERIAL_OPTIONS: Array<{ label: string; value: CustomBrandD
   { label: "Crisp snap", value: "crisp" },
 ];
 
+export function getComponentOverride(brand: CustomBrandDNA, componentId: ComponentId) {
+  const override = brand.componentOverrides[componentId];
+  return override?.enabled ? override : undefined;
+}
+
+export function resolveComponentTokens(brand: CustomBrandDNA, componentId: ComponentId) {
+  const override = getComponentOverride(brand, componentId);
+  return {
+    accent: isHexColor(override?.accent ?? "") ? override!.accent! : brand.tokens.primary,
+    density: override?.density ?? "comfortable",
+    radius: isCssSize(override?.radius ?? "") ? override!.radius! : brand.geometry.controlRadius,
+    surface: isHexColor(override?.surface ?? "") ? override!.surface! : brand.tokens.surface,
+  };
+}
+
 export function getCustomPaletteOption(brand: CustomBrandDNA) {
-  return CUSTOM_PALETTE_OPTIONS.find((option) => option.accent === brand.accent) ?? CUSTOM_PALETTE_OPTIONS[0];
+  return CUSTOM_PALETTE_OPTIONS.find((option) => option.accent === brand.tokens.primary) ?? {
+    accent: brand.tokens.primary,
+    ink: brand.tokens.ink,
+    label: "Custom palette",
+    surface: brand.tokens.surface,
+    ...CUSTOM_VARIABLE_CLASSES,
+  };
+}
+
+export function getCustomCssVariables(brand: CustomBrandDNA, componentId?: ComponentId): CSSProperties & Record<`--${string}`, string> {
+  const componentTokens = componentId ? resolveComponentTokens(brand, componentId) : { accent: brand.tokens.primary, radius: brand.geometry.controlRadius, surface: brand.tokens.surface };
+  return {
+    "--vault-border": brand.tokens.border,
+    "--vault-border-width": brand.geometry.borderWidth,
+    "--vault-card-radius": brand.geometry.cardRadius,
+    "--vault-control-radius": componentTokens.radius,
+    "--vault-danger": brand.tokens.danger,
+    "--vault-duration": brand.motion.duration,
+    "--vault-easing": brand.motion.easing,
+    "--vault-focus": brand.tokens.focusRing,
+    "--vault-hover-lift": brand.motion.hoverLift,
+    "--vault-ink": brand.tokens.ink,
+    "--vault-modal-radius": brand.geometry.modalRadius,
+    "--vault-muted": brand.tokens.mutedInk,
+    "--vault-press-scale": brand.motion.pressScale,
+    "--vault-primary": componentTokens.accent,
+    "--vault-primary-hover": brand.tokens.primaryHover,
+    "--vault-primary-soft": brand.tokens.primarySoft,
+    "--vault-success": brand.tokens.success,
+    "--vault-surface": componentTokens.surface,
+    "--vault-surface-elevated": brand.tokens.surfaceElevated,
+    "--vault-warning": brand.tokens.warning,
+  };
 }
 
 export function getCustomRadiusClass(radius: CustomBrandDNA["radius"]) {

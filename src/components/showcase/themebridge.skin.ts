@@ -1,6 +1,7 @@
-import { DEFAULT_CUSTOM_BRAND, getCustomPaletteOption, getCustomRadiusClass, getCustomShadowClass } from "./custom-brand";
+import type { CSSProperties } from "react";
+import { DEFAULT_CUSTOM_BRAND, getCustomCssVariables, getCustomPaletteOption } from "./custom-brand";
 import { getThemeSource } from "./themebridge.sources";
-import type { CustomBrandDNA, ShowcaseBrandId, ThemeBridge } from "./showcase.types";
+import type { ComponentId, CustomBrandDNA, ShowcaseBrandId, ThemeBridge } from "./showcase.types";
 
 interface PaletteSkin {
   accentClass: string;
@@ -19,10 +20,11 @@ export interface ThemeBridgeSkin {
   controlClass: string;
   frameClass: string;
   label: string;
+  materialName: string;
   paletteBadgeClass: string;
   paletteName: string;
+  style?: CSSProperties;
   surfaceClass: string;
-  materialName: string;
 }
 
 const PALETTE_SKINS: Record<ShowcaseBrandId, PaletteSkin> = {
@@ -147,31 +149,14 @@ function getCustomPaletteSkin(customBrand: CustomBrandDNA): PaletteSkin {
 }
 
 function getCustomMaterialSkin(customBrand: CustomBrandDNA): MaterialSkin {
-  const radiusControl = {
-    "8px": "[&_button]:!rounded-lg [&_input]:!rounded-lg [&_select]:!rounded-lg [&_[role=tab]]:!rounded-lg",
-    "14px": "[&_button]:!rounded-[14px] [&_input]:!rounded-[14px] [&_select]:!rounded-[14px] [&_[role=tab]]:!rounded-[14px]",
-    "20px": "[&_button]:!rounded-[20px] [&_input]:!rounded-[20px] [&_select]:!rounded-[20px] [&_[role=tab]]:!rounded-[20px]",
-    "28px": "[&_button]:!rounded-[28px] [&_input]:!rounded-[28px] [&_select]:!rounded-[28px] [&_[role=tab]]:!rounded-[28px]",
-  }[customBrand.radius] ?? "[&_button]:!rounded-[20px] [&_input]:!rounded-[20px] [&_select]:!rounded-[20px] [&_[role=tab]]:!rounded-[20px]";
-  const shadowControl = {
-    ambient: "[&_button]:!shadow-[0_14px_28px_rgba(124,58,237,0.28)]",
-    sharp: "[&_button]:!shadow-[0_8px_0_rgba(23,17,31,0.24)]",
-    soft: "[&_button]:!shadow-[0_20px_38px_rgba(124,58,237,0.20)]",
-  }[customBrand.shadow] ?? "[&_button]:!shadow-[0_14px_28px_rgba(124,58,237,0.28)]";
-  const responseControl = {
-    crisp: "[&_button]:hover:!translate-x-0.5 [&_button]:active:!translate-y-0.5 [&_button]:!transition-all",
-    elastic: "[&_button]:hover:!-translate-y-1 [&_button]:active:!scale-[0.97] [&_button]:!transition-all",
-    soft: "[&_button]:hover:!-translate-y-0.5 [&_button]:!transition-all",
-  }[customBrand.material] ?? "[&_button]:hover:!-translate-y-0.5 [&_button]:!transition-all";
-
   return {
-    controlClass: `${radiusControl} ${shadowControl} ${responseControl}`,
-    frameClass: `${getCustomRadiusClass(customBrand.radius)} ${getCustomShadowClass(customBrand.shadow)}`,
-    label: `${customBrand.material} ${customBrand.shadow} custom material`,
+    controlClass: "[&_button]:!rounded-[var(--vault-control-radius,20px)] [&_input]:!rounded-[var(--vault-control-radius,20px)] [&_select]:!rounded-[var(--vault-control-radius,20px)] [&_[role=tab]]:!rounded-[var(--vault-control-radius,20px)] [&_button]:!shadow-[0_14px_28px_color-mix(in_srgb,var(--vault-primary,#7C3AED)_28%,transparent)] [&_button]:hover:!translate-y-[calc(var(--vault-hover-lift,2px)*-1)] [&_button]:active:!scale-[var(--vault-press-scale,0.98)] [&_button]:!duration-[var(--vault-duration,260ms)] [&_button]:!ease-[var(--vault-easing,ease-out)]",
+    frameClass: "rounded-[var(--vault-card-radius,24px)] shadow-[0_18px_36px_color-mix(in_srgb,var(--vault-primary,#7C3AED)_20%,transparent)]",
+    label: `${customBrand.material} ${customBrand.shadow} advanced custom material`,
   };
 }
 
-export function getThemeBridgeSkin(themeBridge: ThemeBridge): ThemeBridgeSkin {
+export function getThemeBridgeSkin(themeBridge: ThemeBridge, componentId?: ComponentId): ThemeBridgeSkin {
   const customBrand = themeBridge.customBrand ?? DEFAULT_CUSTOM_BRAND;
   const palette = themeBridge.paletteBrandId === "custom" ? getCustomPaletteSkin(customBrand) : PALETTE_SKINS[themeBridge.paletteBrandId];
   const material = themeBridge.materialBrandId === "custom" ? getCustomMaterialSkin(customBrand) : MATERIAL_SKINS[themeBridge.materialBrandId];
@@ -185,6 +170,7 @@ export function getThemeBridgeSkin(themeBridge: ThemeBridge): ThemeBridgeSkin {
     materialName: materialBrand.name,
     paletteBadgeClass: palette.accentClass,
     paletteName: paletteBrand.name,
+    style: themeBridge.paletteBrandId === "custom" || themeBridge.materialBrandId === "custom" ? getCustomCssVariables(customBrand, componentId) : undefined,
     surfaceClass: palette.surfaceClass,
   };
 }

@@ -19,20 +19,6 @@ export type ShowcaseBrandId =
 
 export type ThemeSourceId = ShowcaseBrandId | "custom";
 
-export interface CustomBrandDNA {
-  accent: string;
-  descriptor: string;
-  displayFont: string;
-  id: "custom";
-  ink: string;
-  material: "crisp" | "elastic" | "soft";
-  name: string;
-  radius: string;
-  sansFont: string;
-  shadow: "ambient" | "sharp" | "soft";
-  surface: string;
-}
-
 export type ComponentId =
   | "Button"
   | "Input"
@@ -44,6 +30,68 @@ export type ComponentId =
   | "Avatar"
   | "Tabs"
   | "Accordion";
+
+export type CustomDensity = "compact" | "comfortable" | "spacious";
+export type CustomEasing = "ease-out" | "ease-in-out" | "linear";
+
+export interface CustomSemanticTokens {
+  border: string;
+  danger: string;
+  focusRing: string;
+  ink: string;
+  mutedInk: string;
+  primary: string;
+  primaryHover: string;
+  primarySoft: string;
+  success: string;
+  surface: string;
+  surfaceElevated: string;
+  warning: string;
+}
+
+export interface CustomGeometryTokens {
+  borderWidth: string;
+  cardRadius: string;
+  controlRadius: string;
+  modalRadius: string;
+}
+
+export interface CustomMotionTokens {
+  duration: string;
+  easing: CustomEasing;
+  hoverLift: string;
+  pressScale: string;
+}
+
+export interface CustomComponentOverride {
+  accent?: string;
+  density?: CustomDensity;
+  enabled: boolean;
+  radius?: string;
+  surface?: string;
+}
+
+export interface CustomBrandDNA {
+  /** 기존 ThemeBridge와의 호환성을 위한 primary 별칭입니다. */
+  accent: string;
+  componentOverrides: Partial<Record<ComponentId, CustomComponentOverride>>;
+  descriptor: string;
+  displayFont: string;
+  geometry: CustomGeometryTokens;
+  id: "custom";
+  /** 기존 ThemeBridge와의 호환성을 위한 semantic ink 별칭입니다. */
+  ink: string;
+  material: "crisp" | "elastic" | "soft";
+  motion: CustomMotionTokens;
+  name: string;
+  /** 기존 ThemeBridge와의 호환성을 위한 control radius 별칭입니다. */
+  radius: string;
+  sansFont: string;
+  shadow: "ambient" | "sharp" | "soft";
+  /** 기존 ThemeBridge와의 호환성을 위한 semantic surface 별칭입니다. */
+  surface: string;
+  tokens: CustomSemanticTokens;
+}
 
 export type VaultComponent = ComponentType<any>;
 
