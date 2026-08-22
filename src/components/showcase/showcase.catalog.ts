@@ -1,0 +1,312 @@
+import type { BrandTokenSet, ComponentId, ShowcaseBrand, ShowcaseBrandId, ShowcaseComponent } from "./showcase.types";
+
+export const SHOWCASE_BRANDS: ShowcaseBrand[] = [
+  {
+    id: "29cm",
+    name: "29CM",
+    directory: "29cm",
+    exportPrefix: "TwentyNineCm",
+    descriptor: "Editorial commerce with bold utility",
+    initials: "29",
+    accentClass: "bg-[#ff4800]",
+    surfaceClass: "bg-[#fff6f2]",
+    borderClass: "border-[#ffd8c5]",
+    textClass: "text-[#e13e00]",
+    avatarClass: "bg-[#ff4800] text-white",
+    status: "10개 실물 연결됨",
+  },
+  {
+    id: "ably",
+    name: "Ably",
+    directory: "Ably",
+    exportPrefix: "Ably",
+    descriptor: "Realtime collaboration infrastructure",
+    initials: "A",
+    accentClass: "bg-[#ff5160]",
+    surfaceClass: "bg-[#fff2ea]",
+    borderClass: "border-[#ffd9d4]",
+    textClass: "text-[#d83f4d]",
+    avatarClass: "bg-[#ff5160] text-white",
+    status: "10개 실물 연결됨",
+  },
+  {
+    id: "apple",
+    name: "Apple",
+    directory: "Apple",
+    exportPrefix: "Apple",
+    descriptor: "Precise, restrained, familiar",
+    initials: "A",
+    accentClass: "bg-[#1d1d1f]",
+    surfaceClass: "bg-[#f5f5f7]",
+    borderClass: "border-[#d2d2d7]",
+    textClass: "text-[#1d1d1f]",
+    avatarClass: "bg-[#1d1d1f] text-white",
+    status: "10개 실물 연결됨",
+  },
+  {
+    id: "baemin",
+    name: "Baemin",
+    directory: "Baemin",
+    exportPrefix: "Baemin",
+    descriptor: "Friendly delivery and local discovery",
+    initials: "B",
+    accentClass: "bg-[#222222]",
+    surfaceClass: "bg-[#f6f6f6]",
+    borderClass: "border-[#c9c9c9]",
+    textClass: "text-[#222222]",
+    avatarClass: "bg-[#222222] text-white",
+    status: "10개 실물 연결됨",
+  },
+  {
+    id: "figma",
+    name: "Figma",
+    directory: "Figma",
+    exportPrefix: "Figma",
+    descriptor: "Collaborative creative systems",
+    initials: "F",
+    accentClass: "bg-black",
+    surfaceClass: "bg-[#f7f7f7]",
+    borderClass: "border-[#ebebeb]",
+    textClass: "text-black",
+    avatarClass: "bg-black text-white",
+    status: "10개 실물 연결됨",
+  },
+  {
+    id: "kakao",
+    name: "Kakao",
+    directory: "Kakao",
+    exportPrefix: "Kakao",
+    descriptor: "Playful everyday connections",
+    initials: "K",
+    accentClass: "bg-[#fae100] !text-[#111111]",
+    surfaceClass: "bg-[#fffce5]",
+    borderClass: "border-[#f3d900]",
+    textClass: "text-[#242424]",
+    avatarClass: "bg-[#fae100] text-[#111111]",
+    status: "10개 실물 연결됨",
+  },
+  {
+    id: "kakaobank",
+    name: "KakaoBank",
+    directory: "KakaoBank",
+    exportPrefix: "KakaoBank",
+    descriptor: "Simple, approachable digital finance",
+    initials: "KB",
+    accentClass: "bg-[#FFE300] !text-[#111111]",
+    surfaceClass: "bg-[#fffce1]",
+    borderClass: "border-[#f1df58]",
+    textClass: "text-[#5f5700]",
+    avatarClass: "bg-[#FFE300] text-[#111111]",
+    status: "10개 실물 연결됨",
+  },
+  {
+    id: "karrot",
+    name: "Karrot",
+    directory: "Karrot",
+    exportPrefix: "Karrot",
+    descriptor: "Warm neighborhood marketplace",
+    initials: "K",
+    accentClass: "bg-[#ff6f0f]",
+    surfaceClass: "bg-[#fff5f0]",
+    borderClass: "border-[#ffe1d0]",
+    textClass: "text-[#e55f00]",
+    avatarClass: "bg-[#ff6f0f] text-white",
+    status: "10개 실물 연결됨",
+  },
+  {
+    id: "likelion",
+    name: "Likelion",
+    directory: "Likelion",
+    exportPrefix: "Likelion",
+    descriptor: "Maker learning and community energy",
+    initials: "L",
+    accentClass: "bg-[#ff6000]",
+    surfaceClass: "bg-[#fcf4ee]",
+    borderClass: "border-[#fed5bb]",
+    textClass: "text-[#d94d00]",
+    avatarClass: "bg-[#ff6000] text-white",
+    status: "10개 실물 연결됨",
+  },
+  {
+    id: "musinsa",
+    name: "Musinsa",
+    directory: "Musinsa",
+    exportPrefix: "Musinsa",
+    descriptor: "Direct fashion commerce utility",
+    initials: "M",
+    accentClass: "bg-black",
+    surfaceClass: "bg-[#f5f5f5]",
+    borderClass: "border-[#dddddd]",
+    textClass: "text-black",
+    avatarClass: "bg-black text-white",
+    status: "10개 실물 연결됨",
+  },
+  {
+    id: "samsung",
+    name: "Samsung",
+    directory: "Samsung",
+    exportPrefix: "Samsung",
+    descriptor: "Confident global product utility",
+    initials: "S",
+    accentClass: "bg-[#007aff]",
+    surfaceClass: "bg-[#f7f7f7]",
+    borderClass: "border-[#eeeeee]",
+    textClass: "text-[#007aff]",
+    avatarClass: "bg-[#007aff] text-white",
+    status: "10개 실물 연결됨",
+  },
+  {
+    id: "tesla",
+    name: "Tesla",
+    directory: "Tesla",
+    exportPrefix: "Tesla",
+    descriptor: "Product-led sustainable energy marketing",
+    initials: "T",
+    accentClass: "bg-[#3e6ae1]",
+    surfaceClass: "bg-[#f4f4f4]",
+    borderClass: "border-[#d0d1d2]",
+    textClass: "text-[#171a20]",
+    avatarClass: "bg-[#3e6ae1] text-white",
+    status: "10개 실물 연결됨",
+  },
+  {
+    id: "toss",
+    name: "Toss",
+    directory: "Toss",
+    exportPrefix: "Toss",
+    descriptor: "Clear financial utility",
+    initials: "T",
+    accentClass: "bg-[#3182f6]",
+    surfaceClass: "bg-[#e8f3ff]",
+    borderClass: "border-[#cfe5ff]",
+    textClass: "text-[#1f6fd9]",
+    avatarClass: "bg-[#3182f6] text-white",
+    status: "10개 실물 연결됨",
+  },
+  {
+    id: "upstage",
+    name: "Upstage",
+    directory: "Upstage",
+    exportPrefix: "Upstage",
+    descriptor: "Focused AI workflow conversion",
+    initials: "U",
+    accentClass: "bg-[#5B52FF]",
+    surfaceClass: "bg-[#f4f3ff]",
+    borderClass: "border-[#dcd9ff]",
+    textClass: "text-[#4a43d6]",
+    avatarClass: "bg-[#5B52FF] text-white",
+    status: "10개 실물 연결됨",
+  },
+  {
+    id: "goodchoice",
+    name: "여기어때",
+    directory: "여기어때",
+    exportPrefix: "GoodChoice",
+    descriptor: "Direct travel and stay discovery",
+    initials: "여",
+    accentClass: "bg-[#F94239]",
+    surfaceClass: "bg-[#fff3f2]",
+    borderClass: "border-[#ffd5d1]",
+    textClass: "text-[#d8342e]",
+    avatarClass: "bg-[#F94239] text-white",
+    status: "10개 실물 연결됨",
+  },
+];
+
+export const BRAND_TOKEN_VALUES: Record<ShowcaseBrandId, BrandTokenSet> = {
+  "29cm": { colors: { primary: "#111111", surface: "#FFFFFF", ink: "#111111", contrast: "#FF4800" }, typography: { sans: "Pretendard, sans-serif", display: "Pretendard, sans-serif" }, radius: "0px", shadow: "0 12px 30px rgba(17,17,17,0.12)", animation: "cubic-bezier(0.2, 0.8, 0.2, 1)", paletteSurfaceClass: "bg-white", paletteBorderClass: "border-[#111111]", paletteInkClass: "text-[#111111]", paletteButtonClass: "bg-[#111111] text-white", materialClass: "shadow-[0_8px_20px_rgba(17,17,17,0.10)] hover:translate-y-0" },
+  ably: { colors: { primary: "#FF5160", surface: "#FFF2EA", ink: "#2A1620", contrast: "#FF5160" }, typography: { sans: "Inter, sans-serif", display: "Inter, sans-serif" }, radius: "24px", shadow: "0 18px 42px rgba(255,81,96,0.24)", animation: "cubic-bezier(0.22, 1, 0.36, 1)", paletteSurfaceClass: "bg-[#fff2ea]", paletteBorderClass: "border-[#ffb6b5]", paletteInkClass: "text-[#3f1721]", paletteButtonClass: "bg-[#ff5160] text-white", materialClass: "shadow-[0_18px_40px_rgba(255,81,96,0.24)] hover:-translate-y-1" },
+  apple: { colors: { primary: "#0071E3", surface: "#F5F5F7", ink: "#1D1D1F", contrast: "#0071E3" }, typography: { sans: "SF Pro Text, sans-serif", display: "SF Pro Display, sans-serif" }, radius: "18px", shadow: "0 18px 48px rgba(29,29,31,0.12)", animation: "cubic-bezier(0.16, 1, 0.3, 1)", paletteSurfaceClass: "bg-[#f5f5f7]", paletteBorderClass: "border-[#d2d2d7]", paletteInkClass: "text-[#1d1d1f]", paletteButtonClass: "bg-[#0071e3] text-white", materialClass: "shadow-[0_18px_48px_rgba(29,29,31,0.12)] hover:-translate-y-0.5" },
+  baemin: { colors: { primary: "#0CEFD3", surface: "#F8FFFC", ink: "#222222", contrast: "#0CEFD3" }, typography: { sans: "BM Hanna, sans-serif", display: "BM Hanna, sans-serif" }, radius: "20px", shadow: "0 14px 0 rgba(34,34,34,0.16)", animation: "cubic-bezier(0.34, 1.56, 0.64, 1)", paletteSurfaceClass: "bg-[#f8fffc]", paletteBorderClass: "border-[#0cefd3]", paletteInkClass: "text-[#222222]", paletteButtonClass: "bg-[#0cefd3] text-[#111111]", materialClass: "shadow-[0_10px_0_rgba(34,34,34,0.16)] hover:-translate-y-1 active:translate-y-0" },
+  figma: { colors: { primary: "#0D99FF", surface: "#2C2C2C", ink: "#111111", contrast: "#0D99FF" }, typography: { sans: "figmaSans, sans-serif", display: "figmaSans, sans-serif" }, radius: "8px", shadow: "0 16px 36px rgba(0,0,0,0.22)", animation: "cubic-bezier(0.2, 0, 0, 1)", paletteSurfaceClass: "bg-[#2c2c2c]", paletteBorderClass: "border-[#0d99ff]", paletteInkClass: "text-white", paletteButtonClass: "bg-[#0d99ff] text-white", materialClass: "shadow-[0_16px_36px_rgba(0,0,0,0.22)] hover:-translate-y-0.5" },
+  kakao: { colors: { primary: "#FAE100", surface: "#FFFCE5", ink: "#242424", contrast: "#FAE100" }, typography: { sans: "Apple SD Gothic Neo, sans-serif", display: "Apple SD Gothic Neo, sans-serif" }, radius: "18px", shadow: "0 12px 28px rgba(92,72,0,0.18)", animation: "cubic-bezier(0.34, 1.56, 0.64, 1)", paletteSurfaceClass: "bg-[#fffce5]", paletteBorderClass: "border-[#f3d900]", paletteInkClass: "text-[#242424]", paletteButtonClass: "bg-[#fae100] text-[#111111]", materialClass: "shadow-[0_12px_28px_rgba(92,72,0,0.18)] hover:-translate-y-1" },
+  kakaobank: { colors: { primary: "#FFE300", surface: "#FFFCE1", ink: "#111111", contrast: "#FFE300" }, typography: { sans: "Pretendard, sans-serif", display: "Pretendard, sans-serif" }, radius: "20px", shadow: "0 18px 38px rgba(65,56,0,0.14)", animation: "cubic-bezier(0.22, 1, 0.36, 1)", paletteSurfaceClass: "bg-[#fffce1]", paletteBorderClass: "border-[#f1df58]", paletteInkClass: "text-[#111111]", paletteButtonClass: "bg-[#ffe300] text-[#111111]", materialClass: "shadow-[0_18px_38px_rgba(65,56,0,0.14)] hover:-translate-y-1" },
+  karrot: { colors: { primary: "#FF6F0F", surface: "#FFF5F0", ink: "#2B1B12", contrast: "#FF6F0F" }, typography: { sans: "Pretendard, sans-serif", display: "Pretendard, sans-serif" }, radius: "22px", shadow: "0 16px 34px rgba(255,111,15,0.20)", animation: "cubic-bezier(0.22, 1, 0.36, 1)", paletteSurfaceClass: "bg-[#fff5f0]", paletteBorderClass: "border-[#ffe1d0]", paletteInkClass: "text-[#2b1b12]", paletteButtonClass: "bg-[#ff6f0f] text-white", materialClass: "shadow-[0_16px_34px_rgba(255,111,15,0.20)] hover:-translate-y-1" },
+  likelion: { colors: { primary: "#FF6000", surface: "#FCF4EE", ink: "#21160F", contrast: "#FF6000" }, typography: { sans: "Pretendard, sans-serif", display: "ui-monospace, monospace" }, radius: "12px", shadow: "0 14px 30px rgba(255,96,0,0.18)", animation: "cubic-bezier(0.2, 0.9, 0.2, 1)", paletteSurfaceClass: "bg-[#fcf4ee]", paletteBorderClass: "border-[#fed5bb]", paletteInkClass: "text-[#21160f]", paletteButtonClass: "bg-[#ff6000] text-white", materialClass: "shadow-[0_14px_30px_rgba(255,96,0,0.18)] hover:-translate-y-1" },
+  musinsa: { colors: { primary: "#000000", surface: "#F5F5F5", ink: "#000000", contrast: "#000000" }, typography: { sans: "Pretendard, sans-serif", display: "Pretendard, sans-serif" }, radius: "0px", shadow: "0 10px 26px rgba(0,0,0,0.16)", animation: "cubic-bezier(0.2, 0.8, 0.2, 1)", paletteSurfaceClass: "bg-[#f5f5f5]", paletteBorderClass: "border-black", paletteInkClass: "text-black", paletteButtonClass: "bg-black text-white", materialClass: "shadow-[0_10px_26px_rgba(0,0,0,0.16)] hover:-translate-y-0.5" },
+  samsung: { colors: { primary: "#007AFF", surface: "#F5F7FB", ink: "#1428A0", contrast: "#007AFF" }, typography: { sans: "SamsungOne, sans-serif", display: "SamsungSharpSans, sans-serif" }, radius: "24px", shadow: "0 18px 42px rgba(0,122,255,0.18)", animation: "cubic-bezier(0.2, 0.8, 0.2, 1)", paletteSurfaceClass: "bg-[#f5f7fb]", paletteBorderClass: "border-[#a7cfff]", paletteInkClass: "text-[#1428a0]", paletteButtonClass: "bg-[#007aff] text-white", materialClass: "shadow-[0_18px_42px_rgba(0,122,255,0.18)] hover:-translate-y-0.5" },
+  tesla: { colors: { primary: "#3E6AE1", surface: "#F4F4F4", ink: "#171A20", contrast: "#3E6AE1" }, typography: { sans: "system-ui, sans-serif", display: "system-ui, sans-serif" }, radius: "8px", shadow: "0 16px 38px rgba(23,26,32,0.16)", animation: "cubic-bezier(0.2, 0.8, 0.2, 1)", paletteSurfaceClass: "bg-[#f4f4f4]", paletteBorderClass: "border-[#aeb2b8]", paletteInkClass: "text-[#171a20]", paletteButtonClass: "bg-[#3e6ae1] text-white", materialClass: "shadow-[0_16px_38px_rgba(23,26,32,0.16)] hover:-translate-y-0.5" },
+  toss: { colors: { primary: "#3182F6", surface: "#E8F3FF", ink: "#191F28", contrast: "#3182F6" }, typography: { sans: "Pretendard, sans-serif", display: "Pretendard, sans-serif" }, radius: "28px", shadow: "0 18px 42px rgba(49,130,246,0.20)", animation: "cubic-bezier(0.22, 1.2, 0.36, 1)", paletteSurfaceClass: "bg-[#e8f3ff]", paletteBorderClass: "border-[#cfe5ff]", paletteInkClass: "text-[#191f28]", paletteButtonClass: "bg-[#3182f6] text-white", materialClass: "shadow-[0_18px_42px_rgba(49,130,246,0.20)] hover:-translate-y-1 active:scale-[0.985]" },
+  upstage: { colors: { primary: "#5B52FF", surface: "#F4F3FF", ink: "#0A0D14", contrast: "#5B52FF" }, typography: { sans: "Geist, sans-serif", display: "Espeak, sans-serif" }, radius: "8px", shadow: "0 18px 44px rgba(91,82,255,0.22)", animation: "cubic-bezier(0.22, 1, 0.36, 1)", paletteSurfaceClass: "bg-[#f4f3ff]", paletteBorderClass: "border-[#dcd9ff]", paletteInkClass: "text-[#0a0d14]", paletteButtonClass: "bg-[#5b52ff] text-white", materialClass: "shadow-[0_18px_44px_rgba(91,82,255,0.22)] hover:-translate-y-1" },
+  goodchoice: { colors: { primary: "#F94239", surface: "#FFF3F2", ink: "#2B1716", contrast: "#F94239" }, typography: { sans: "Pretendard, sans-serif", display: "Pretendard, sans-serif" }, radius: "18px", shadow: "0 18px 40px rgba(249,66,57,0.20)", animation: "cubic-bezier(0.22, 1, 0.36, 1)", paletteSurfaceClass: "bg-[#fff3f2]", paletteBorderClass: "border-[#ffd5d1]", paletteInkClass: "text-[#2b1716]", paletteButtonClass: "bg-[#f94239] text-white", materialClass: "shadow-[0_18px_40px_rgba(249,66,57,0.20)] hover:-translate-y-1" },
+};
+
+export const THEME_BRIDGE_TYPOGRAPHY_CLASSES: Record<ShowcaseBrandId, string> = {
+  "29cm": "tracking-[-0.025em]",
+  ably: "tracking-[-0.035em]",
+  apple: "tracking-[-0.04em]",
+  baemin: "tracking-[-0.02em]",
+  figma: "tracking-[-0.02em]",
+  kakao: "tracking-[-0.02em]",
+  kakaobank: "tracking-[-0.025em]",
+  karrot: "tracking-[-0.025em]",
+  likelion: "font-mono tracking-[-0.02em]",
+  musinsa: "tracking-[-0.04em]",
+  samsung: "tracking-[-0.03em]",
+  tesla: "tracking-[0.01em]",
+  toss: "tracking-[-0.035em]",
+  upstage: "tracking-[-0.03em]",
+  goodchoice: "tracking-[-0.02em]",
+};
+
+export const SHOWCASE_COMPONENTS: ShowcaseComponent[] = [
+  { id: "Button", number: "01", title: "Button", description: "핵심 행동을 명확히 전달하는 실제 버튼" },
+  { id: "Input", number: "02", title: "Input", description: "입력과 피드백을 위한 실제 필드" },
+  { id: "HeroCard", number: "03", title: "Hero Card", description: "브랜드의 첫인상을 만드는 실제 콘텐츠 영역" },
+  { id: "Toast", number: "04", title: "Toast", description: "짧고 분명한 상태 안내" },
+  { id: "Badge", number: "05", title: "Badge", description: "상태와 카테고리를 구분하는 태그" },
+  { id: "Modal", number: "06", title: "Modal", description: "중요한 결정을 돕는 실제 대화상자" },
+  { id: "Select", number: "07", title: "Select", description: "옵션을 고르는 실제 선택 컨트롤" },
+  { id: "Avatar", number: "08", title: "Avatar", description: "사람과 팀을 보여주는 프로필" },
+  { id: "Tabs", number: "09", title: "Tabs", description: "정보 영역을 전환하는 실제 탭" },
+  { id: "Accordion", number: "10", title: "Accordion", description: "필요한 정보만 펼쳐 보는 실제 메뉴" },
+];
+
+export const ACTION_PAIR_HERO_BRANDS = new Set<ShowcaseBrandId>(["apple", "baemin", "figma", "kakao", "karrot"]);
+export const VISIBLE_TOAST_BRANDS = new Set<ShowcaseBrandId>(["baemin", "kakao", "karrot"]);
+export const NATIVE_FORM_BRANDS = new Set<ShowcaseBrandId>(["apple", "figma"]);
+export const NATIVE_MODAL_BRANDS = new Set<ShowcaseBrandId>(["apple", "figma"]);
+
+export function getTailwindConfigSnippet(brand: ShowcaseBrand) {
+  const tokens = BRAND_TOKEN_VALUES[brand.id];
+  const theme = {
+    theme: {
+      extend: {
+        colors: {
+          brand: tokens.colors.primary,
+          "brand-surface": tokens.colors.surface,
+          "brand-ink": tokens.colors.ink,
+          "brand-contrast": tokens.colors.contrast,
+        },
+        fontFamily: {
+          brand: [tokens.typography.sans],
+          "brand-display": [tokens.typography.display],
+        },
+        borderRadius: {
+          brand: tokens.radius,
+        },
+        boxShadow: {
+          brand: tokens.shadow,
+        },
+        transitionTimingFunction: {
+          brand: tokens.animation,
+        },
+      },
+    },
+  };
+
+  return `// ${brand.name} vault theme tokens\nexport const ${brand.exportPrefix}TailwindTheme = ${JSON.stringify(theme, null, 2)} as const;`;
+}
+
+export function getComponentImportSnippet(brand: ShowcaseBrand, componentId: ComponentId) {
+  const exportedName = `${brand.exportPrefix}${componentId}`;
+
+  return `// Vault file
+// src/components/vault/${brand.directory}/${componentId}.tsx
+
+import ${exportedName} from "@/components/vault/${brand.directory}/${componentId}";
+
+export function Example() {
+  return <${exportedName} />;
+}`;
+}
