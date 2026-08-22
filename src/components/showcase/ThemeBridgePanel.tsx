@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { BrandGenerationWorkbench } from "./BrandGenerationWorkbench";
 import { CustomBrandBuilder } from "./CustomBrandBuilder";
+import { CustomBrandLibrary } from "./CustomBrandLibrary";
 import { SHOWCASE_BRANDS } from "./showcase.catalog";
 import { GALLERY_RECIPES, MATERIAL_LABELS, MATERIAL_MOTION_RECIPES, MATERIAL_PREVIEW_CLASSES, type GalleryRecipe } from "./themebridge.gallery-data";
 import { getThemeSource, getThemeSourceOptions, type ThemeBridgeSource } from "./themebridge.sources";
-import type { CustomBrandDNA, ShowcaseBrand, ThemeSourceId } from "./showcase.types";
+import type { CustomBrandDNA, CustomBrandId, ShowcaseBrand, ThemeSourceId } from "./showcase.types";
 import { joinClasses } from "./showcase.utils";
 
 function SparkleIcon() {
@@ -113,15 +114,20 @@ function GalleryRecipeCard({ recipe, paletteBrand, materialBrand, selected, onAp
 }
 
 export interface ThemeBridgePanelProps {
+  activeCustomBrandId: CustomBrandId;
   activeRecipeId: string | null;
+  customBrands: CustomBrandDNA[];
+  customBrandSaved: boolean;
   materialBrandId: ThemeSourceId;
   mixEnabled: boolean;
   onApplyRecipe: (recipe: GalleryRecipe) => void;
-  customBrand: CustomBrandDNA;
-  customBrandSaved: boolean;
+  onCreateCustomBrand: () => void;
   onCustomBrandChange: (brand: CustomBrandDNA) => void;
+  onCustomBrandDelete: (brandId: CustomBrandId) => void;
+  onCustomBrandDuplicate: (brandId: CustomBrandId) => void;
   onCustomBrandReset: () => void;
   onCustomBrandSave: () => void;
+  onCustomBrandSelect: (brandId: CustomBrandId) => void;
   onMaterialBrandChange: (brandId: ThemeSourceId) => void;
   onPaletteBrandChange: (brandId: ThemeSourceId) => void;
   onToggleMix: () => void;
@@ -129,23 +135,29 @@ export interface ThemeBridgePanelProps {
 }
 
 export function ThemeBridgePanel({
+  activeCustomBrandId,
   activeRecipeId,
-  customBrand,
+  customBrands,
   customBrandSaved,
   materialBrandId,
   mixEnabled,
   onApplyRecipe,
+  onCreateCustomBrand,
   onCustomBrandChange,
+  onCustomBrandDelete,
+  onCustomBrandDuplicate,
   onCustomBrandReset,
   onCustomBrandSave,
+  onCustomBrandSelect,
   onMaterialBrandChange,
   onPaletteBrandChange,
   onToggleMix,
   paletteBrandId,
 }: ThemeBridgePanelProps) {
-  const sources = getThemeSourceOptions(customBrand);
-  const paletteBrand = getThemeSource(paletteBrandId, customBrand);
-  const materialBrand = getThemeSource(materialBrandId, customBrand);
+  const customBrand = customBrands.find((brand) => brand.id === activeCustomBrandId) ?? customBrands[0];
+  const sources = getThemeSourceOptions(customBrands);
+  const paletteBrand = getThemeSource(paletteBrandId, customBrands);
+  const materialBrand = getThemeSource(materialBrandId, customBrands);
 
   return (
     <>
@@ -186,15 +198,16 @@ export function ThemeBridgePanel({
         </div>
       </section>
 
-      <CustomBrandBuilder brand={customBrand} onChange={onCustomBrandChange} onReset={onCustomBrandReset} onSave={onCustomBrandSave} saved={customBrandSaved} />
-      <BrandGenerationWorkbench
+      <CustomBrandLibrary activeBrandId={activeCustomBrandId} brands={customBrands} onCreate={onCreateCustomBrand} onDelete={onCustomBrandDelete} onDuplicate={onCustomBrandDuplicate} onSelect={onCustomBrandSelect} />
+      {customBrand ? <CustomBrandBuilder brand={customBrand} onChange={onCustomBrandChange} onReset={onCustomBrandReset} onSave={onCustomBrandSave} saved={customBrandSaved} /> : null}
+      {customBrand ? <BrandGenerationWorkbench
         brand={customBrand}
         onActivateThemeBridge={() => {
-          onPaletteBrandChange("custom");
-          onMaterialBrandChange("custom");
+          onPaletteBrandChange(customBrand.id);
+          onMaterialBrandChange(customBrand.id);
           if (!mixEnabled) onToggleMix();
         }}
-      />
+      /> : null}
 
       <section aria-labelledby="mix-gallery-title" className="mt-8">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">

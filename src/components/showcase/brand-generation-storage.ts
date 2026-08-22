@@ -1,11 +1,16 @@
 import { createDefaultGenerationBrief, createManifestDownload, isGeneratedManifest, sanitizeGenerationBrief, type BrandGenerationBrief, type BrandGenerationManifest, type GeneratedVaultFile } from "./brand-generator";
 import type { CustomBrandDNA } from "./showcase.types";
 
-export const BRAND_GENERATION_STORAGE_KEY = "universal-ui-vault.brand-generation.v1";
+export const BRAND_GENERATION_STORAGE_KEY = "universal-ui-vault.brand-generation.v2";
+const LEGACY_BRAND_GENERATION_STORAGE_KEY = "universal-ui-vault.brand-generation.v1";
 
 export interface StoredBrandGeneration {
   brief: BrandGenerationBrief;
   manifest: BrandGenerationManifest | null;
+}
+
+function getGenerationStorageKey(brand: CustomBrandDNA) {
+  return `${BRAND_GENERATION_STORAGE_KEY}.${brand.id.replace("custom:", "")}`;
 }
 
 export function loadStoredBrandGeneration(brand: CustomBrandDNA): StoredBrandGeneration {
@@ -14,18 +19,16 @@ export function loadStoredBrandGeneration(brand: CustomBrandDNA): StoredBrandGen
     manifest: null,
   };
 
-  if (typeof window === "undefined") {
-    return fallback;
-  }
+  if (typeof window === "undefined") return fallback;
 
   try {
-    const serialized = window.localStorage.getItem(BRAND_GENERATION_STORAGE_KEY);
+    const serialized = window.localStorage.getItem(getGenerationStorageKey(brand)) ?? window.localStorage.getItem(LEGACY_BRAND_GENERATION_STORAGE_KEY);
     if (!serialized) return fallback;
 
     const parsed = JSON.parse(serialized) as Partial<StoredBrandGeneration>;
     return {
       brief: sanitizeGenerationBrief(parsed.brief ?? {}, brand),
-      manifest: isGeneratedManifest(parsed.manifest) ? parsed.manifest : null,
+      manifest: isGeneratedManifest(parsed.manifest) && parsed.manifest.brand.slug === sanitizeGenerationBrief(parsed.brief ?? {}, brand).slug ? parsed.manifest : null,
     };
   } catch {
     return fallback;
@@ -40,12 +43,13 @@ export function saveStoredBrandGeneration(stored: StoredBrandGeneration, brand: 
     manifest: isGeneratedManifest(stored.manifest) ? stored.manifest : null,
   };
 
-  window.localStorage.setItem(BRAND_GENERATION_STORAGE_KEY, JSON.stringify(safeValue));
+  window.localStorage.setItem(getGenerationStorageKey(brand), JSON.stringify(safeValue));
 }
 
-export function resetStoredBrandGeneration() {
+export function resetStoredBrandGeneration(brand?: CustomBrandDNA) {
   if (typeof window !== "undefined") {
-    window.localStorage.removeItem(BRAND_GENERATION_STORAGE_KEY);
+    if (brand) window.localStorage.removeItem(getGenerationStorageKey(brand));
+    else window.localStorage.removeItem(LEGACY_BRAND_GENERATION_STORAGE_KEY);
   }
 }
 

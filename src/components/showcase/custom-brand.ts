@@ -1,7 +1,8 @@
 import type { CSSProperties } from "react";
-import type { ComponentId, CustomBrandDNA, CustomComponentOverride, CustomDensity, CustomEasing, CustomGeometryTokens, CustomMotionTokens, CustomSemanticTokens } from "./showcase.types";
+import type { ComponentId, CustomBrandDNA, CustomBrandId, CustomBrandLibrary, CustomComponentOverride, CustomDensity, CustomEasing, CustomGeometryTokens, CustomMotionTokens, CustomSemanticTokens } from "./showcase.types";
 
 export const CUSTOM_BRAND_STORAGE_KEY = "universal-ui-vault.custom-brand.v2";
+export const CUSTOM_BRAND_LIBRARY_STORAGE_KEY = "universal-ui-vault.custom-brand-library.v1";
 
 export const CUSTOM_COMPONENT_IDS: ComponentId[] = [
   "Button",
@@ -51,7 +52,7 @@ export const DEFAULT_CUSTOM_BRAND: CustomBrandDNA = {
   descriptor: "A custom ThemeBridge design DNA",
   displayFont: "font-sans",
   geometry: DEFAULT_GEOMETRY,
-  id: "custom",
+  id: "custom:my-brand",
   ink: DEFAULT_TOKENS.ink,
   material: "soft",
   motion: DEFAULT_MOTION,
@@ -83,6 +84,12 @@ export function isCssSize(value: string) {
 
 function sanitizeColor(value: unknown, fallback: string) {
   return typeof value === "string" && isHexColor(value) ? value.toUpperCase() : fallback;
+}
+
+function slugifyCustomId(value: unknown) {
+  const raw = typeof value === "string" ? value.replace(/^custom:/, "") : "";
+  const slug = raw.toLowerCase().replace(/[^a-z0-9-]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 28);
+  return `custom:${slug || "my-brand"}` as CustomBrandId;
 }
 
 function sanitizeGeometry(input: Partial<CustomGeometryTokens> | undefined): CustomGeometryTokens {
@@ -152,7 +159,7 @@ export function sanitizeCustomBrand(input: Partial<CustomBrandDNA>): CustomBrand
     descriptor,
     displayFont: FONT_CLASS_VALUES.includes(input.displayFont as (typeof FONT_CLASS_VALUES)[number]) ? input.displayFont! : DEFAULT_CUSTOM_BRAND.displayFont,
     geometry,
-    id: "custom",
+    id: slugifyCustomId(input.id),
     ink,
     material: input.material === "crisp" || input.material === "elastic" || input.material === "soft" ? input.material : DEFAULT_CUSTOM_BRAND.material,
     motion,
@@ -165,25 +172,91 @@ export function sanitizeCustomBrand(input: Partial<CustomBrandDNA>): CustomBrand
   };
 }
 
-export function loadCustomBrand(): CustomBrandDNA {
-  if (typeof window === "undefined") return DEFAULT_CUSTOM_BRAND;
+function makeUniqueId(existing: CustomBrandDNA[], requestedId: CustomBrandId) {
+  if (!existing.some((brand) => brand.id === requestedId)) return requestedId;
+  const base = requestedId.replace(/^custom:/, "");
+  let index = 2;
+  let candidate = `custom:${base}-${index}` as CustomBrandId;
+  while (existing.some((brand) => brand.id === candidate)) {
+    index += 1;
+    candidate = `custom:${base}-${index}` as CustomBrandId;
+  }
+  return candidate;
+}
+
+export function createCustomBrand(existing: CustomBrandDNA[], source: CustomBrandDNA = DEFAULT_CUSTOM_BRAND): CustomBrandDNA {
+  const name = `${source.name || "My Brand"} copy`;
+  const requestedId = slugifyCustomId(name);
+  return sanitizeCustomBrand({
+    ...source,
+    componentOverrides: structuredClone(source.componentOverrides),
+    geometry: { ...source.geometry },
+    id: makeUniqueId(existing, requestedId),
+    name,
+    motion: { ...source.motion },
+    tokens: { ...source.tokens },
+  });
+}
+
+function sanitizeLibrary(input: Partial<CustomBrandLibrary>): CustomBrandLibrary {
+  const rawBrands = Array.isArray(input.brands) ? input.brands : [];
+  const brands: CustomBrandDNA[] = [];
+  for (const rawBrand of rawBrands) {
+    const sanitized = sanitizeCustomBrand(rawBrand);
+    const id = makeUniqueId(brands, sanitized.id);
+    brands.push(id === sanitized.id ? sanitized : { ...sanitized, id });
+  }
+
+  if (!brands.length) brands.push(DEFAULT_CUSTOM_BRAND);
+  const requestedActiveId = slugifyCustomId(input.activeBrandId);
+  const activeBrandId = brands.some((brand) => brand.id === requestedActiveId) ? requestedActiveId : brands[0].id;
+  return { activeBrandId, brands, version: 1 };
+}
+
+export function loadCustomBrandLibrary(): CustomBrandLibrary {
+  if (typeof window === "undefined") return { activeBrandId: DEFAULT_CUSTOM_BRAND.id, brands: [DEFAULT_CUSTOM_BRAND], version: 1 };
 
   try {
-    const serialized = window.localStorage.getItem(CUSTOM_BRAND_STORAGE_KEY) ?? window.localStorage.getItem("universal-ui-vault.custom-brand.v1");
-    return serialized ? sanitizeCustomBrand(JSON.parse(serialized) as Partial<CustomBrandDNA>) : DEFAULT_CUSTOM_BRAND;
+    const current = window.localStorage.getItem(CUSTOM_BRAND_LIBRARY_STORAGE_KEY);
+    if (current) return sanitizeLibrary(JSON.parse(current) as Partial<CustomBrandLibrary>);
+
+    const legacy = window.localStorage.getItem(CUSTOM_BRAND_STORAGE_KEY) ?? window.localStorage.getItem("universal-ui-vault.custom-brand.v1");
+    if (legacy) {
+      const migrated = sanitizeCustomBrand(JSON.parse(legacy) as Partial<CustomBrandDNA>);
+      return { activeBrandId: migrated.id, brands: [migrated], version: 1 };
+    }
   } catch {
-    return DEFAULT_CUSTOM_BRAND;
+    // Invalid browser storage is intentionally replaced by the safe starter library.
+  }
+
+  return { activeBrandId: DEFAULT_CUSTOM_BRAND.id, brands: [DEFAULT_CUSTOM_BRAND], version: 1 };
+}
+
+export function saveCustomBrandLibrary(library: CustomBrandLibrary) {
+  if (typeof window !== "undefined") {
+    window.localStorage.setItem(CUSTOM_BRAND_LIBRARY_STORAGE_KEY, JSON.stringify(sanitizeLibrary(library)));
   }
 }
 
+/** @deprecated Use loadCustomBrandLibrary; retained for generation and preview modules that require the active DNA. */
+export function loadCustomBrand(): CustomBrandDNA {
+  const library = loadCustomBrandLibrary();
+  return library.brands.find((brand) => brand.id === library.activeBrandId) ?? library.brands[0];
+}
+
+/** @deprecated Use saveCustomBrandLibrary; retained for compatibility with the existing custom builder contract. */
 export function saveCustomBrand(brand: CustomBrandDNA) {
-  if (typeof window !== "undefined") {
-    window.localStorage.setItem(CUSTOM_BRAND_STORAGE_KEY, JSON.stringify(sanitizeCustomBrand(brand)));
-  }
+  const library = loadCustomBrandLibrary();
+  const sanitized = sanitizeCustomBrand(brand);
+  const brands = library.brands.some((candidate) => candidate.id === sanitized.id)
+    ? library.brands.map((candidate) => candidate.id === sanitized.id ? sanitized : candidate)
+    : [...library.brands, sanitized];
+  saveCustomBrandLibrary({ activeBrandId: sanitized.id, brands, version: 1 });
 }
 
 export function resetCustomBrand() {
   if (typeof window !== "undefined") {
+    window.localStorage.removeItem(CUSTOM_BRAND_LIBRARY_STORAGE_KEY);
     window.localStorage.removeItem(CUSTOM_BRAND_STORAGE_KEY);
     window.localStorage.removeItem("universal-ui-vault.custom-brand.v1");
   }

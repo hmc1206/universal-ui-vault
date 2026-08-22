@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
 import { DEFAULT_CUSTOM_BRAND, getCustomCssVariables, getCustomPaletteOption } from "./custom-brand";
-import { getThemeSource } from "./themebridge.sources";
+import { getCustomBrandBySourceId, getThemeSource, isCustomThemeSourceId } from "./themebridge.sources";
 import type { ComponentId, CustomBrandDNA, ShowcaseBrandId, ThemeBridge } from "./showcase.types";
 
 interface PaletteSkin {
@@ -157,11 +157,14 @@ function getCustomMaterialSkin(customBrand: CustomBrandDNA): MaterialSkin {
 }
 
 export function getThemeBridgeSkin(themeBridge: ThemeBridge, componentId?: ComponentId): ThemeBridgeSkin {
-  const customBrand = themeBridge.customBrand ?? DEFAULT_CUSTOM_BRAND;
-  const palette = themeBridge.paletteBrandId === "custom" ? getCustomPaletteSkin(customBrand) : PALETTE_SKINS[themeBridge.paletteBrandId];
-  const material = themeBridge.materialBrandId === "custom" ? getCustomMaterialSkin(customBrand) : MATERIAL_SKINS[themeBridge.materialBrandId];
-  const paletteBrand = getThemeSource(themeBridge.paletteBrandId, customBrand);
-  const materialBrand = getThemeSource(themeBridge.materialBrandId, customBrand);
+  const customBrands = themeBridge.customBrands ?? [themeBridge.customBrand ?? DEFAULT_CUSTOM_BRAND];
+  const paletteCustomBrand = isCustomThemeSourceId(themeBridge.paletteBrandId) ? getCustomBrandBySourceId(themeBridge.paletteBrandId, customBrands) : undefined;
+  const materialCustomBrand = isCustomThemeSourceId(themeBridge.materialBrandId) ? getCustomBrandBySourceId(themeBridge.materialBrandId, customBrands) : undefined;
+  const palette = paletteCustomBrand ? getCustomPaletteSkin(paletteCustomBrand) : PALETTE_SKINS[themeBridge.paletteBrandId as ShowcaseBrandId];
+  const material = materialCustomBrand ? getCustomMaterialSkin(materialCustomBrand) : MATERIAL_SKINS[themeBridge.materialBrandId as ShowcaseBrandId];
+  const paletteBrand = getThemeSource(themeBridge.paletteBrandId, customBrands);
+  const materialBrand = getThemeSource(themeBridge.materialBrandId, customBrands);
+  const cssBrand = paletteCustomBrand ?? materialCustomBrand;
 
   return {
     controlClass: `${palette.controlClass} ${material.controlClass}`,
@@ -170,7 +173,7 @@ export function getThemeBridgeSkin(themeBridge: ThemeBridge, componentId?: Compo
     materialName: materialBrand.name,
     paletteBadgeClass: palette.accentClass,
     paletteName: paletteBrand.name,
-    style: themeBridge.paletteBrandId === "custom" || themeBridge.materialBrandId === "custom" ? getCustomCssVariables(customBrand, componentId) : undefined,
+    style: cssBrand ? getCustomCssVariables(cssBrand, componentId) : undefined,
     surfaceClass: palette.surfaceClass,
   };
 }

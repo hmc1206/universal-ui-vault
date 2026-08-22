@@ -1,4 +1,5 @@
 import { useMemo, useState, type CSSProperties } from "react";
+import { AccessibilityAuditPanel } from "./AccessibilityAuditPanel";
 import { CUSTOM_COMPONENT_IDS, CUSTOM_FONT_OPTIONS, CUSTOM_MATERIAL_OPTIONS, CUSTOM_PALETTE_OPTIONS, CUSTOM_RADIUS_OPTIONS, CUSTOM_SHADOW_OPTIONS, getComponentOverride, isHexColor } from "./custom-brand";
 import type { ComponentId, CustomBrandDNA, CustomComponentOverride, CustomDensity, CustomEasing, CustomGeometryTokens, CustomMotionTokens, CustomSemanticTokens } from "./showcase.types";
 import { joinClasses } from "./showcase.utils";
@@ -178,6 +179,8 @@ export function CustomBrandBuilder({ brand, onChange, onReset, onSave, saved }: 
             </div>
             <div className="mt-5 flex flex-wrap gap-2"><span className="inline-flex min-h-11 items-center rounded-[var(--preview-radius)] bg-[var(--preview-primary)] px-4 text-sm font-bold text-white shadow-[0_12px_24px_color-mix(in_srgb,var(--preview-primary)_28%,transparent)]">Primary action</span><span className="inline-flex min-h-11 items-center rounded-[var(--preview-radius)] border border-[var(--preview-border)] bg-white/80 px-4 text-sm font-bold">{brand.motion.duration} · {brand.motion.hoverLift} lift</span><span className="inline-flex min-h-11 items-center rounded-[var(--preview-radius)] border border-[var(--preview-border)] bg-[var(--preview-primary-soft)] px-4 text-sm font-bold">Surface token</span></div>
           </aside>
+
+          <AccessibilityAuditPanel brand={brand} />
 
           <div className="rounded-2xl border border-[#d8d1ef] bg-white/55 p-4">
             <button aria-expanded={advancedOpen} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-[#c9bdeb] bg-white px-4 text-sm font-bold text-[#493d67] outline-none transition hover:bg-[#f8f5ff] focus-visible:ring-2 focus-visible:ring-[#5d42c7]/30" onClick={() => setAdvancedOpen((value) => !value)} type="button"><AdjustIcon />{advancedOpen ? "고급 토큰 접기" : "고급 토큰 직접 편집"}</button>

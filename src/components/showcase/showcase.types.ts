@@ -17,7 +17,8 @@ export type ShowcaseBrandId =
   | "upstage"
   | "goodchoice";
 
-export type ThemeSourceId = ShowcaseBrandId | "custom";
+export type CustomBrandId = `custom:${string}`;
+export type ThemeSourceId = ShowcaseBrandId | CustomBrandId;
 
 export type ComponentId =
   | "Button"
@@ -78,7 +79,8 @@ export interface CustomBrandDNA {
   descriptor: string;
   displayFont: string;
   geometry: CustomGeometryTokens;
-  id: "custom";
+  /** 브라우저 라이브러리에서 고유하게 관리되는 source id입니다. */
+  id: CustomBrandId;
   /** 기존 ThemeBridge와의 호환성을 위한 semantic ink 별칭입니다. */
   ink: string;
   material: "crisp" | "elastic" | "soft";
@@ -91,6 +93,32 @@ export interface CustomBrandDNA {
   /** 기존 ThemeBridge와의 호환성을 위한 semantic surface 별칭입니다. */
   surface: string;
   tokens: CustomSemanticTokens;
+}
+
+export interface CustomBrandLibrary {
+  activeBrandId: CustomBrandId;
+  brands: CustomBrandDNA[];
+  version: 1;
+}
+
+export type AccessibilityAuditLevel = "pass" | "review" | "fail";
+
+export interface AccessibilityAuditCheck {
+  actualRatio: number;
+  background: string;
+  category: "focus" | "status" | "text";
+  foreground: string;
+  id: string;
+  label: string;
+  level: AccessibilityAuditLevel;
+  minimumRatio: number;
+  suggestion: string;
+}
+
+export interface AccessibilityAuditResult {
+  checks: AccessibilityAuditCheck[];
+  passCount: number;
+  totalCount: number;
 }
 
 export type VaultComponent = ComponentType<any>;
@@ -124,8 +152,10 @@ export interface ShowcaseBrand {
 }
 
 export interface ThemeBridge {
-  /** paletteBrandId의 색상·타이포그래피 표면과 materialBrandId의 깊이·반응을 전시 전용 skin layer에 합성합니다. */
+  /** 선택된 custom DNA입니다. 기존 preview adapter와의 호환성을 위해 보존합니다. */
   customBrand?: CustomBrandDNA;
+  /** 현재 세션에서 사용할 수 있는 모든 custom DNA source입니다. */
+  customBrands?: CustomBrandDNA[];
   enabled: boolean;
   paletteBrandId: ThemeSourceId;
   materialBrandId: ThemeSourceId;
