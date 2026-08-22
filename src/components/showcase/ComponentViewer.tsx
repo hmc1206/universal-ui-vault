@@ -209,11 +209,20 @@ export interface ShowcaseBrand {
   status: string;
 }
 
+export interface ThemeBridge {
+  /** paletteBrandId의 색상·타이포그래피 표면과 materialBrandId의 깊이·반응을 전시 컨테이너에만 합성합니다. */
+  enabled: boolean;
+  paletteBrandId: ShowcaseBrandId;
+  materialBrandId: ShowcaseBrandId;
+}
+
 export interface ComponentViewerProps {
   /** 전시할 실제 vault 브랜드의 식별자입니다. */
   brandId: ShowcaseBrandId;
   /** 카탈로그 화면으로 돌아갈 때 실행할 함수입니다. */
   onBack?: () => void;
+  /** 실제 vault 코드를 수정하지 않는 선택적 전시 테마 조합입니다. */
+  themeBridge?: ThemeBridge;
 }
 
 interface ShowcaseComponent {
@@ -435,6 +444,95 @@ export const SHOWCASE_BRANDS: ShowcaseBrand[] = [
     status: "10개 실물 연결됨",
   },
 ];
+
+
+interface BrandTokenSet {
+  colors: {
+    primary: string;
+    surface: string;
+    ink: string;
+    contrast: string;
+  };
+  typography: {
+    sans: string;
+    display: string;
+  };
+  radius: string;
+  shadow: string;
+  animation: string;
+  paletteSurfaceClass: string;
+  paletteBorderClass: string;
+  paletteInkClass: string;
+  paletteButtonClass: string;
+  materialClass: string;
+}
+
+const BRAND_TOKEN_VALUES: Record<ShowcaseBrandId, BrandTokenSet> = {
+  "29cm": { colors: { primary: "#111111", surface: "#FFFFFF", ink: "#111111", contrast: "#FF4800" }, typography: { sans: "Pretendard, sans-serif", display: "Pretendard, sans-serif" }, radius: "0px", shadow: "0 12px 30px rgba(17,17,17,0.12)", animation: "cubic-bezier(0.2, 0.8, 0.2, 1)", paletteSurfaceClass: "bg-white", paletteBorderClass: "border-[#111111]", paletteInkClass: "text-[#111111]", paletteButtonClass: "bg-[#111111] text-white", materialClass: "shadow-[0_8px_20px_rgba(17,17,17,0.10)] hover:translate-y-0" },
+  ably: { colors: { primary: "#FF5160", surface: "#FFF2EA", ink: "#2A1620", contrast: "#FF5160" }, typography: { sans: "Inter, sans-serif", display: "Inter, sans-serif" }, radius: "24px", shadow: "0 18px 42px rgba(255,81,96,0.24)", animation: "cubic-bezier(0.22, 1, 0.36, 1)", paletteSurfaceClass: "bg-[#fff2ea]", paletteBorderClass: "border-[#ffb6b5]", paletteInkClass: "text-[#3f1721]", paletteButtonClass: "bg-[#ff5160] text-white", materialClass: "shadow-[0_18px_40px_rgba(255,81,96,0.24)] hover:-translate-y-1" },
+  apple: { colors: { primary: "#0071E3", surface: "#F5F5F7", ink: "#1D1D1F", contrast: "#0071E3" }, typography: { sans: "SF Pro Text, sans-serif", display: "SF Pro Display, sans-serif" }, radius: "18px", shadow: "0 18px 48px rgba(29,29,31,0.12)", animation: "cubic-bezier(0.16, 1, 0.3, 1)", paletteSurfaceClass: "bg-[#f5f5f7]", paletteBorderClass: "border-[#d2d2d7]", paletteInkClass: "text-[#1d1d1f]", paletteButtonClass: "bg-[#0071e3] text-white", materialClass: "shadow-[0_18px_48px_rgba(29,29,31,0.12)] hover:-translate-y-0.5" },
+  baemin: { colors: { primary: "#0CEFD3", surface: "#F8FFFC", ink: "#222222", contrast: "#0CEFD3" }, typography: { sans: "BM Hanna, sans-serif", display: "BM Hanna, sans-serif" }, radius: "20px", shadow: "0 14px 0 rgba(34,34,34,0.16)", animation: "cubic-bezier(0.34, 1.56, 0.64, 1)", paletteSurfaceClass: "bg-[#f8fffc]", paletteBorderClass: "border-[#0cefd3]", paletteInkClass: "text-[#222222]", paletteButtonClass: "bg-[#0cefd3] text-[#111111]", materialClass: "shadow-[0_10px_0_rgba(34,34,34,0.16)] hover:-translate-y-1 active:translate-y-0" },
+  figma: { colors: { primary: "#0D99FF", surface: "#2C2C2C", ink: "#111111", contrast: "#0D99FF" }, typography: { sans: "figmaSans, sans-serif", display: "figmaSans, sans-serif" }, radius: "8px", shadow: "0 16px 36px rgba(0,0,0,0.22)", animation: "cubic-bezier(0.2, 0, 0, 1)", paletteSurfaceClass: "bg-[#2c2c2c]", paletteBorderClass: "border-[#0d99ff]", paletteInkClass: "text-white", paletteButtonClass: "bg-[#0d99ff] text-white", materialClass: "shadow-[0_16px_36px_rgba(0,0,0,0.22)] hover:-translate-y-0.5" },
+  kakao: { colors: { primary: "#FAE100", surface: "#FFFCE5", ink: "#242424", contrast: "#FAE100" }, typography: { sans: "Apple SD Gothic Neo, sans-serif", display: "Apple SD Gothic Neo, sans-serif" }, radius: "18px", shadow: "0 12px 28px rgba(92,72,0,0.18)", animation: "cubic-bezier(0.34, 1.56, 0.64, 1)", paletteSurfaceClass: "bg-[#fffce5]", paletteBorderClass: "border-[#f3d900]", paletteInkClass: "text-[#242424]", paletteButtonClass: "bg-[#fae100] text-[#111111]", materialClass: "shadow-[0_12px_28px_rgba(92,72,0,0.18)] hover:-translate-y-1" },
+  kakaobank: { colors: { primary: "#FFE300", surface: "#FFFCE1", ink: "#111111", contrast: "#FFE300" }, typography: { sans: "Pretendard, sans-serif", display: "Pretendard, sans-serif" }, radius: "20px", shadow: "0 18px 38px rgba(65,56,0,0.14)", animation: "cubic-bezier(0.22, 1, 0.36, 1)", paletteSurfaceClass: "bg-[#fffce1]", paletteBorderClass: "border-[#f1df58]", paletteInkClass: "text-[#111111]", paletteButtonClass: "bg-[#ffe300] text-[#111111]", materialClass: "shadow-[0_18px_38px_rgba(65,56,0,0.14)] hover:-translate-y-1" },
+  karrot: { colors: { primary: "#FF6F0F", surface: "#FFF5F0", ink: "#2B1B12", contrast: "#FF6F0F" }, typography: { sans: "Pretendard, sans-serif", display: "Pretendard, sans-serif" }, radius: "22px", shadow: "0 16px 34px rgba(255,111,15,0.20)", animation: "cubic-bezier(0.22, 1, 0.36, 1)", paletteSurfaceClass: "bg-[#fff5f0]", paletteBorderClass: "border-[#ffe1d0]", paletteInkClass: "text-[#2b1b12]", paletteButtonClass: "bg-[#ff6f0f] text-white", materialClass: "shadow-[0_16px_34px_rgba(255,111,15,0.20)] hover:-translate-y-1" },
+  likelion: { colors: { primary: "#FF6000", surface: "#FCF4EE", ink: "#21160F", contrast: "#FF6000" }, typography: { sans: "Pretendard, sans-serif", display: "ui-monospace, monospace" }, radius: "12px", shadow: "0 14px 30px rgba(255,96,0,0.18)", animation: "cubic-bezier(0.2, 0.9, 0.2, 1)", paletteSurfaceClass: "bg-[#fcf4ee]", paletteBorderClass: "border-[#fed5bb]", paletteInkClass: "text-[#21160f]", paletteButtonClass: "bg-[#ff6000] text-white", materialClass: "shadow-[0_14px_30px_rgba(255,96,0,0.18)] hover:-translate-y-1" },
+  musinsa: { colors: { primary: "#000000", surface: "#F5F5F5", ink: "#000000", contrast: "#000000" }, typography: { sans: "Pretendard, sans-serif", display: "Pretendard, sans-serif" }, radius: "0px", shadow: "0 10px 26px rgba(0,0,0,0.16)", animation: "cubic-bezier(0.2, 0.8, 0.2, 1)", paletteSurfaceClass: "bg-[#f5f5f5]", paletteBorderClass: "border-black", paletteInkClass: "text-black", paletteButtonClass: "bg-black text-white", materialClass: "shadow-[0_10px_26px_rgba(0,0,0,0.16)] hover:-translate-y-0.5" },
+  samsung: { colors: { primary: "#007AFF", surface: "#F5F7FB", ink: "#1428A0", contrast: "#007AFF" }, typography: { sans: "SamsungOne, sans-serif", display: "SamsungSharpSans, sans-serif" }, radius: "24px", shadow: "0 18px 42px rgba(0,122,255,0.18)", animation: "cubic-bezier(0.2, 0.8, 0.2, 1)", paletteSurfaceClass: "bg-[#f5f7fb]", paletteBorderClass: "border-[#a7cfff]", paletteInkClass: "text-[#1428a0]", paletteButtonClass: "bg-[#007aff] text-white", materialClass: "shadow-[0_18px_42px_rgba(0,122,255,0.18)] hover:-translate-y-0.5" },
+  tesla: { colors: { primary: "#3E6AE1", surface: "#F4F4F4", ink: "#171A20", contrast: "#3E6AE1" }, typography: { sans: "system-ui, sans-serif", display: "system-ui, sans-serif" }, radius: "8px", shadow: "0 16px 38px rgba(23,26,32,0.16)", animation: "cubic-bezier(0.2, 0.8, 0.2, 1)", paletteSurfaceClass: "bg-[#f4f4f4]", paletteBorderClass: "border-[#aeb2b8]", paletteInkClass: "text-[#171a20]", paletteButtonClass: "bg-[#3e6ae1] text-white", materialClass: "shadow-[0_16px_38px_rgba(23,26,32,0.16)] hover:-translate-y-0.5" },
+  toss: { colors: { primary: "#3182F6", surface: "#E8F3FF", ink: "#191F28", contrast: "#3182F6" }, typography: { sans: "Pretendard, sans-serif", display: "Pretendard, sans-serif" }, radius: "28px", shadow: "0 18px 42px rgba(49,130,246,0.20)", animation: "cubic-bezier(0.22, 1.2, 0.36, 1)", paletteSurfaceClass: "bg-[#e8f3ff]", paletteBorderClass: "border-[#cfe5ff]", paletteInkClass: "text-[#191f28]", paletteButtonClass: "bg-[#3182f6] text-white", materialClass: "shadow-[0_18px_42px_rgba(49,130,246,0.20)] hover:-translate-y-1 active:scale-[0.985]" },
+  upstage: { colors: { primary: "#5B52FF", surface: "#F4F3FF", ink: "#0A0D14", contrast: "#5B52FF" }, typography: { sans: "Geist, sans-serif", display: "Espeak, sans-serif" }, radius: "8px", shadow: "0 18px 44px rgba(91,82,255,0.22)", animation: "cubic-bezier(0.22, 1, 0.36, 1)", paletteSurfaceClass: "bg-[#f4f3ff]", paletteBorderClass: "border-[#dcd9ff]", paletteInkClass: "text-[#0a0d14]", paletteButtonClass: "bg-[#5b52ff] text-white", materialClass: "shadow-[0_18px_44px_rgba(91,82,255,0.22)] hover:-translate-y-1" },
+  goodchoice: { colors: { primary: "#F94239", surface: "#FFF3F2", ink: "#2B1716", contrast: "#F94239" }, typography: { sans: "Pretendard, sans-serif", display: "Pretendard, sans-serif" }, radius: "18px", shadow: "0 18px 40px rgba(249,66,57,0.20)", animation: "cubic-bezier(0.22, 1, 0.36, 1)", paletteSurfaceClass: "bg-[#fff3f2]", paletteBorderClass: "border-[#ffd5d1]", paletteInkClass: "text-[#2b1716]", paletteButtonClass: "bg-[#f94239] text-white", materialClass: "shadow-[0_18px_40px_rgba(249,66,57,0.20)] hover:-translate-y-1" },
+};
+
+const THEME_BRIDGE_TYPOGRAPHY_CLASSES: Record<ShowcaseBrandId, string> = {
+  "29cm": "tracking-[-0.025em]",
+  ably: "tracking-[-0.035em]",
+  apple: "tracking-[-0.04em]",
+  baemin: "tracking-[-0.02em]",
+  figma: "tracking-[-0.02em]",
+  kakao: "tracking-[-0.02em]",
+  kakaobank: "tracking-[-0.025em]",
+  karrot: "tracking-[-0.025em]",
+  likelion: "font-mono tracking-[-0.02em]",
+  musinsa: "tracking-[-0.04em]",
+  samsung: "tracking-[-0.03em]",
+  tesla: "tracking-[0.01em]",
+  toss: "tracking-[-0.035em]",
+  upstage: "tracking-[-0.03em]",
+  goodchoice: "tracking-[-0.02em]",
+};
+
+function getTailwindConfigSnippet(brand: ShowcaseBrand) {
+  const tokens = BRAND_TOKEN_VALUES[brand.id];
+  const theme = {
+    theme: {
+      extend: {
+        colors: {
+          brand: tokens.colors.primary,
+          "brand-surface": tokens.colors.surface,
+          "brand-ink": tokens.colors.ink,
+          "brand-contrast": tokens.colors.contrast,
+        },
+        fontFamily: {
+          brand: [tokens.typography.sans],
+          "brand-display": [tokens.typography.display],
+        },
+        borderRadius: {
+          brand: tokens.radius,
+        },
+        boxShadow: {
+          brand: tokens.shadow,
+        },
+        transitionTimingFunction: {
+          brand: tokens.animation,
+        },
+      },
+    },
+  };
+
+  return `// ${brand.name} vault theme tokens\nexport const ${brand.exportPrefix}TailwindTheme = ${JSON.stringify(theme, null, 2)} as const;`;
+}
 
 const VAULT_COMPONENTS: Record<ShowcaseBrandId, VaultComponentSet> = {
   "29cm": {
@@ -893,13 +991,61 @@ function getComponentImportSnippet(brand: ShowcaseBrand, componentId: ComponentI
   return `// Vault file\n// src/components/vault/${brand.directory}/${componentId}.tsx\n\nimport ${exportedName} from "@/components/vault/${brand.directory}/${componentId}";\n\nexport function Example() {\n  return <${exportedName} />;\n}`;
 }
 
+function PreviewPane({ label, seniorMode, children }: { label: string; seniorMode: boolean; children: React.ReactNode }) {
+  return (
+    <section
+      aria-label={label}
+      className={joinClasses(
+        "relative flex min-h-[238px] w-full items-center justify-center overflow-auto rounded-xl border p-4",
+        seniorMode
+          ? "border-yellow-300 bg-black text-white shadow-[inset_0_0_0_2px_#ffffff] [&_button]:!min-h-12 [&_button]:!border-2 [&_button]:!border-yellow-300 [&_button]:!bg-yellow-300 [&_button]:!px-4 [&_button]:!text-[1.5em] [&_button]:!text-black [&_input]:!min-h-12 [&_input]:!border-2 [&_input]:!border-yellow-300 [&_input]:!bg-black [&_input]:!text-[1.5em] [&_input]:!text-white [&_select]:!min-h-12 [&_select]:!border-2 [&_select]:!border-yellow-300 [&_select]:!bg-black [&_select]:!text-[1.5em] [&_select]:!text-white [&_p]:!text-[1.5em] [&_span]:!text-[1.5em] [&_h1]:!text-[1.5em] [&_h2]:!text-[1.5em] [&_h3]:!text-[1.5em]"
+          : "border-[#ececf0] bg-white",
+      )}
+    >
+      <span className={joinClasses("absolute left-3 top-3 rounded-full px-2 py-1 text-[10px] font-bold", seniorMode ? "bg-yellow-300 text-black" : "bg-[#f1f2f5] text-[#63636d]")}>{label}</span>
+      <div className={joinClasses("w-full pt-6", seniorMode ? "min-w-[310px]" : "")}>{children}</div>
+    </section>
+  );
+}
+
+function ComponentComparison({ brand, component, components, seniorMode }: { brand: ShowcaseBrand; component: ShowcaseComponent; components: VaultComponentSet; seniorMode: boolean }) {
+  const preview = <ComponentPreview brand={brand} componentId={component.id} components={components} />;
+
+  if (!seniorMode) {
+    return <PreviewPane label="일반 모드" seniorMode={false}>{preview}</PreviewPane>;
+  }
+
+  return (
+    <div className="grid w-full gap-3 xl:grid-cols-2">
+      <PreviewPane label="일반 모드" seniorMode={false}><ComponentPreview brand={brand} componentId={component.id} components={components} /></PreviewPane>
+      <PreviewPane label="시니어 모드 · 150% 텍스트" seniorMode><ComponentPreview brand={brand} componentId={component.id} components={components} /></PreviewPane>
+    </div>
+  );
+}
+
+async function copyToClipboard(text: string) {
+  if (navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(text);
+    return;
+  }
+
+  const textarea = document.createElement("textarea");
+  textarea.value = text;
+  textarea.className = "fixed -left-[9999px] top-0 opacity-0";
+  document.body.appendChild(textarea);
+  textarea.select();
+  document.execCommand("copy");
+  textarea.remove();
+}
+
 /**
- * 선택한 실제 vault 브랜드의 Button부터 Accordion까지 10개 구성요소를 렌더링하는 전시 화면입니다.
- * VAULT_COMPONENTS는 모든 실물 default export를 명시적으로 매핑하고, 선택된 brandId에 따라 정확한 한 세트만 전시에 사용합니다.
- * 기존 placeholder는 유지하지 않으며, control API 차이는 Hero, Toast, Select, Modal, Avatar의 작은 어댑터에서만 처리합니다.
+ * 선택한 실제 vault 브랜드의 Button부터 Accordion까지 10개 구성요소를 렌더링하는 지능형 전시 화면입니다.
+ * ThemeBridge는 컨테이너 레이어에서만 팔레트와 물성을 합성하며, VAULT_COMPONENTS의 실제 코드는 변형하지 않습니다.
  */
-export function ComponentViewer({ brandId, onBack }: ComponentViewerProps) {
+export function ComponentViewer({ brandId, onBack, themeBridge }: ComponentViewerProps) {
   const [copiedComponentId, setCopiedComponentId] = useState<ComponentId | null>(null);
+  const [tokenCopied, setTokenCopied] = useState(false);
+  const [seniorMode, setSeniorMode] = useState(false);
   const matchedBrand = SHOWCASE_BRANDS.find((item) => item.id === brandId);
   const components = VAULT_COMPONENTS[brandId];
 
@@ -908,12 +1054,18 @@ export function ComponentViewer({ brandId, onBack }: ComponentViewerProps) {
   }
 
   const brand = matchedBrand;
+  const isThemeBridgeEnabled = Boolean(themeBridge?.enabled);
+  const paletteTokens = BRAND_TOKEN_VALUES[isThemeBridgeEnabled ? themeBridge!.paletteBrandId : brand.id];
+  const materialTokens = BRAND_TOKEN_VALUES[isThemeBridgeEnabled ? themeBridge!.materialBrandId : brand.id];
+  const paletteBrandId = isThemeBridgeEnabled ? themeBridge!.paletteBrandId : brand.id;
+  const materialBrandId = isThemeBridgeEnabled ? themeBridge!.materialBrandId : brand.id;
+  const paletteBrand = SHOWCASE_BRANDS.find((item) => item.id === paletteBrandId) ?? brand;
+  const materialBrand = SHOWCASE_BRANDS.find((item) => item.id === materialBrandId) ?? brand;
+  const bridgeTypographyClass = THEME_BRIDGE_TYPOGRAPHY_CLASSES[paletteBrandId];
 
   async function handleCopy(componentId: ComponentId) {
-    const snippet = getComponentImportSnippet(brand, componentId);
-
     try {
-      await navigator.clipboard.writeText(snippet);
+      await copyToClipboard(getComponentImportSnippet(brand, componentId));
       setCopiedComponentId(componentId);
       window.setTimeout(() => setCopiedComponentId(null), 1800);
     } catch {
@@ -921,58 +1073,103 @@ export function ComponentViewer({ brandId, onBack }: ComponentViewerProps) {
     }
   }
 
+  async function handleCopyTokens() {
+    try {
+      await copyToClipboard(getTailwindConfigSnippet(brand));
+      setTokenCopied(true);
+      window.setTimeout(() => setTokenCopied(false), 1800);
+    } catch {
+      setTokenCopied(false);
+    }
+  }
+
   return (
-    <section className="min-h-screen bg-[#f7f7f8] px-4 py-6 text-[#242429] sm:px-6 lg:px-10">
+    <section className={joinClasses("min-h-screen px-4 py-6 sm:px-6 lg:px-10", paletteTokens.paletteSurfaceClass, paletteTokens.paletteInkClass, bridgeTypographyClass)}>
       <div className="mx-auto max-w-7xl">
-        <header className="flex flex-col gap-5 border-b border-[#e4e4e8] pb-6 sm:flex-row sm:items-end sm:justify-between">
-          <div className="flex items-start gap-4">
-            {onBack ? (
+        <header className={joinClasses("rounded-2xl border bg-white/80 p-5 backdrop-blur-xl shadow-[0_18px_48px_rgba(29,29,34,0.10)] sm:p-7", paletteTokens.paletteBorderClass)}>
+          <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
+            <div className="flex items-start gap-4">
+              {onBack ? (
+                <button
+                  aria-label="브랜드 목록으로 돌아가기"
+                  className="mt-1 inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-[#dedee3] bg-white text-[#55555e] transition hover:bg-[#f0f0f2] focus-visible:ring-2 focus-visible:ring-[#55555e]/30"
+                  onClick={onBack}
+                  type="button"
+                >
+                  <ArrowLeftIcon />
+                </button>
+              ) : null}
+              <div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className={joinClasses("inline-flex h-8 min-w-8 items-center justify-center rounded-lg px-2 text-xs font-bold", brand.avatarClass)}>{brand.initials}</span>
+                  <p className="text-sm font-semibold text-[#6b6b75]">{brand.name} intelligent component catalog</p>
+                </div>
+                <h1 className="mt-3 text-3xl font-bold tracking-[-0.04em] sm:text-4xl">10개의 실제 구성요소</h1>
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-[#5e616a]">{brand.descriptor}의 실제 vault 구현을 렌더링하고 있습니다. 테마 합성과 시니어 보기는 전시 컨테이너에만 적용됩니다.</p>
+              </div>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
               <button
-                aria-label="브랜드 목록으로 돌아가기"
-                className="mt-1 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#dedee3] bg-white text-[#55555e] transition-colors duration-200 hover:bg-[#f0f0f2] focus-visible:ring-2 focus-visible:ring-[#55555e]/30"
-                onClick={onBack}
+                aria-pressed={seniorMode}
+                className={joinClasses("inline-flex min-h-11 items-center justify-center rounded-xl border px-4 text-sm font-bold outline-none transition focus-visible:ring-2 focus-visible:ring-[#242429]/30", seniorMode ? "border-black bg-black text-white" : "border-[#cfd2d9] bg-white text-[#30323a]")}
+                onClick={() => setSeniorMode((value) => !value)}
                 type="button"
               >
-                <ArrowLeftIcon />
+                {seniorMode ? "Accessibility Simulation 켜짐" : "Accessibility Simulation"}
               </button>
-            ) : null}
-            <div>
-              <div className="flex items-center gap-2">
-                <span className={joinClasses("inline-flex h-8 min-w-8 items-center justify-center rounded-lg px-2 text-xs font-bold", brand.avatarClass)}>{brand.initials}</span>
-                <p className="text-sm font-semibold text-[#6b6b75]">{brand.name} component catalog</p>
-              </div>
-              <h1 className="mt-3 text-3xl font-bold tracking-[-0.04em] sm:text-4xl">10개의 실제 구성요소</h1>
-              <p className="mt-2 text-sm leading-6 text-[#6b6b75]">{brand.descriptor}의 실물 vault 구현을 렌더링하고 있습니다.</p>
+              <button
+                className={joinClasses("inline-flex min-h-11 items-center justify-center rounded-xl border px-4 text-sm font-bold outline-none transition focus-visible:ring-2 focus-visible:ring-[#242429]/30", paletteTokens.paletteButtonClass)}
+                onClick={handleCopyTokens}
+                type="button"
+              >
+                {tokenCopied ? "Tailwind Config 복사됨" : "Copy Tailwind Config"}
+              </button>
             </div>
           </div>
-          <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-[#e8f7f0] px-3 py-1.5 text-xs font-semibold text-[#197a50]">
-            <CheckIcon />
-            {brand.status}
-          </span>
+
+          <div className="mt-5 grid gap-3 lg:grid-cols-[1fr_auto]">
+            <div className={joinClasses("rounded-xl border px-4 py-3 text-sm", isThemeBridgeEnabled ? "border-white/75 bg-white/70" : "border-[#e8e8ec] bg-[#fafafb]")}>
+              <p className="font-bold">{isThemeBridgeEnabled ? "ThemeBridge 활성" : "브랜드 고유 테마"}</p>
+              <p className="mt-1 text-xs leading-5 text-[#60646d]">
+                {isThemeBridgeEnabled ? `${paletteBrand.name}의 팔레트·타이포그래피 × ${materialBrand.name}의 그림자·반응을 실제 컴포넌트 주변 컨테이너에 합성합니다.` : `${brand.name} vault의 원래 토큰과 2026 접근성 확장 레이어를 사용합니다.`}
+              </p>
+            </div>
+            <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-[#e8f7f0] px-3 py-1.5 text-xs font-semibold text-[#197a50]">
+              <CheckIcon />
+              {brand.status}
+            </span>
+          </div>
         </header>
 
-        <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        {seniorMode ? (
+          <aside aria-live="polite" className="mt-5 rounded-2xl border-2 border-yellow-300 bg-black px-5 py-4 text-white shadow-[0_18px_40px_rgba(0,0,0,0.22)]">
+            <p className="text-base font-bold text-yellow-300">시니어 모드 비교가 활성화되었습니다.</p>
+            <p className="mt-1 text-sm leading-6">각 카드에서 일반 모드와 시니어 모드를 나란히 비교합니다. 시니어 모드는 텍스트를 150%로 확대하고, button/input/select hit area를 최소 48px로 키우며, yellow-on-black 고대비 경계를 표시합니다.</p>
+          </aside>
+        ) : null}
+
+        <div className={joinClasses("mt-6 grid gap-4", seniorMode ? "xl:grid-cols-1" : "md:grid-cols-2 xl:grid-cols-3")}>
           {SHOWCASE_COMPONENTS.map((component) => (
-            <article className="flex min-h-[310px] flex-col overflow-hidden rounded-xl border border-[#e1e1e6] bg-white" key={component.id}>
+            <article className={joinClasses("flex min-h-[310px] flex-col overflow-hidden rounded-2xl border bg-white/82 backdrop-blur-xl transition-[transform,box-shadow] duration-200", paletteTokens.paletteBorderClass, materialTokens.materialClass)} key={component.id}>
               <div className="flex items-start justify-between gap-4 border-b border-[#eeeeF1] px-5 py-4">
                 <div>
-                  <p className={joinClasses("text-xs font-bold", brand.textClass)}>{component.number}</p>
+                  <p className={joinClasses("text-xs font-bold", paletteTokens.paletteInkClass)}>{component.number}</p>
                   <h2 className="mt-1 text-lg font-bold tracking-[-0.03em]">{component.title}</h2>
-                  <p className="mt-1 text-xs leading-5 text-[#777780]">{component.description}</p>
+                  <p className="mt-1 text-xs leading-5 text-[#62656d]">{component.description}</p>
                 </div>
                 <button
-                  className="shrink-0 rounded-lg border border-[#dedee3] px-2.5 py-1.5 text-xs font-semibold text-[#5c5c65] transition-colors duration-200 hover:bg-[#f3f3f5] focus-visible:ring-2 focus-visible:ring-[#55555e]/30"
+                  className="shrink-0 rounded-lg border border-[#dedee3] bg-white px-2.5 py-1.5 text-xs font-semibold text-[#454750] transition hover:bg-[#f3f3f5] focus-visible:ring-2 focus-visible:ring-[#55555e]/30"
                   onClick={() => handleCopy(component.id)}
                   type="button"
                 >
                   {copiedComponentId === component.id ? "복사됨" : "코드 복사"}
                 </button>
               </div>
-              <div className={joinClasses("flex flex-1 items-center justify-center overflow-hidden p-5", brand.surfaceClass)}>
-                <ComponentPreview brand={brand} componentId={component.id} components={components} />
+              <div className={joinClasses("flex flex-1 items-center justify-center overflow-hidden p-4 sm:p-5", paletteTokens.paletteSurfaceClass)}>
+                <ComponentComparison brand={brand} component={component} components={components} seniorMode={seniorMode} />
               </div>
               <div className="border-t border-[#eeeeF1] px-5 py-3">
-                <code className="text-[11px] text-[#7a7a84]">vault/{brand.directory}/{component.id}.tsx</code>
+                <code className="text-[11px] text-[#62656d]">vault/{brand.directory}/{component.id}.tsx</code>
               </div>
             </article>
           ))}

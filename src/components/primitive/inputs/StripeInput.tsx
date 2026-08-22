@@ -17,7 +17,7 @@ export interface StripeInputProps extends InputHTMLAttributes<HTMLInputElement> 
   containerClassName?: string;
 }
 
-function joinClasses(...classes: Array<string | undefined | false>) {
+function joinClasses(...classes: Array<string | number | bigint | boolean | null | undefined>) {
   return classes.filter(Boolean).join(" ");
 }
 
